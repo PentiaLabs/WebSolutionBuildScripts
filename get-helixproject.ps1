@@ -12,7 +12,7 @@ Function get-helixproject {
 	}
 	
 	$projects = get-childitem -Path $path -Recurse *.csproj -Exclude *test*
-	$helixProjects = $projects | Select-Object  @{n = "FullName"; e = {$_.FullName}}, @{n = "Layer"; e = {$_.FullName.Remove(0, $_.FullName.IndexOf("src") + 4).Split("\") | select -First 1}}
+	$helixProjects = $projects | Select-Object  @{n = "FullName"; e = {$_.FullName}}, @{n = "Layer"; e = {$_.FullName.Remove(0, $_.FullName.IndexOf("src") + 4).Split("\") | select -First 1}},@{n = "ProjectPath"; e = {$Path}}
 	
 	$LayerIsEmpty = [string]::IsNullOrEmpty($Layer)
 	if (-not $LayerIsEmpty) {
