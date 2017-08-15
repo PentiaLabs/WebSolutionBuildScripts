@@ -39,9 +39,9 @@ Function Publish-WebProject {
         }
         if ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
             Write-Verbose "`$MSBuildExecutablePath not set."
-            $MSBuildExecutablePath = Get-MSBuild | Select-Object -ExpandProperty FullName
+            $MSBuildExecutablePath = Get-MSBuild
         }
-        Write-Verbose "Using '$MSBuildExecutablePath'"
+        Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Information "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
         & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
         Write-Verbose "Exit code '$LASTEXITCODE'."

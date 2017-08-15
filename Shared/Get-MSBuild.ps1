@@ -17,5 +17,5 @@ Function Get-MSBuild {
 	if($msBuildExecutable -eq $null) {
 		Throw "Didn't find MSBuild.exe in '$visualStudioInstallationPath'."
 	}
-	return $msBuildExecutable
+	$msBuildExecutable | Select-Object -ExpandProperty "FullName"
 }
