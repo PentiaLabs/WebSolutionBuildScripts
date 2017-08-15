@@ -19,7 +19,8 @@ Function Invoke-ConfigurationTransform {
             $MSBuildExecutablePath = Get-MSBuild
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
-        & "$MSBuildExecutablePath" ./applytransform.targets /target:"ApplyTransform" /property:Configuration="$BuildConfiguration" /p:WebConfigToTransform="$OutputFilePath" /p:TransformFile="$ConfigurationFilePath" /p:FileToTransform="$($_.Name)"
+        Write-Verbose "Transforming '$ConfigurationFilePath' to '$OutputFilePath' for build configuration '$BuildConfiguration'."
+        & "$MSBuildExecutablePath" "./ApplyTransform.targets" /target:"ApplyTransform" /property:Configuration="$BuildConfiguration" /p:WebConfigToTransform="$OutputFilePath" /p:TransformFile="$ConfigurationFilePath" /p:FileToTransform="$($_.Name)"
     }
 
 }
