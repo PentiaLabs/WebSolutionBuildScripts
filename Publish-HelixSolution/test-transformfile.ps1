@@ -1,4 +1,5 @@
-function test-transformfile {
+# Check whether or not a given XML file is a WebTransform-file based on the value of the XDT-attribute.
+function Test-TransformFile {
 	[CmdletBinding()]
 	Param(		
 		[Parameter(Position = 0)]
