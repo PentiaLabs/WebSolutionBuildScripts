@@ -20,7 +20,9 @@ Function Publish-HelixProject {
 			Write-Verbose "`$MSBuildExecutablePath not set."
 			$MSBuildExecutablePath = Get-MSBuild | Select-Object -ExpandProperty FullName
 		}
-        Write-Verbose "Publishing '$HelixProjectPath' to '$PublishUrlOrDirectory'."
-        & "$MSBuildExecutablePath" "$HelixProjectPath" /t:WebPublish /verbosity:minimal /p:publishUrl="$PublishUrlOrDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
+		Write-Verbose "Using '$MSBuildExecutablePath'"
+        Write-Information "Publishing '$HelixProjectPath' to '$PublishUrlOrDirectory'."
+		& "$MSBuildExecutablePath" "$HelixProjectPath" /t:WebPublish /verbosity:minimal /p:publishUrl="$PublishUrlOrDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
+		Write-Verbose "Exit code '$LASTEXITCODE'."
     }
 }
