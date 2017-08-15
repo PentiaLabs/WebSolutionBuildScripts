@@ -1,4 +1,4 @@
-. "..\Shared\Get-MSBuild.ps1"
+. "$PSScriptRoot\..\Shared\Get-MSBuild.ps1"
 
 Function Publish-HelixProject {
     [CmdletBinding()]
