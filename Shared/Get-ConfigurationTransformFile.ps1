@@ -1,4 +1,4 @@
-. $PSScriptRoot\Test-ConfigurationTransformFile.ps1
+. "$PSScriptRoot\Test-ConfigurationTransformFile.ps1"
 
 <#
 .SYNOPSIS
