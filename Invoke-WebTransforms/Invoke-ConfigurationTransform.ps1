@@ -74,9 +74,7 @@ Function Get-RelativeConfigurationDirectory {
 Function TransformXmlDocument {
     Param (
         [Parameter(Mandatory = $True)]
-        [string]$XmlFilePath
-    )
-    Param (
+        [string]$XmlFilePath,        
         [Parameter(Mandatory = $True)]
         [string]$XdtFilePath
     )
@@ -98,5 +96,13 @@ Function TransformXmlDocument {
     {
         Throw "Transformation of document '$XmlFilePath' failed using transform file '$XdtFilePath'."
     }
-    $XmlDocument.Save($XmlFilePath);
+    $StringWriter = New-Object -TypeName "System.IO.StringWriter"
+    $XmlTextWriter = [System.Xml.XmlWriter]::Create($stringWriter)
+    $XmlDocument.WriteTo($XmlTextWriter)
+    $XmlTextWriter.Flush()
+    $TransformedXml = $StringWriter.GetStringBuilder().ToString()
+    $XmlTextWriter.Dispose()
+    $StringWriter.Dispose()
+    
+    $TransformedXml.Trim()
 }
