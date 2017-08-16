@@ -37,12 +37,13 @@ Function Invoke-ConfigurationTransform {
     )
 
     Process {
-        $FileToTransform = Get-FileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
-        $FileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $FileToTransform)
+        $NameOfFileToTransform = Get-FileToTransform $ConfigurationTransformFilePath
+        $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
+        $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
 
-        Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$FileToTransform'."
+        Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$PathOfFileToTransform'."
         
-        XmlDocTransform -xml $FileToTransform -xdt $ConfigurationTransformFileName
+        XmlDocTransform -xml $PathOfFileToTransform -xdt $ConfigurationTransformFileName
     }
 }
 
@@ -51,16 +52,35 @@ Function Get-FileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
     )
-    # C:\[...]\Web.Debug.Config -> # Web.Debug.Config
+    # "C:\MySite\App_Config\Sitecore\Include\Web.Debug.Config" -> "Web.Debug.Config"
     $FileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
     $FileNamePartSeparator = "."
     # ["Web", "Debug", "config"]
     [System.Collections.ArrayList]$FileNameParts = $FileName.Split($FileNamePartSeparator)
     $BuildConfigurationIndex = $FileNameParts.Count - 2
+    If($BuildConfigurationIndex -lt 1) {
+        Throw "Can't determine file to transform based on file name '$FileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
+    }
     # ["Web", "Debug", "config"] -> ["Web", "config"]
     $FileNameParts.RemoveAt($BuildConfigurationIndex)
     # ["Web", "config"] -> "Web.config"
     [string]::Join($FileNamePartSeparator, $FileNameParts.ToArray())
+}
+
+Function Get-RelativeConfigurationDirectory {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$ConfigurationTransformFilePath
+    )
+    # "C:\MySite\App_Config\Sitecore\Include\Pentia\Sites.Debug.Config" -> "C:\MySite\App_Config\Sitecore\Include\Pentia"
+    $DirectoryName = [System.IO.Path]::GetDirectoryName($ConfigurationTransformFilePath)
+    $ConfigurationDirectoryName = "App_Config"
+    $ConfigurationDirectoryIndex = $DirectoryName.IndexOf($ConfigurationDirectoryName, [System.StringComparison]::InvariantCultureIgnoreCase)
+    If($ConfigurationDirectoryIndex -lt 0) {
+        Throw "Can't determine relative configuration directory. '$ConfigurationDirectoryName' not found in path '$ConfigurationTransformFilePath'."
+    }
+    # "C:\MySite\App_Config\Sitecore\Include\Pentia" -> "App_Config\Sitecore\Include\Pentia"
+    $DirectoryName.Substring($ConfigurationDirectoryIndex)
 }
 
 Function XmlDocTransform($xml, $xdt)
