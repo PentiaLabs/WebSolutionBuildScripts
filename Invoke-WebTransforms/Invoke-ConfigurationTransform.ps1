@@ -51,18 +51,12 @@ Function Get-FileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
     )
-
-    #TODO Add handling of App_Config 
-
-    $BuildConfiguration = $ConfigurationTransformFilePath.Split(".") | Select-Object -Last 2 | Select-Object -First 1 
-
-    $BuildConfigurationLenght = $BuildConfiguration.Length
-    
-    $ConfigurationTransformFileName = Get-Item $ConfigurationTransformFilePath | Select-Object -ExpandProperty Name
-
-    $IndexOfBuildConfiguration = $ConfigurationTransformFileName.LastIndexOf($BuildConfiguration)
-
-    return $ConfigurationTransformFileName.Remove($IndexOfBuildConfiguration, $BuildConfigurationLenght+1)
+    $FileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
+    $FileNamePartSeparator = "."
+    [System.Collections.ArrayList]$FileNameParts = $FileName.Split($FileNamePartSeparator)
+    $BuildConfigurationIndex = $FileNameParts.Count - 2
+    $FileNameParts.RemoveAt($BuildConfigurationIndex)
+    [string]::Join($FileNamePartSeparator, $FileNameParts.ToArray())
 }
 
 Function XmlDocTransform($xml, $xdt)
