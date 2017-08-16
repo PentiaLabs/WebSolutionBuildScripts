@@ -30,9 +30,9 @@ General notes
 Function Invoke-ConfigurationTransform {
     [CmdletBinding()]
     Param (
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline)]
+        [Parameter(Mandatory = $True, ValueFromPipeline)]
         [string]$ConfigurationTransformFilePath,
-        [Parameter(Position = 2, Mandatory = $True)]
+        [Parameter(Mandatory = $True)]
         [string]$WebrootDirectory
     )
 
@@ -43,7 +43,7 @@ Function Invoke-ConfigurationTransform {
 
         Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$PathOfFileToTransform'."
         
-        XmlDocTransform -xml $PathOfFileToTransform -xdt $ConfigurationTransformFileName
+        TransformXmlDocument -XmlFilePath $PathOfFileToTransform -XdtFilePath $ConfigurationTransformFilePath
     }
 }
 
@@ -83,27 +83,34 @@ Function Get-RelativeConfigurationDirectory {
     $DirectoryName.Substring($ConfigurationDirectoryIndex)
 }
 
-Function XmlDocTransform($xml, $xdt)
-{
-    if (!$xml -or !(Test-Path -path $xml -PathType Leaf)) {
-        throw "File not found. $xml";
+Function TransformXmlDocument {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$XmlFilePath
+    )
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$XdtFilePath
+    )
+    If (!(Test-Path -Path $XmlFilePath -PathType Leaf)) {
+        Throw "File not found. $XmlFilePath"
     }
-    if (!$xdt -or !(Test-Path -path $xdt -PathType Leaf)) {
-        throw "File not found. $xdt";
+    If (!(Test-Path -Path $XdtFilePath -PathType Leaf)) {
+        Throw "File not found. $XdtFilePath"
     }
 
     Add-Type -LiteralPath "$PSScriptRoot\Microsoft.Web.XmlTransform.dll"
 
-    $xmldoc = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument;
-    $xmldoc.PreserveWhitespace = $true
-    $xmldoc.Load($xml);
+    $XmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument
+    $XmlDocument.PreserveWhitespace = $True
+    $XmlDocument.Load($XmlFilePath)
 
-    $transf = New-Object Microsoft.Web.XmlTransform.XmlTransformation($xdt);
-    if ($transf.Apply($xmldoc) -eq $false)
+    $Transformation = New-Object Microsoft.Web.XmlTransform.XmlTransformation($XdtFilePath)
+    If ($Transformation.Apply($XmlDocument) -eq $False)
     {
-        throw "Transformation failed."
+        Throw "Transformation of document '$XmlFilePath' failed using transform file '$XdtFilePath'."
     }
-    $xmldoc.Save($xml);
+    $XmlDocument.Save($XmlFilePath);
 }
 
 Invoke-ConfigurationTransform -ConfigurationTransformFilePath D:\Projects\AAB.Intranet\src\Project\Environment\App_Config\Include\dataFolder.Debug.config -WebrootDirectory D:\websites\AAB.Intranet -Verbose
