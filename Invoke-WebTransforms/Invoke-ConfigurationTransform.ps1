@@ -1,5 +1,3 @@
-. "$PSScriptRoot\..\Shared\Get-MSBuild.ps1"
-
 <#
 .SYNOPSIS
 Creates a "transformed" configuration file using a "configuration base file" and an transform file (XDT).
@@ -10,14 +8,14 @@ Given the following file and folder structure:
     ... the transform "MyConfig.Debug.config" is applied to the file "/webroot/App_Config/MyProject/MyProject.config" when $BuildConfiguration is "Debug".
 
 .PARAMETER ConfigurationTransformFilePath
-E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.Config".
+E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.config".
 
 .PARAMETER WebrootDirectory
 E.g. "D:\websites\AAB.Intranet\www".
 
 .EXAMPLE
-Invoke-ConfigurationTransform -ConfigurationTransformFilePath "D:\Projects\AAB.Intranet\src\Project\Environment\App_Config\Include\dataFolder.Debug.config" -WebrootDirectory "D:\websites\AAB.Intranet\www"
-This modifies the file "D:\websites\AAB.Intranet\www\App_Config\Include\dataFolder.config" using the transformations found in "dataFolder.Debug.config".
+Invoke-ConfigurationTransform -ConfigurationTransformFilePath "D:\Projects\AAB.Intranet\src\Project\Environment\App_Config\Include\dataFolder.Debug.config" -WebrootDirectory "D:\websites\AAB.Intranet\www" -Verbose
+This modifies the file "D:\websites\AAB.Intranet\www\App_Config\Include\dataFolder.config" using the transformations found in "dataFolder.Debug.config" and outputs verbose log messages.
 #>
 Function Invoke-ConfigurationTransform {
     [CmdletBinding()]
