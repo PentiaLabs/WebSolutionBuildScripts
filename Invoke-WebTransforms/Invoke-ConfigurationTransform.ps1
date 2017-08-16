@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-Short description
+Creates a "transformed" configuration file using a "configuration base file" and an transform file (XDT).
 
 .DESCRIPTION
 Given the following file and folder structure:
@@ -10,22 +10,14 @@ Given the following file and folder structure:
     ... the transform "MyConfig.Debug.config" is applied to the file "/webroot/App_Config/MyProject/MyProject.config" when $BuildConfiguration is "Debug".
 
 .PARAMETER ConfigurationTransformFilePath
-Parameter description
+E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.Config".
 
-.PARAMETER BuildConfiguration
-Parameter description
-
-.PARAMETER TransformDirectory
-Parameter description
-
-.PARAMETER MSBuildExecutablePath
-Parameter description
+.PARAMETER WebrootDirectory
+E.g. "D:\websites\AAB.Intranet\www".
 
 .EXAMPLE
-An example
-
-.NOTES
-General notes
+Invoke-ConfigurationTransform -ConfigurationTransformFilePath "D:\Projects\AAB.Intranet\src\Project\Environment\App_Config\Include\dataFolder.Debug.config" -WebrootDirectory "D:\websites\AAB.Intranet\www"
+This modifies the file "D:\websites\AAB.Intranet\www\App_Config\Include\dataFolder.config" using the transformations found in "dataFolder.Debug.config".
 #>
 Function Invoke-ConfigurationTransform {
     [CmdletBinding()]
@@ -40,9 +32,7 @@ Function Invoke-ConfigurationTransform {
         $NameOfFileToTransform = Get-FileToTransform $ConfigurationTransformFilePath
         $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
         $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
-
-        Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$PathOfFileToTransform'."
-        
+        Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$PathOfFileToTransform'."        
         TransformXmlDocument -XmlFilePath $PathOfFileToTransform -XdtFilePath $ConfigurationTransformFilePath
     }
 }
