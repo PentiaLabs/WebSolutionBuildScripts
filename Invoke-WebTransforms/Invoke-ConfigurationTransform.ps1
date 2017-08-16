@@ -51,11 +51,15 @@ Function Get-FileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
     )
+    # C:\[...]\Web.Debug.Config -> # Web.Debug.Config
     $FileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
     $FileNamePartSeparator = "."
+    # ["Web", "Debug", "config"]
     [System.Collections.ArrayList]$FileNameParts = $FileName.Split($FileNamePartSeparator)
     $BuildConfigurationIndex = $FileNameParts.Count - 2
+    # ["Web", "Debug", "config"] -> ["Web", "config"]
     $FileNameParts.RemoveAt($BuildConfigurationIndex)
+    # ["Web", "config"] -> "Web.config"
     [string]::Join($FileNamePartSeparator, $FileNameParts.ToArray())
 }
 
