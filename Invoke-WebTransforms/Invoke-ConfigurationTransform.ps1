@@ -102,5 +102,3 @@ Function TransformXmlDocument {
     }
     $XmlDocument.Save($XmlFilePath);
 }
-
-Invoke-ConfigurationTransform -ConfigurationTransformFilePath D:\Projects\AAB.Intranet\src\Project\Environment\App_Config\Include\dataFolder.Debug.config -WebrootDirectory D:\websites\AAB.Intranet -Verbose
