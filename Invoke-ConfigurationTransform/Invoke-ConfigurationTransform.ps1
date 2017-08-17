@@ -3,9 +3,19 @@
 Creates a "transformed" configuration file using a "configuration base file" and an transform file (XDT).
 
 .DESCRIPTION
-Given the following file and folder structure:
-    /src/Foundation/MyProject/App_Config/MyProject/MyConfig.Debug.config
-    ... the transform "MyConfig.Debug.config" is applied to the file "/webroot/App_Config/MyProject/MyProject.config" when $BuildConfiguration is "Debug".
+Creates a "transformed" configuration file using a "configuration base file" and an transform file (XDT).
+
+The location of the "configuration base file" is determined based on the location of the transform file relative to the "App_Config" directory.
+
+E.g.:
+Given the following project folder structure:
+    
+    "C:\MySolution\src\Foundation\MyProject\App_Config\MyConfig.Debug.config"
+
+... and given the webroot "C:\MyWebsite\www"
+... the transform "MyConfig.Debug.config" would be applied to the following configuration file:
+
+    "C:\MyWebsite\www\App_Config\MyConfig.config"
 
 .PARAMETER ConfigurationTransformFilePath
 E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.config".
