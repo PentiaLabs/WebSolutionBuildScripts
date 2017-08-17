@@ -18,7 +18,9 @@ Function Get-ConfigurationTransformFile {
 	[CmdletBinding()]
 	Param (
 		[Parameter(Position = 0, Mandatory = $True)]
-		[string]$SolutionRootPath
+		[string]$SolutionRootPath,
+		[Parameter(Position = 1, Mandatory = $False)]
+		[string]$BuildConfiguration
 	)
 	
 	if($(Test-Path $SolutionRootPath) -eq $False)
@@ -28,7 +30,12 @@ Function Get-ConfigurationTransformFile {
 
 	$ConfigurationFiles = Get-ChildItem "*.config" -Path "$SolutionRootPath" -Recurse -File 
 	$ConfigurationFilesNotInBinAndObj = $ConfigurationFiles | Where-Object { $_.FullName -NotLike "*\obj*" -and $_.FullName -notlike "*\bin*" }
-	$ConfigurationTransformFiles = $ConfigurationFilesNotInBinAndObj | Where-Object { $(Test-ConfigurationTransformFile -FullPath $_.FullName 	)}
+	$ConfigurationTransformFiles = $ConfigurationFilesNotInBinAndObj | Where-Object { $(Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName 	)}
+
+    if ([string]::IsNullOrEmpty($BuildConfiguration) -eq $False) {
+		$ConfigurationTransformFiles = $ConfigurationTransformFiles | Where-Object { $_.Name.Split(".")[-2].ToLower() -eq $BuildConfiguration.ToLower() }
+    }
+
 	$ConfigurationTransformFiles | Select-Object -ExpandProperty FullName
 }
 
