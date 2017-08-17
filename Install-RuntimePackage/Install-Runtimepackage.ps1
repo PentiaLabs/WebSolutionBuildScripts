@@ -1,5 +1,5 @@
 #Requires -RunAsAdministrator
-function Install-NugetPackage (
+function Install-RuntimePackage (
     [Parameter(Mandatory=$true)]
     [object]$package,
     [Parameter(Mandatory=$true)]
@@ -9,7 +9,7 @@ function Install-NugetPackage (
     [Parameter(Mandatory=$False)]
     [string]$username = [string]::Empty,
     [Parameter(Mandatory=$False)]
-    [string]$password = [string]::Empty) {
+    [SecureString]$password = [SecureString]::Empty) {
 
     . $PSScriptRoot\Get-WebRequestFromUrl.ps1
     Write-Host "Getting" $package.packageName "Package"
@@ -21,8 +21,7 @@ function Install-NugetPackage (
         
         $Credential = [System.Management.Automation.PSCredential]::Empty
         if ([string]::IsNullOrWhiteSpace($username) -eq $false -and [string]::IsNullOrWhiteSpace($password) -eq $false) {
-            $userPassword = ConvertTo-SecureString -String $password -AsPlainText -Force
-            $Credential =  New-Object System.Management.Automation.PSCredential($username, $userPassword)
+            $Credential =  New-Object System.Management.Automation.PSCredential($username, $password)
         }
 
         if($Credential -eq [System.Management.Automation.PSCredential]::Empty)
@@ -46,6 +45,7 @@ function Install-NugetPackage (
             }
         }
         
+        Write-Verbose -Message ("Installing package: " + $package.packageName)
         Find-Package -Source $package.location -Name $package.packageName -RequiredVersion $package.version -Credential $Credential | Install-Package -Credential $Credential -Force
         $nugetPackage = Get-Package -ProviderName NuGet -AllVersions | Where-Object {$_.Name -eq $package.packageName -and $_.version -eq $package.version} 
     }

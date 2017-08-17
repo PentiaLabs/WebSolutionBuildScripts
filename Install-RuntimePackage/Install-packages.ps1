@@ -6,7 +6,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$dataRootPath)
 
-. $PSScriptRoot\install-package.ps1
+. $PSScriptRoot\Install-Runtimepackage.ps1
 $ErrorActionPreference = "Stop"
 
 if((Test-Path -Path $packagesFileLocation) -eq $false)
