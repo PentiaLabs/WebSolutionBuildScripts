@@ -28,7 +28,7 @@ Function Get-ConfigurationTransformFile {
 
 	$ConfigurationFiles = Get-ChildItem "*.config" -Path "$SolutionRootPath" -Recurse -File 
 	$ConfigurationFilesNotInBinAndObj = $ConfigurationFiles | Where-Object { $_.FullName -NotLike "*\obj*" -and $_.FullName -notlike "*\bin*" }
-	$ConfigurationTransformFiles = $ConfigurationFilesNotInBinAndObj | Where-Object { $(test-transformfile -FullPath $_.FullName 	)}
+	$ConfigurationTransformFiles = $ConfigurationFilesNotInBinAndObj | Where-Object { $(Test-ConfigurationTransformFile -FullPath $_.FullName 	)}
 	$ConfigurationTransformFiles | Select-Object -ExpandProperty FullName
 }
 
