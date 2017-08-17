@@ -5,7 +5,7 @@ Creates a "transformed" configuration file using a "configuration base file" and
 .DESCRIPTION
 Creates a "transformed" configuration file using a "configuration base file" and an transform file (XDT).
 
-The location of the "configuration base file" is determined based on the location of the transform file.
+The location of the "configuration base file" is determined based on the location of the transform file relative to the "App_Config" directory.
 
 E.g.:
 Given the following project folder structure:
