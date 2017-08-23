@@ -8,8 +8,6 @@ Describe "Publish-WebProject" {
     $PublishWebsitePath = "$TestDrive\Website"
     $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\WebProject.csproj"
     
-    Write-Host $PublishWebsitePath
-    
     Function CompileTestProject {
         $msBuildExecutable = Get-MSBuild
         & "$msBuildExecutable" "$WebProjectFilePath"
@@ -20,7 +18,7 @@ Describe "Publish-WebProject" {
         CompileTestProject
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
 
         # Assert
         Test-Path $PublishWebsitePath | Should Be $True
@@ -31,7 +29,7 @@ Describe "Publish-WebProject" {
         CompileTestProject
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
 
         # Assert
         $countOfPublishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
@@ -44,7 +42,7 @@ Describe "Publish-WebProject" {
         & "$msBuildExecutable" "$FoundationWebProjectFilePath"
         
         # Act
-        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose }
+        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputDirectory $PublishWebsitePath }
 
         # Assert
         $publishWebProject | Should Throw
