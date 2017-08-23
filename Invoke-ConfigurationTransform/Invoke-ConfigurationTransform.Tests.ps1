@@ -2,6 +2,20 @@
 . "$PSScriptRoot\Invoke-ConfigurationTransform.ps1"
 
 Describe "Invoke-ConfigurationTransform" {
+    It "can transform XML using XDT" {
+        # Arrange
+        Set-Content -Path "TestDrive:\test.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
+        Set-Content -Path "TestDrive:\test.Transform.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
+        
+        $expectedTransformedContent = "<?xml version=""1.0"" encoding=""utf-8""?><configuration><setting /></configuration>"
+        
+        # Act
+        $transformedXML = Invoke-TransformXMLDocument -XmlFilePath "$TestDrive\test.config" -XdtFilePath "$TestDrive\test.Transform.config"
+        
+        # Assert
+        $transformedXML | Should Be $expectedTransformedContent
+    }
+
     It "applies configuration transforms to the correct configuration file in the webroot" {
         # Arrange
         New-Item -Path "TestDrive:\WebsiteRoot\" -ItemType Directory
@@ -17,9 +31,10 @@ Describe "Invoke-ConfigurationTransform" {
         $expectedTransformedContent = "<?xml version=""1.0"" encoding=""utf-8""?><configuration><setting /></configuration>"
 
         # Act
-        $result = Invoke-ConfigurationTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootDirectory $websiteRoot
+        Invoke-ConfigurationTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootDirectory $websiteRoot
+        $transformedContent = Get-Content -Path "TestDrive:\WebsiteRoot\App_Config\Web.config"
 
         # Assert
-        $result | Should Be $expectedTransformedContent
+        $transformedContent | Should Be $expectedTransformedContent
     }
 }
