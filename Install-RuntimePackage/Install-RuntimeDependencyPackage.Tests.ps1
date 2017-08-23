@@ -28,41 +28,6 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
     }
 }
 
-Describe "Test-Url" {
-    It "should return true for HTTP URL" {
-        # Arrange
-        $url = "http://localhost"
-
-        # Act
-        $isUrl = Test-Url $url
-
-        # Assert
-        $isUrl | Should Be $True
-    }
-    
-    It "should return true for HTTPS URL" {
-        # Arrange
-        $url = "https://localhost"
-
-        # Act
-        $isUrl = Test-Url $url
-
-        # Assert
-        $isUrl | Should Be $True
-    }
-    
-    It "should return false for file URI" {
-        # Arrange
-        $url = "file://C/Temp"
-
-        # Act
-        $isUrl = Test-Url $url
-
-        # Assert
-        $isUrl | Should Be $False
-    }
-}
-
 Describe "Install-RuntimeDependencyPackage" {  
     It "should install NuGet packages from the specified source" {
         # Arrange

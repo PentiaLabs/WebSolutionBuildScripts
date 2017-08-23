@@ -78,52 +78,9 @@ Function Install-RuntimeDependencyPackage {
     if ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
-
-    if ($credentials -eq [System.Management.Automation.PSCredential]::Empty) {
-        Write-Verbose ("No credentials provided.")
-        Write-Verbose ("Testing if package source is URL.")
-        if (Test-Url $PackageSource) {
-            Write-Verbose ("Package source is a URL ('$PackageSource').")
-            Write-Verbose ("Testing if package source needs authentication.")
-            $request = Get-WebRequestFromUrl -Url $PackageSource
-            $statusCode = [int]$request.StatusCode;
-            if ($statusCode -eq 401) {
-                Write-Verbose ("Getting credentials for endpoint")
-                $credentials = Get-Credential -Message ("Please enter your credentials for " + $PackageSource);
-            }
-            elseif ($statusCode -gt 399) {
-                Throw "Package source endpoint '$PackageSource' failed with error code '$statusCode'."
-            }
-        }
-    }
     
     Write-Verbose "Installing package '$PackageName'."
-    Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $Credential | Install-Package -Credential $Credential -Force
-}
-
-Function Test-Url {
-    Param(
-        [Parameter(Mandatory = $True)]
-        [string]$Url
-    )
-    [Uri]$uriResult = $Null
-    $result = [Uri]::TryCreate($Url, [UriKind]::Absolute, [ref] $uriResult)
-    $result -and ($uriResult.Scheme -eq [Uri]::UriSchemeHttp -or $uriResult.Scheme -eq [Uri]::UriSchemeHttps)
-}
-
-Function Get-WebRequestFromUrl {
-    Param(        
-        [Parameter(Mandatory = $True)]
-        [string]$Url
-    )
-    $httpRequest = [System.Net.WebRequest]::Create($Url)
-    Try {
-        $response = $httpRequest.GetResponse()
-    }
-    Catch [System.Net.WebException] {
-        $response = $_.Exception.Response
-    }
-    Write-Output $response
+    Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials | Install-Package -Credential $credentials -Force
 }
 
 Function Copy-RuntimeDependencyPackageContents {
