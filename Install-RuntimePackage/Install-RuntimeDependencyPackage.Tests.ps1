@@ -29,6 +29,17 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
 }
 
 Describe "Install-RuntimeDependencyPackage" {  
+    It "should display a helpful error when NuGet isn't resgistered as a package provider" {
+        # Arrange
+        Mock Get-PackageProvider { return @() }
+
+        # Act
+        $getPackage = { Get-RuntimeDependencyPackageFromCache -PackageName "jQuery" -PackageVersion "3.1.1" }
+
+        # Assert
+        $getPackage | Should Throw "The NuGet package provider isn't installed. Run 'Install-PackageProvider -Name NuGet' from an elevated PowerShell prompt."
+    }
+
     It "should install NuGet packages from the specified source" {
         # Arrange
         $packageName = "jquery"

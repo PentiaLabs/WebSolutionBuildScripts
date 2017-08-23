@@ -53,8 +53,19 @@ Function Get-RuntimeDependencyPackageFromCache {
         [Parameter(Mandatory = $True)]
         [string]$PackageVersion
     )
+    If(!(Test-PackageProvider "NuGet")) {
+        Throw "The NuGet package provider isn't installed. Run 'Install-PackageProvider -Name NuGet' from an elevated PowerShell prompt."
+    }
     $nugetPackage = Get-Package -ProviderName NuGet -AllVersions | Where-Object {$_.Name -eq $PackageName -and $_.Version -eq $PackageVersion}
     $nugetPackage
+}
+
+Function Test-PackageProvider {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$Name
+    )
+    (Get-PackageProvider | Where-Object { $_.Name -eq $Name } | Select-Object -ExpandProperty "Count") -gt 0
 }
 
 Function Install-RuntimeDependencyPackage {    
