@@ -45,8 +45,9 @@ Function Publish-WebProject {
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Host "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
-        $output = & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
-        Write-Host $output
-        Write-Verbose "Exit code '$LASTEXITCODE'."
+        & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true" | Write-Host
+        If($LASTEXITCODE -ne 0) {
+            Throw "Error building project '$WebProjectFilePath'."
+        }
     }
 }

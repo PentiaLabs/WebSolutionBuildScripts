@@ -2,15 +2,18 @@
 Import-Module "$PSScriptRoot\Publish-WebProject.ps1" -Force
 Import-Module "$PSScriptRoot\..\Shared\Get-MSBuild.ps1" -Force
 
-$webProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
-$publishWebsitePath = "$TestDrive\Website"
-
-Function CompileTestProject {
-    $msBuildExecutable = Get-MSBuild
-    & "$msBuildExecutable" "$webProjectFilePath" 
-}
-
 Describe "Publish-WebProject" {
+
+    $webProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
+    $publishWebsitePath = "$TestDrive\Website"
+    
+    Write-Host $publishWebsitePath
+    
+    Function CompileTestProject {
+        $msBuildExecutable = Get-MSBuild
+        & "$msBuildExecutable" "$webProjectFilePath"
+    }
+    
     It "should create the output directory if it doesn't exist" {
         # Arrange
         CompileTestProject
@@ -31,7 +34,7 @@ Describe "Publish-WebProject" {
 
         # Assert
         $countOfPublishedFiles = Get-ChildItem $publishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
-        $countOfPublishedFiles | Should Be 4
+        $countOfPublishedFiles | Should Be 3
     }
 }
 
