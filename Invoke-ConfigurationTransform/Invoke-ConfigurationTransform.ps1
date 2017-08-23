@@ -37,6 +37,12 @@ Function Invoke-ConfigurationTransform {
     )
 
     Process {
+        If (!(Test-Path -Path $ConfigurationTransformFilePath -PathType Leaf)) {
+            Throw "File '$ConfigurationTransformFilePath' not found."
+        }
+        If (!(Test-Path -Path $WebrootDirectory -PathType Container)) {
+            Throw "Directory '$WebrootDirectory' not found."
+        }
         $NameOfFileToTransform = Get-FileToTransform $ConfigurationTransformFilePath
         $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
         $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
@@ -89,10 +95,10 @@ Function TransformXmlDocument {
         [string]$XdtFilePath
     )
     If (!(Test-Path -Path $XmlFilePath -PathType Leaf)) {
-        Throw "File not found. $XmlFilePath"
+        Throw "File '$XmlFilePath' not found."
     }
     If (!(Test-Path -Path $XdtFilePath -PathType Leaf)) {
-        Throw "File not found. $XdtFilePath"
+        Throw "File '$XdtFilePath' not found."
     }
 
     Add-Type -LiteralPath "$PSScriptRoot\Microsoft.Web.XmlTransform.dll"
