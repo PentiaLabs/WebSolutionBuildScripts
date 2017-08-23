@@ -20,7 +20,7 @@
  .EXAMPLE 
  Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputDirectory "C:\Websites\MyWebsite" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
  Publish a project and specify which MSBuild.exe to use.
-#>
+#>   
 Function Publish-WebProject {
     [CmdletBinding()]
     Param (
@@ -45,7 +45,7 @@ Function Publish-WebProject {
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Information "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
-        & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
+        & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true" | Write-Verbose
         Write-Verbose "Exit code '$LASTEXITCODE'."
     }
 }
