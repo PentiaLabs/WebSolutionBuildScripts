@@ -30,26 +30,30 @@ Describe "Invoke-ConfigurationTransform" {
         # Assert
         $transformedXML | Should Be $expectedTransformedContent
     }
+}
 
-    # xIt "applies configuration transforms to the correct configuration file in the webroot" {
-    #     # Arrange
-    #     New-Item -Path "TestDrive:\WebsiteRoot\" -ItemType Directory
-    #     New-Item -Path "TestDrive:\WebsiteRoot\App_Config" -ItemType Directory
-    #     Set-Content -Path "TestDrive:\WebsiteRoot\App_Config\Web.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
-    #     $websiteRoot = "$TestDrive\WebsiteRoot\"
+Describe "Configuration transformation integration test" {    
+    It "applies configuration transforms to the correct configuration file in the webroot" {
+        # Arrange
+        New-Item -Path "TestDrive:\WebsiteRoot\" -ItemType Directory
+        New-Item -Path "TestDrive:\WebsiteRoot\App_Config" -ItemType Directory
+        Set-Content -Path "TestDrive:\WebsiteRoot\App_Config\Web.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
+        $webrootDirectory = "$TestDrive\WebsiteRoot\"
         
-    #     New-Item -Path "TestDrive:\ProjectRoot" -ItemType Directory
-    #     New-Item -Path "TestDrive:\ProjectRoot\App_Config" -ItemType Directory
-    #     Set-Content -Path "TestDrive:\ProjectRoot\App_Config\Web.Debug.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
-    #     $configurationTransformFilePath = "$TestDrive\ProjectRoot\App_Config\Web.Debug.config"
+        New-Item -Path "TestDrive:\ProjectRoot" -ItemType Directory
+        New-Item -Path "TestDrive:\ProjectRoot\App_Config" -ItemType Directory
+        Set-Content -Path "TestDrive:\ProjectRoot\App_Config\Web.Debug.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
+        $configurationTransformFilePath = "$TestDrive\ProjectRoot\App_Config\Web.Debug.config"
         
-    #     $expectedTransformedContent = "<?xml version=""1.0"" encoding=""utf-8""?><configuration><setting /></configuration>"
+        $expectedTransformedContent = "<?xml version=""1.0"" encoding=""utf-8""?><configuration><setting /></configuration>"
 
-    #     # Act
-    #     Invoke-ConfigurationTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootDirectory $websiteRoot
-    #     $transformedContent = Get-Content -Path "TestDrive:\WebsiteRoot\App_Config\Web.config"
+        # Act
+        $pathOfFileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootDirectory $webrootDirectory
+        $transformedContent = Invoke-ConfigurationTransform -XmlFilePath $pathOfFileToTransform -XdtFilePath $configurationTransformFilePath
+        $transformedContent | Out-File $pathOfFileToTransform -Encoding utf8
 
-    #     # Assert
-    #     $transformedContent | Should Be $expectedTransformedContent
-    # }
+        # Assert
+        $transformedContent = Get-Content -Path "TestDrive:\WebsiteRoot\App_Config\Web.config"
+        $transformedContent | Should Be $expectedTransformedContent
+    }
 }
