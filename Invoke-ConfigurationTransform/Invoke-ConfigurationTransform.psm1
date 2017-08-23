@@ -104,3 +104,5 @@ Function Invoke-ConfigurationTransform {
     
     $TransformedXml.Trim()
 }
+
+Export-ModuleMember -Function Get-PathOfFileToTransform, Invoke-ConfigurationTransform

@@ -1,5 +1,5 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
-. "$PSScriptRoot\Invoke-ConfigurationTransform.ps1"
+Import-Module "$PSScriptRoot\Invoke-ConfigurationTransform.psm1" -Force
 
 Describe "Get-PathOfFileToTransform" {
     It "should return the path of the file to transform" {
