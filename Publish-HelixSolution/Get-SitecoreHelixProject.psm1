@@ -67,3 +67,5 @@ Function Test-WebProject {
     $projectFileContent = Get-Content $ProjectFilePath | Out-String
     $projectFileContent.ToLowerInvariant().Contains($webApplicationProjectTypeGuid.ToLowerInvariant())
 }
+
+Export-ModuleMember -Function Get-SitecoreHelixProject

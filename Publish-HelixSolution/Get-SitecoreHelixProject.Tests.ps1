@@ -1,5 +1,5 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
-Import-Module "$PSScriptRoot\Get-SitecoreHelixProject.ps1" -Force
+Import-Module "$PSScriptRoot\Get-SitecoreHelixProject.psm1" -Force
 
 Describe "Get-SitecoreHelixProject" {
     
