@@ -4,9 +4,9 @@ Import-Module "$PSScriptRoot\Install-RuntimeDependencyPackage.ps1" -Force
 Describe "Get-RuntimeDependencyPackageFromCache" {  
     It "should find package by name and version" {
         # Arrange
-        # TODO: Install a test package
-        $packageName = "Sitecore.Full"
-        $packageVersion = "8.2.170407"
+        $packageName = "jQuery"
+        $packageVersion = "3.1.1"
+        Install-Package -Name $packageName -RequiredVersion $packageVersion -ProviderName "NuGet" #-ErrorAction SilentlyContinue
 
         # Act
         $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
@@ -31,13 +31,16 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
 Describe "Install-RuntimeDependencyPackage" {  
     It "should install NuGet packages from the specified source" {
         # Arrange
-        $packageName = "Sitecore.Full"
-        $packageVersion = "8.2.170407"
+        $packageName = "jquery"
+        $packageVersion = "3.1.1"
+        $packageSource = "$PSScriptRoot\TestPackages\"
+        Uninstall-Package -Name $packageName -RequiredVersion $packageVersion -ErrorAction SilentlyContinue
 
         # Act
-        $nugetPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion
+        $package = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource
 
         # Assert
-        $nugetPackage | Should Not Be $Null
+        $package.Name | Should Be $packageName
+        $package.Version | Should Be $packageVersion
     }
 }
