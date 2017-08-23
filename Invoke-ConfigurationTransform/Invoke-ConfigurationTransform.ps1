@@ -47,9 +47,11 @@ Function Invoke-ConfigurationTransform {
         $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
         $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
         Write-Verbose "Transforming '$ConfigurationTransformFilePath' to '$PathOfFileToTransform'."        
-        TransformXmlDocument -XmlFilePath $PathOfFileToTransform -XdtFilePath $ConfigurationTransformFilePath
+        $TransformedXmlDocument = TransformXmlDocument -XmlFilePath $PathOfFileToTransform -XdtFilePath $ConfigurationTransformFilePath
+        $TransformedXmlDocument | Out-File -FilePath $PathOfFileToTransform -Encoding utf8 -Force
     }
 }
+
 
 Function Get-FileToTransform {
     Param (
