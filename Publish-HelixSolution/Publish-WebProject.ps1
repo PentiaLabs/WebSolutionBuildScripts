@@ -33,13 +33,15 @@ Function Publish-WebProject {
     )
 		
     Process {
-        $pathExists = Test-Path $WebProjectFilePath
-        if ($pathExists -eq $False) {
+        if (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
             Throw "Path '$WebProjectFilePath' not found."
         }
         if ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
             Write-Verbose "`$MSBuildExecutablePath not set."
             $MSBuildExecutablePath = Get-MSBuild
+        }
+        if (!(Test-Path $MSBuildExecutablePath -PathType Leaf)) {
+            Throw "Path '$MSBuildExecutablePath' not found."
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Information "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
