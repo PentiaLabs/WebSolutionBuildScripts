@@ -44,8 +44,9 @@ Function Publish-WebProject {
             Throw "Path '$MSBuildExecutablePath' not found."
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
-        Write-Information "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
-        & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true" | Write-Verbose
+        Write-Host "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
+        $output = & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true"
+        Write-Host $output
         Write-Verbose "Exit code '$LASTEXITCODE'."
     }
 }
