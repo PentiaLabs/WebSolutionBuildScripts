@@ -4,14 +4,15 @@ Import-Module "$PSScriptRoot\..\Shared\Get-MSBuild.ps1" -Force
 
 Describe "Publish-WebProject" {
 
-    $webProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
-    $publishWebsitePath = "$TestDrive\Website"
+    $WebProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
+    $PublishWebsitePath = "$TestDrive\Website"
+    $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\WebProject.csproj"
     
-    Write-Host $publishWebsitePath
+    Write-Host $PublishWebsitePath
     
     Function CompileTestProject {
         $msBuildExecutable = Get-MSBuild
-        & "$msBuildExecutable" "$webProjectFilePath"
+        & "$msBuildExecutable" "$WebProjectFilePath"
     }
     
     It "should create the output directory if it doesn't exist" {
@@ -19,10 +20,10 @@ Describe "Publish-WebProject" {
         CompileTestProject
 
         # Act
-        Publish-WebProject -WebProjectFilePath $webProjectFilePath -OutputDirectory $publishWebsitePath -Verbose
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose
 
         # Assert
-        Test-Path $publishWebsitePath | Should Be $True
+        Test-Path $PublishWebsitePath | Should Be $True
     }
 
     It "should publish a web project to the target directory" {
@@ -30,11 +31,23 @@ Describe "Publish-WebProject" {
         CompileTestProject
 
         # Act
-        Publish-WebProject -WebProjectFilePath $webProjectFilePath -OutputDirectory $publishWebsitePath -Verbose
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose
 
         # Assert
-        $countOfPublishedFiles = Get-ChildItem $publishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
+        $countOfPublishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
         $countOfPublishedFiles | Should Be 3
+    }
+    
+    It "should throw an exception when a project fails to publish" {
+        # Arrange
+        $msBuildExecutable = Get-MSBuild
+        & "$msBuildExecutable" "$FoundationWebProjectFilePath"
+        
+        # Act
+        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputDirectory $PublishWebsitePath -Verbose }
+
+        # Assert
+        $publishWebProject | Should Throw
     }
 }
 
