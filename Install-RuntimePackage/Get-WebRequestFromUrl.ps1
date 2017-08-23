@@ -1,15 +1,14 @@
-function Get-WebRequestFromUrl (
-    [Parameter(Mandatory=$true)]
-    [string]$url
-)
-{
-$HTTP_Request = [System.Net.WebRequest]::Create($url)
-
-try {
-    $res = $HTTP_Request.GetResponse()
-} catch [System.Net.WebException] {
-    $res = $_.Exception.Response
-}
-
-Write-Output $res
+Function Get-WebRequestFromUrl {
+    Param(        
+        [Parameter(Mandatory = $true)]
+        [string]$url
+    )
+    $httpRequest = [System.Net.WebRequest]::Create($url)
+    try {
+        $res = $httpRequest.GetResponse()
+    }
+    catch [System.Net.WebException] {
+        $res = $_.Exception.Response
+    }
+    Write-Output $res
 }
