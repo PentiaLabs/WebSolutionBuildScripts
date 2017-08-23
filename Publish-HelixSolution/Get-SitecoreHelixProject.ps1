@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-Gets the paths to project files and allows filtering based on Helix solution layer.
+Gets the paths to web project files and allows filtering based on Helix solution layer.
 
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path.
 
 .PARAMETER HelixLayer
-The Helix layer in which to search for projects. Defaults to $Null, which includes all layers.
+The Helix layer in which to search for web projects. Defaults to $Null, which includes all layers.
 
 .PARAMETER IncludeFilter
 Specifies which files do include in the search. Defaults to "*.csproj".
