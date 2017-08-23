@@ -29,7 +29,7 @@ Function Get-PathOfFileToTransform {
         [string]$WebrootDirectory
     )
     $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
-    $NameOfFileToTransform = Get-FileToTransform $ConfigurationTransformFilePath
+    $NameOfFileToTransform = Get-NameOfFileToTransform $ConfigurationTransformFilePath
     $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
     $PathOfFileToTransform
 }
@@ -50,7 +50,7 @@ Function Get-RelativeConfigurationDirectory {
     $DirectoryName.Substring($ConfigurationDirectoryIndex)
 }
 
-Function Get-FileToTransform {
+Function Get-NameOfFileToTransform {
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
