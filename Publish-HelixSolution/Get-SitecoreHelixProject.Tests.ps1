@@ -1,9 +1,10 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Get-SitecoreHelixProject.ps1" -Force
 
-$solutionDirectory = "$PSScriptRoot\TestSolution"
-
 Describe "Get-SitecoreHelixProject" {
+    
+    $solutionDirectory = "$PSScriptRoot\TestSolution"
+
     It "Should return all web projects in the solution" {
         # Arrange 
         $expectedProjects = @(
