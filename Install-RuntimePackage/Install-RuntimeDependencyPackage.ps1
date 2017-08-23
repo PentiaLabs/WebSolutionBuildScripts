@@ -31,10 +31,11 @@ Function Install-RuntimePackage {
     ) 
 
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
-    $nugetPackage = Get-Package -ProviderName NuGet -AllVersions | Where-Object {$_.Name -eq $PackageName -and $_.version -eq $PackageVersion} 
+    $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     if (-not $nugetPackage) {
         Write-Verbose "Package '$PackageName $PackageVersion' not found locally. Installing from '$PackageSource'."
         Install-RuntimeDependencyPackageFromRemote
+        $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
     
     Copy-RuntimeDependencyPackageContents
@@ -60,12 +61,28 @@ Function Get-RuntimeDependencyPackageFromCache {
 }
 
 Function Install-RuntimeDependencyPackage {    
-    $Credential = [System.Management.Automation.PSCredential]::Empty
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$PackageName,
+    
+        [Parameter(Mandatory = $True)]
+        [string]$PackageVersion,
+    
+        [Parameter(Mandatory = $True)]
+        [string]$PackageSource,
+    
+        [Parameter(Mandatory = $False)]
+        [string]$Username = [string]::Empty,
+    
+        [Parameter(Mandatory = $False)]
+        [SecureString]$Password = [SecureString]::Empty
+    )
+    $credentials = [System.Management.Automation.PSCredential]::Empty
     if ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
-        $Credential = New-Object System.Management.Automation.PSCredential($Username, $Password)
+        $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
 
-    if ($Credential -eq [System.Management.Automation.PSCredential]::Empty) {
+    if ($credentials -eq [System.Management.Automation.PSCredential]::Empty) {
         Write-Verbose ("Testing if location is url")
         if ($package.location.StartsWith("http://") -or $package.location.StartsWith("https://")) {
             Write-Verbose ("Location had been determined to be a url: " + $package.location)
@@ -75,7 +92,7 @@ Function Install-RuntimeDependencyPackage {
 
             if ($statusCode -eq 401) {
                 Write-Verbose ("Getting credentials for endpoint")
-                $Credential = Get-Credential -Message ("Please enter your credentials for " + $package.location);
+                $credentials = Get-Credential -Message ("Please enter your credentials for " + $package.location);
             }
             elseif ($statusCode -gt 499 -and $statusCode -lt 600) {
                 Write-Error ("package location endpoint " + $package.location + " failed with error code " + $statusCode)
@@ -85,6 +102,16 @@ Function Install-RuntimeDependencyPackage {
     
     Write-Verbose "Installing package '$($PackageName)'."
     Find-Package -Source $package.location -Name $PackageName -RequiredVersion $PackageVersion -Credential $Credential | Install-Package -Credential $Credential -Force
+}
+
+Function Test-Url {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$Url
+    )
+    [Uri]$uriResult = $Null
+    $result = [Uri]::TryCreate($Url, [UriKind]::Absolute, [ref] $uriResult)
+    $result -and ($uriResult.Scheme -eq [Uri]::UriSchemeHttp -or $uriResult.Scheme -eq [Uri]::UriSchemeHttps)
 }
 
 Function Copy-RuntimeDependencyPackageContents {
