@@ -1,5 +1,5 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
-Import-Module "$PSScriptRoot\Publish-WebProject.ps1" -Force
+Import-Module "$PSScriptRoot\Publish-WebProject.psm1" -Force
 Import-Module "$PSScriptRoot\..\Shared\Get-MSBuild.ps1" -Force
 
 Describe "Publish-WebProject" {
