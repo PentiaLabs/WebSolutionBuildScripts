@@ -28,10 +28,10 @@ Function Get-PathOfFileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$WebrootDirectory
     )
-    $RelativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
-    $NameOfFileToTransform = Get-NameOfFileToTransform $ConfigurationTransformFilePath
-    $PathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $RelativeConfigurationDirectory, $NameOfFileToTransform)
-    $PathOfFileToTransform
+    $relativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
+    $nameOfFileToTransform = Get-NameOfFileToTransform $ConfigurationTransformFilePath
+    $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $relativeConfigurationDirectory, $nameOfFileToTransform)
+    $pathOfFileToTransform
 }
 
 Function Get-RelativeConfigurationDirectory {
@@ -40,14 +40,14 @@ Function Get-RelativeConfigurationDirectory {
         [string]$ConfigurationTransformFilePath
     )
     # "C:\MySite\App_Config\Sitecore\Include\Pentia\Sites.Debug.Config" -> "C:\MySite\App_Config\Sitecore\Include\Pentia"
-    $DirectoryName = [System.IO.Path]::GetDirectoryName($ConfigurationTransformFilePath)
-    $ConfigurationDirectoryName = "App_Config"
-    $ConfigurationDirectoryIndex = $DirectoryName.IndexOf($ConfigurationDirectoryName, [System.StringComparison]::InvariantCultureIgnoreCase)
-    If ($ConfigurationDirectoryIndex -lt 0) {
-        Throw "Can't determine relative configuration directory. '$ConfigurationDirectoryName' not found in path '$ConfigurationTransformFilePath'."
+    $directoryName = [System.IO.Path]::GetDirectoryName($ConfigurationTransformFilePath)
+    $configurationDirectoryName = "App_Config"
+    $configurationDirectoryIndex = $DirectoryName.IndexOf($configurationDirectoryName, [System.StringComparison]::InvariantCultureIgnoreCase)
+    If ($configurationDirectoryIndex -lt 0) {
+        Throw "Can't determine relative configuration directory. '$configurationDirectoryName' not found in path '$ConfigurationTransformFilePath'."
     }
     # "C:\MySite\App_Config\Sitecore\Include\Pentia" -> "App_Config\Sitecore\Include\Pentia"
-    $DirectoryName.Substring($ConfigurationDirectoryIndex)
+    $directoryName.Substring($configurationDirectoryIndex)
 }
 
 Function Get-NameOfFileToTransform {
@@ -56,18 +56,18 @@ Function Get-NameOfFileToTransform {
         [string]$ConfigurationTransformFilePath
     )
     # "C:\MySite\App_Config\Sitecore\Include\Web.Debug.Config" -> "Web.Debug.Config"
-    $FileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
-    $FileNamePartSeparator = "."
+    $fileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
+    $fileNamePartSeparator = "."
     # ["Web", "Debug", "config"]
-    [System.Collections.ArrayList]$FileNameParts = $FileName.Split($FileNamePartSeparator)
-    $BuildConfigurationIndex = $FileNameParts.Count - 2
-    If ($BuildConfigurationIndex -lt 1) {
-        Throw "Can't determine file to transform based on file name '$FileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
+    [System.Collections.ArrayList]$fileNameParts = $fileName.Split($fileNamePartSeparator)
+    $buildConfigurationIndex = $fileNameParts.Count - 2
+    If ($buildConfigurationIndex -lt 1) {
+        Throw "Can't determine file to transform based on file name '$fileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
     }
     # ["Web", "Debug", "config"] -> ["Web", "config"]
-    $FileNameParts.RemoveAt($BuildConfigurationIndex)
+    $fileNameParts.RemoveAt($buildConfigurationIndex)
     # ["Web", "config"] -> "Web.config"
-    [string]::Join($FileNamePartSeparator, $FileNameParts.ToArray())
+    [string]::Join($fileNamePartSeparator, $fileNameParts.ToArray())
 }
 
 Function Invoke-ConfigurationTransform {
@@ -86,23 +86,23 @@ Function Invoke-ConfigurationTransform {
 
     Add-Type -LiteralPath "$PSScriptRoot\Microsoft.Web.XmlTransform.dll"
 
-    $XmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument
-    $XmlDocument.PreserveWhitespace = $True
-    $XmlDocument.Load($XmlFilePath)
+    $xmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument
+    $xmlDocument.PreserveWhitespace = $True
+    $xmlDocument.Load($XmlFilePath)
 
-    $Transformation = New-Object Microsoft.Web.XmlTransform.XmlTransformation($XdtFilePath)
-    If ($Transformation.Apply($XmlDocument) -eq $False) {
+    $transformation = New-Object Microsoft.Web.XmlTransform.XmlTransformation($XdtFilePath)
+    If ($transformation.Apply($xmlDocument) -eq $False) {
         Throw "Transformation of document '$XmlFilePath' failed using transform file '$XdtFilePath'."
     }
-    $StringWriter = New-Object -TypeName "System.IO.StringWriter"
-    $XmlTextWriter = [System.Xml.XmlWriter]::Create($stringWriter)
-    $XmlDocument.WriteTo($XmlTextWriter)
-    $XmlTextWriter.Flush()
-    $TransformedXml = $StringWriter.GetStringBuilder().ToString()
-    $XmlTextWriter.Dispose()
-    $StringWriter.Dispose()
+    $stringWriter = New-Object -TypeName "System.IO.StringWriter"
+    $xmlTextWriter = [System.Xml.XmlWriter]::Create($stringWriter)
+    $xmlDocument.WriteTo($xmlTextWriter)
+    $xmlTextWriter.Flush()
+    $transformedXml = $stringWriter.GetStringBuilder().ToString()
+    $xmlTextWriter.Dispose()
+    $stringWriter.Dispose()
     
-    $TransformedXml.Trim()
+    $transformedXml.Trim()
 }
 
 Export-ModuleMember -Function Get-PathOfFileToTransform, Invoke-ConfigurationTransform
