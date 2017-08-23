@@ -2,7 +2,7 @@
 Import-Module "$PSScriptRoot\Publish-WebProject.ps1" -Force
 Import-Module "$PSScriptRoot\..\Shared\Get-MSBuild.ps1" -Force
 
-$webProjectFilePath = "$PSScriptRoot\TestWebProject\src\Project\SampleWebApplication\SampleWebApplication.csproj"
+$webProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
 $publishWebsitePath = "$TestDrive\Website"
 
 Function CompileTestProject {
