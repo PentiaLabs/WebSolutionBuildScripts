@@ -51,3 +51,5 @@ Function Publish-WebProject {
         }
     }
 }
+
+Export-ModuleMember -Function Publish-WebProject
