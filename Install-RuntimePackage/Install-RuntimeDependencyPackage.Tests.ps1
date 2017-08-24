@@ -70,22 +70,37 @@ Describe "Install-RuntimeDependencyPackage" {
 }
 
 Describe "Copy-RuntimeDependencyPackageContents" {
+    $packageName = "sample-runtime-dependency"
+    $packageVersion = "1.0.0"
+    $packageSource = "$PSScriptRoot\TestPackages\"
+    $destination = "$TestDrive"
+    $installedPackage = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Destination $destination
+    
     It "should copy 'Webroot' folder contents to the target webroot path" {
         # Arrange
-        $packageName = "sample-runtime-dependency"
-        $packageVersion = "1.0.0"
-        $packageSource = "$PSScriptRoot\TestPackages\"
-        $destination = "$TestDrive"
-        $installedPackage = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Destination $destination
         $expectedFileNames = @("WebrootSampleFile.txt")
         $webrootOutputPath = "$TestDrive\my-webroot"
-        $dataOutputPath = "$TestDrive\my-data-folder"
+        $dataOutputPath = "$TestDrive\not-used-in-this-test"
 
         # Act
         Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
         # Assert
         $files = Get-ChildItem -Path $webrootOutputPath | Select-Object -ExpandProperty "Name"
+        $files | Should Be $expectedFileNames
+    }
+    
+    It "should copy 'Data' folder contents to the target data path" {
+        # Arrange
+        $expectedFileNames = @("DataSampleFile.txt")
+        $webrootOutputPath = "$TestDrive\not-used-in-this-test"
+        $dataOutputPath = "$TestDrive\my-data-folder"
+
+        # Act
+        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+
+        # Assert
+        $files = Get-ChildItem -Path $dataOutputPath | Select-Object -ExpandProperty "Name"
         $files | Should Be $expectedFileNames
     }
 }

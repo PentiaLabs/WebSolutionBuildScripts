@@ -54,7 +54,7 @@ Function Get-RuntimeDependencyPackageFromCache {
         [string]$PackageVersion
     )
     $packageProvider = "NuGet"
-    If(!(Test-PackageProvider $packageProvider)) {
+    If (!(Test-PackageProvider $packageProvider)) {
         Throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
     }
     $package = Get-Package -ProviderName $packageProvider -Name $PackageName -RequiredVersion $PackageVersion -ErrorAction SilentlyContinue
@@ -98,7 +98,7 @@ Function Install-RuntimeDependencyPackage {
 
 Function Copy-RuntimeDependencyPackageContents {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package,
 
         [Parameter(Mandatory = $True)]
@@ -108,16 +108,37 @@ Function Copy-RuntimeDependencyPackageContents {
         [string]$DataOutputPath
     )
     
-    Write-Host "Copying $($PackageName)"
-    return $null
-    $packagePath = $Package | Select-Object -Property Source | ForEach-Object { Split-Path -Path $_.Source }
-    if (Test-Path -Path "$packagePath\Webroot" -PathType Container) {
-        Write-Verbose "Copying '$($PackageName)' web root."
-        robocopy "$packagePath\Webroot" "$WebrootPath" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
-    }
+    $packageName = $Package.Name
+    Write-Verbose "Copying package '$packageName'."
+
+    $webrootSourcePath = $Package.FullPath + "\Webroot"
+    Copy-PackageFolder -PackageName $packageName -SourceFriendlyName "webroot" -Source $webrootSourcePath -Target $WebrootOutputPath
     
-    if (Test-Path -Path "$packagePath\Data" -PathType Container) {
-        Write-Verbose "Copying '$($PackageName)' data root."
-        robocopy "$packagePath\Data" "$DataRootPath" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
+    $dataSourcePath = $Package.FullPath + "\Data"
+    Copy-PackageFolder -PackageName $packageName -SourceFriendlyName "data" -Source $dataSourcePath -Target $DataOutputPath
+}
+
+Function Copy-PackageFolder {
+    Param (        
+        [Parameter(Mandatory = $True)]
+        [string]$PackageName,
+        
+        [Parameter(Mandatory = $True)]
+        [string]$SourceFriendlyName,
+                
+        [Parameter(Mandatory = $True)]
+        [string]$Source,
+    
+        [Parameter(Mandatory = $True)]
+        [string]$Target
+    )
+
+    Write-Verbose "Checking if package '$PackageName' has a $SourceFriendlyName folder '$Source'."
+    if (Test-Path -Path $Source -PathType Container) {
+        Write-Verbose "Copying '$PackageName' $SourceFriendlyName files from '$Source' to '$Target'."
+        robocopy "$Source" "$Target" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
+    }
+    else {
+        Write-Verbose "No $SourceFriendlyName folder '$Source' found in package '$PackageName'."
     }
 }
