@@ -11,7 +11,7 @@
     <language>en-US</language>
   </metadata>
   <files>
-    <file src="Data\*" target="content\Data" />
-	<file src="Webroot\*" target="content\Webroot" />
+    <file src="Data\*" target="Data" />
+    <file src="Webroot\*" target="Webroot" />
   </files>
 </package>
