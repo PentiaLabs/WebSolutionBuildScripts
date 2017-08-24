@@ -57,7 +57,8 @@ Function Get-RuntimeDependencyPackageFromCache {
     If(!(Test-PackageProvider $packageProvider)) {
         Throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
     }
-    $package = Get-Package -ProviderName $packageProvider -AllVersions | Where-Object {$_.Name -eq $PackageName -and $_.Version -eq $PackageVersion}
+    $package = Get-Package -ProviderName $packageProvider -Name $PackageName -RequiredVersion $PackageVersion -ErrorAction SilentlyContinue
+    Write-Host $package
     $package
 }
 
@@ -98,16 +99,17 @@ Function Install-RuntimeDependencyPackage {
 Function Copy-RuntimeDependencyPackageContents {
     Param (
         [Parameter(Mandatory = $true)]
-        [SoftwareIdentity]$Package,
+        [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package,
 
         [Parameter(Mandatory = $True)]
-        [string]$WebrootPath,
+        [string]$WebrootOutputPath,
 
         [Parameter(Mandatory = $True)]
-        [string]$DataRootPath
+        [string]$DataOutputPath
     )
     
     Write-Host "Copying $($PackageName)"
+    return $null
     $packagePath = $Package | Select-Object -Property Source | ForEach-Object { Split-Path -Path $_.Source }
     if (Test-Path -Path "$packagePath\Webroot" -PathType Container) {
         Write-Verbose "Copying '$($PackageName)' web root."
