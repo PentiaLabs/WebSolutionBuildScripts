@@ -1,9 +1,49 @@
 <#
 .SYNOPSIS
-Installs a package using Windows PackageManagement (https://docs.microsoft.com/en-us/powershell/module/PackageManagement/?view=powershell-5.0).
-Requires -RunAsAdministrator.
+Publishes the contents of a runtime dependency package to a website. Requires -RunAsAdministrator.
+
+.DESCRIPTION
+Publishes the contents of a runtime dependency package to a website, using Windows PackageManagement (https://docs.microsoft.com/en-us/powershell/module/PackageManagement/?view=powershell-5.0).
+
+Packages are expected to be NuGet-packages and contain any of the following folders:
+
+- <package>/Webroot
+- <package>/Data
+
+All of the above are optional.
+
+The following steps are performed during package publishing:
+
+1. Check if the required package is cached locally.
+1.1 If the package isn't found locally, install it from the specified package source.
+2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
+3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
+
+.PARAMETER PackageName
+The name of the package to install.
+
+.PARAMETER PackageVersion
+The exact version of the package to install.
+
+.PARAMETER PackageSource
+The URI where the package is located. Can be a file path as well.
+
+.PARAMETER Username
+Optional username required to access the package source.
+
+.PARAMETER Password
+Optional password required to access the package source.
+
+.PARAMETER WebrootOutputPath
+The path where the contents of "<package>\Webroot" will be copied to.
+
+.PARAMETER DataOutputPath
+The path where the contents of "<package>\Data" will be copied to.
+
+.EXAMPLE
+Deploy-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/feeds/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
 #>
-Function Install-RuntimePackage {
+Function Publish-RuntimeDependencyPackage {
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -21,28 +61,21 @@ Function Install-RuntimePackage {
         [SecureString]$Password = [SecureString]::Empty,
         
         [Parameter(Mandatory = $True)]
-        [string]$WebrootPath,
+        [string]$WebrootOutputPath,
 
         [Parameter(Mandatory = $True)]
-        [string]$DataRootPath
+        [string]$DataOutputPath
     ) 
 
+    Write-Host "Publishing package '$PackageName'."
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
-    $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
-    if (-not $nugetPackage) {
-        Write-Verbose "Package '$PackageName $PackageVersion' not found locally. Installing from '$PackageSource'."
-        Install-RuntimeDependencyPackageFromRemote
-        $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
+    $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
+    if (-not $package) {
+        Write-Verbose "Package '$PackageName' version '$PackageVersion' not found locally. Installing from '$PackageSource'."
+        Install-RuntimeDependencyPackage
+        $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
-    
-    Copy-RuntimeDependencyPackageContents
-
-    $hasDeployScript = (Get-ChildItem -Path "$WebrootPath" -Filter packageDeploy.ps1).Count -gt 0
-
-    if ($hasDeployScript) {
-        Invoke-Expression "$WebrootPath\packageDeploy.ps1"  
-        Remove-Item -Path "$WebrootPath\packageDeploy.ps1" 
-    }
+    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
 
 Function Get-RuntimeDependencyPackageFromCache {
