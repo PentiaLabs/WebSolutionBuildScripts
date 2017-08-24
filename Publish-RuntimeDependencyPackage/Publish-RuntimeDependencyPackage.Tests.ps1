@@ -1,5 +1,5 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
-Import-Module "$PSScriptRoot\Install-RuntimeDependencyPackage.ps1" -Force
+Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage.ps1" -Force
 
 Describe "Test-PackageProvider" {
     It "should return '$True' when the specified Package Provider is installed" {
