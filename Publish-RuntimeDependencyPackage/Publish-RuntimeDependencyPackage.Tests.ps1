@@ -125,7 +125,7 @@ Describe "Publish-RuntimeDependencyPackage" {
         $webrootOutputPath = "$TestDrive\my-webroot-folder"
         $dataOutputPath = "$TestDrive\my-data-folder"
         $expectedFileNames = @("DataSampleFile.txt", "WebrootSampleFile.txt")
-        Uninstall-Package -Name $packageName
+        Uninstall-Package -Name $packageName -ErrorAction SilentlyContinue
 
         # Act
         Publish-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath

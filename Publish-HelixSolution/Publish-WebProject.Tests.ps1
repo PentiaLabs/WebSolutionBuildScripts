@@ -9,13 +9,23 @@ Describe "Publish-WebProject" {
     $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\WebProject.csproj"
     
     Function CompileTestProject {
+        Param(
+            [Parameter(Mandatory=$True)]
+            [string]$ProjectFilePath
+        )
         $msBuildExecutable = Get-MSBuild
-        & "$msBuildExecutable" "$WebProjectFilePath"
+        If (-not $msBuildExecutable) {
+            Throw "Didn't find MSBuild.exe. Can't compile solution for running tests."
+        }
+        & "$msBuildExecutable" "$ProjectFilePath"
+        If ($LASTEXITCODE -ne 0) {
+            Throw "Failed to build solution. Make sure you have ASP.NET features installed for Visual Studio."
+        }
     }
     
     It "should create the output directory if it doesn't exist" {
         # Arrange
-        CompileTestProject
+        CompileTestProject -ProjectFilePath $WebProjectFilePath
 
         # Act
         Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
@@ -26,7 +36,7 @@ Describe "Publish-WebProject" {
 
     It "should publish a web project to the target directory" {
         # Arrange
-        CompileTestProject
+        CompileTestProject -ProjectFilePath $WebProjectFilePath
 
         # Act
         Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
@@ -38,8 +48,7 @@ Describe "Publish-WebProject" {
     
     It "should throw an exception when a project fails to publish" {
         # Arrange
-        $msBuildExecutable = Get-MSBuild
-        & "$msBuildExecutable" "$FoundationWebProjectFilePath"
+        CompileTestProject -ProjectFilePath $FoundationWebProjectFilePath
         
         # Act
         $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputDirectory $PublishWebsitePath }
