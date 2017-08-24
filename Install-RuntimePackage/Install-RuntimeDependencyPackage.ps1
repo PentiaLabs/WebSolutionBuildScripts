@@ -58,7 +58,6 @@ Function Get-RuntimeDependencyPackageFromCache {
         Throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
     }
     $package = Get-Package -ProviderName $packageProvider -Name $PackageName -RequiredVersion $PackageVersion -ErrorAction SilentlyContinue
-    Write-Host $package
     $package
 }
 
@@ -109,7 +108,7 @@ Function Copy-RuntimeDependencyPackageContents {
     )
     
     $packageName = $Package.Name
-    Write-Verbose "Copying package '$packageName'."
+    Write-Host "Copying package '$packageName'."
 
     $webrootSourcePath = $Package.FullPath + "\Webroot"
     Copy-PackageFolder -PackageName $packageName -SourceFriendlyName "webroot" -Source $webrootSourcePath -Target $WebrootOutputPath
