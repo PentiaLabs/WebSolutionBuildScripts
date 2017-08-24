@@ -6,7 +6,8 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
         # Arrange
         $packageName = "jQuery"
         $packageVersion = "3.1.1"
-        Install-Package -Name $packageName -RequiredVersion $packageVersion -ProviderName "NuGet" #-ErrorAction SilentlyContinue
+        $packageSource = "https://www.nuget.org/api/v2"
+        Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Force
 
         # Act
         $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
@@ -29,18 +30,6 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
 }
 
 Describe "Install-RuntimeDependencyPackage" {  
-    # "Mock" doesn't work in PS 5 - see https://github.com/pester/Pester/wiki/Mocking-with-Pester
-    # It "should display a helpful error when NuGet isn't resgistered as a package provider" {
-    #     # Arrange
-    #     Mock Get-PackageProvider { return @() }
-
-    #     # Act
-    #     $getPackage = { Get-RuntimeDependencyPackageFromCache -PackageName "jQuery" -PackageVersion "3.1.1" }
-
-    #     # Assert
-    #     $getPackage | Should Throw "The NuGet package provider isn't installed. Run 'Install-PackageProvider -Name NuGet' from an elevated PowerShell prompt."
-    # }
-
     It "should install NuGet packages from the specified source" {
         # Arrange
         $packageName = "jquery"

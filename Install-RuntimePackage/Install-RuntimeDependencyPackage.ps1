@@ -65,7 +65,7 @@ Function Test-PackageProvider {
         [Parameter(Mandatory = $True)]
         [string]$Name
     )
-    (Get-PackageProvider | Where-Object { $_.Name -eq $Name } | Select-Object -ExpandProperty "Count") -gt 0
+    (Get-PackageProvider | Select-Object -ExpandProperty "Name") -contains $Name
 }
 
 Function Install-RuntimeDependencyPackage {    
