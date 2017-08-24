@@ -161,13 +161,13 @@ Function Get-PackageDirectory {
     # The "FullPath" points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\".
     If ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
         $packageDirectory = $Package.FullPath
-        Write-Verbose "Using `$Package.FullPath ('$packageDirectory')."
+        Write-Verbose "Unpack directory determined via `$Package.FullPath ('$packageDirectory')."
         return $packageDirectory
     }
     # The "Source" points to the NuGet package file *inside* the "unpack directory", e.g. "<package root>\My-Package.1.0.0\My-Package.1.0.0.nupgk".
     If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.File]::Exists($Package.Source)) {
         $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
-        Write-Verbose "Using `$Package.Source ('$packageDirectory')."
+        Write-Verbose "Unpack directory determined via `$Package.Source ('$packageDirectory')."
         return $packageDirectory
     }
     Throw "Unable to determine unpack directory of package '$($Package.Name)'. Source: '$($Package.Source)'. FullPath: '$($Package.FullPath)'."
