@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>sample-runtime-dependency</id>
+    <version>1.0.0</version>
+    <title>sample-runtime-dependency</title>
+    <authors>Pentia A/S</authors>
+    <owners>Pentia A/S</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A sample package for integration tests.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src="Data\*" target="Data" />
+    <file src="Webroot\*" target="Webroot" />
+  </files>
+</package>
