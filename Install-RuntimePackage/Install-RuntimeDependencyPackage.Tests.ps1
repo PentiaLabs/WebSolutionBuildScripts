@@ -83,7 +83,7 @@ Describe "Copy-RuntimeDependencyPackageContents" {
         $dataOutputPath = "$TestDrive\not-used-in-this-test"
 
         # Act
-        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath -Verbose
+        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
         # Assert
         $files = Get-ChildItem -Path $webrootOutputPath | Select-Object -ExpandProperty "Name"
@@ -97,7 +97,7 @@ Describe "Copy-RuntimeDependencyPackageContents" {
         $dataOutputPath = "$TestDrive\my-data-folder"
 
         # Act
-        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath -Verbose
+        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
         # Assert
         $files = Get-ChildItem -Path $dataOutputPath | Select-Object -ExpandProperty "Name"
@@ -125,9 +125,10 @@ Describe "Publish-RuntimeDependencyPackage" {
         $webrootOutputPath = "$TestDrive\my-webroot-folder"
         $dataOutputPath = "$TestDrive\my-data-folder"
         $expectedFileNames = @("DataSampleFile.txt", "WebrootSampleFile.txt")
+        Uninstall-Package -Name $packageName
 
         # Act
-        Publish-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+        Publish-RuntimeDependencyPackage -Verbose -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
         # Assert
         $files = Get-ChildItem -Path $TestDrive -Recurse -File | Select-Object -ExpandProperty "Name"

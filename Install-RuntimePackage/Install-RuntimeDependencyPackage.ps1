@@ -159,16 +159,16 @@ Function Get-PackageDirectory {
     )
     Write-Verbose "Determining package directory."
     $packageDirectory = $Null
-    If ([System.IO.Path]::IsPathRooted($Package.FullPath)) {
-        $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.FullPath)
-        Write-Verbose "Using `$Package.FullPath as file source ('$packageDirectory')."
+    If ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
+        $packageDirectory = $Package.FullPath
+        Write-Verbose "Using '$packageDirectory' as package directory."
         return $packageDirectory
     }
-    If ([System.IO.Path]::IsPathRooted($Package.Source)) {
-        $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
-        Write-Verbose "Using `$Package.Source as file source ('$packageDirectory')."
-        return $packageDirectory
-    }
+    # If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.Directory]::Exists($Package.Source)) {
+    #     $packageDirectory = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($Package.Source), $Package.PackageFilename)
+    #     Write-Verbose "Using `$Package.Source as file source ('$packageDirectory')."
+    #     return $packageDirectory
+    # }
     Throw "Unable to determine package directory."
 }
 
