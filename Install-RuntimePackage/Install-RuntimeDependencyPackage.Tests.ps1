@@ -128,7 +128,7 @@ Describe "Publish-RuntimeDependencyPackage" {
         Uninstall-Package -Name $packageName
 
         # Act
-        Publish-RuntimeDependencyPackage -Verbose -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+        Publish-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
         # Assert
         $files = Get-ChildItem -Path $TestDrive -Recurse -File | Select-Object -ExpandProperty "Name"

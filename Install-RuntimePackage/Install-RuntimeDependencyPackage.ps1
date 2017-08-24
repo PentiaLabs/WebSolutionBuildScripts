@@ -157,27 +157,20 @@ Function Get-PackageDirectory {
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
     )
-    Write-Verbose "Determining package directory."
-    $packageDirectory = $Null
-    # The full path points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\"
+    Write-Verbose "Determining directory where package '$($Package.Name)' was unpacked."
+    # The "FullPath" points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\".
     If ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
         $packageDirectory = $Package.FullPath
-        Write-Verbose "Using '$packageDirectory' as package directory."
+        Write-Verbose "Using `$Package.FullPath ('$packageDirectory')."
         return $packageDirectory
     }
-    # The source points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\"
-    If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.Directory]::Exists($Package.Source)) {
-        $packageDirectory = $Package.Source
-        Write-Verbose "Using '$packageDirectory' as package directory."
-        return $packageDirectory
-    }
-    # The source points to the NuGet package file *inside* the "unpack directory", e.g. "<package root>\My-Package.1.0.0\My-Package.1.0.0.nupgk"
+    # The "Source" points to the NuGet package file *inside* the "unpack directory", e.g. "<package root>\My-Package.1.0.0\My-Package.1.0.0.nupgk".
     If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.File]::Exists($Package.Source)) {
         $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
-        Write-Verbose "Using '$packageDirectory' as package directory."
+        Write-Verbose "Using `$Package.Source ('$packageDirectory')."
         return $packageDirectory
     }
-    Throw "Unable to determine package directory."
+    Throw "Unable to determine unpack directory of package '$($Package.Name)'. Source: '$($Package.Source)'. FullPath: '$($Package.FullPath)'."
 }
 
 Function Copy-PackageFolder {
