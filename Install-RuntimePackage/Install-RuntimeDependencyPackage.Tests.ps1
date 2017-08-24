@@ -7,10 +7,10 @@ Describe "Test-PackageProvider" {
         $packageProvider = "NuGet"
     
         # Act
-        $result = Test-PackageProvider $packageProvider
+        $isInstalled = Test-PackageProvider $packageProvider
     
         # Assert
-        $result | Should Be $True
+        $isInstalled | Should Be $True
     }
 
     It "should return '$False' when the specified Package Provider is not installed" {
@@ -18,10 +18,10 @@ Describe "Test-PackageProvider" {
         $packageProvider = "This package provider is not installed"
     
         # Act
-        $result = Test-PackageProvider $packageProvider
+        $isInstalled = Test-PackageProvider $packageProvider
     
         # Assert
-        $result | Should Be $False
+        $isInstalled | Should Be $False
     }
 }
 
@@ -31,13 +31,13 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
         $packageName = "jQuery"
         $packageVersion = "3.1.1"
         $packageSource = "https://www.nuget.org/api/v2"
-        Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Force
+        $package = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Force
 
         # Act
-        $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
+        $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $package.Name -PackageVersion $package.Version
 
         # Assert
-        $nugetPackage | Should Not Be $Null
+        $cachedPackage | Should Not Be $Null
     }  
 
     It "should return null when package is not found" {
@@ -46,10 +46,10 @@ Describe "Get-RuntimeDependencyPackageFromCache" {
         $packageVersion = "1234567890"
     
         # Act
-        $nugetPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
+        $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
     
         # Assert
-        $nugetPackage | Should Be $Null
+        $cachedPackage | Should Be $Null
     }
 }
 
@@ -59,13 +59,12 @@ Describe "Install-RuntimeDependencyPackage" {
         $packageName = "jquery"
         $packageVersion = "3.1.1"
         $packageSource = "$PSScriptRoot\TestPackages\"
-        Uninstall-Package -Name $packageName -RequiredVersion $packageVersion -ErrorAction SilentlyContinue
 
         # Act
-        $package = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource
+        $installedPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource
 
         # Assert
-        $package.Name | Should Be $packageName
-        $package.Version | Should Be $packageVersion
+        $installedPackage.Name | Should Be $packageName
+        $installedPackage.Version | Should Be $packageVersion
     }
 }

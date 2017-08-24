@@ -21,7 +21,7 @@ Function Install-RuntimePackage {
         [SecureString]$Password = [SecureString]::Empty,
         
         [Parameter(Mandatory = $True)]
-        [string]$WebRootPath,
+        [string]$WebrootPath,
 
         [Parameter(Mandatory = $True)]
         [string]$DataRootPath
@@ -37,11 +37,11 @@ Function Install-RuntimePackage {
     
     Copy-RuntimeDependencyPackageContents
 
-    $hasDeployScript = (Get-ChildItem -Path "$WebRootPath" -Filter packageDeploy.ps1).Count -lt 0
+    $hasDeployScript = (Get-ChildItem -Path "$WebrootPath" -Filter packageDeploy.ps1).Count -gt 0
 
     if ($hasDeployScript) {
-        Invoke-Expression "$WebRootPath\packageDeploy.ps1"  
-        Remove-Item -Path "$WebRootPath\packageDeploy.ps1" 
+        Invoke-Expression "$WebrootPath\packageDeploy.ps1"  
+        Remove-Item -Path "$WebrootPath\packageDeploy.ps1" 
     }
 }
 
@@ -98,14 +98,20 @@ Function Install-RuntimeDependencyPackage {
 Function Copy-RuntimeDependencyPackageContents {
     Param (
         [Parameter(Mandatory = $true)]
-        [object]$nugetPackage
+        [SoftwareIdentity]$Package,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataRootPath
     )
     
     Write-Host "Copying $($PackageName)"
-    $packagePath = $nugetPackage | Select-Object -Property Source | ForEach-Object { Split-Path -Path $_.Source }
+    $packagePath = $Package | Select-Object -Property Source | ForEach-Object { Split-Path -Path $_.Source }
     if (Test-Path -Path "$packagePath\Webroot" -PathType Container) {
         Write-Verbose "Copying '$($PackageName)' web root."
-        robocopy "$packagePath\Webroot" "$WebRootPath" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
+        robocopy "$packagePath\Webroot" "$WebrootPath" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
     }
     
     if (Test-Path -Path "$packagePath\Data" -PathType Container) {
