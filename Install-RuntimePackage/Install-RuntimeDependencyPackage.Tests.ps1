@@ -1,6 +1,30 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Install-RuntimeDependencyPackage.ps1" -Force
 
+Describe "Test-PackageProvider" {
+    It "should return '$True' when the specified Package Provider is installed" {
+        # Arrange
+        $packageProvider = "NuGet"
+    
+        # Act
+        $result = Test-PackageProvider $packageProvider
+    
+        # Assert
+        $result | Should Be $True
+    }
+
+    It "should return '$False' when the specified Package Provider is not installed" {
+        # Arrange
+        $packageProvider = "This package provider is not installed"
+    
+        # Act
+        $result = Test-PackageProvider $packageProvider
+    
+        # Assert
+        $result | Should Be $False
+    }
+}
+
 Describe "Get-RuntimeDependencyPackageFromCache" {  
     It "should find package by name and version" {
         # Arrange
