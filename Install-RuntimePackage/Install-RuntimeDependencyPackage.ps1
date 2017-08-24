@@ -72,7 +72,7 @@ Function Publish-RuntimeDependencyPackage {
     $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     if (-not $package) {
         Write-Verbose "Package '$PackageName' version '$PackageVersion' not found locally. Installing from '$PackageSource'."
-        Install-RuntimeDependencyPackage
+        Install-RuntimeDependencyPackage -PackageName $PackageName -PackageVersion $PackageVersion -PackageSource $PackageSource -Username $Username -Password $Password
         $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
     Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
@@ -141,20 +141,39 @@ Function Copy-RuntimeDependencyPackageContents {
     )
     
     $packageName = $Package.Name
-    Write-Host "Copying package '$packageName'."
+    Write-Verbose "Copying package contents of '$packageName'."
 
-    $webrootSourcePath = $Package.FullPath + "\Webroot"
-    Copy-PackageFolder -PackageName $packageName -SourceFriendlyName "webroot" -Source $webrootSourcePath -Target $WebrootOutputPath
+    $packageDirectory = Get-PackageDirectory -Package $Package
+
+    $webrootSourcePath = [System.IO.Path]::Combine($packageDirectory, "Webroot")
+    Copy-PackageFolder -SourceFriendlyName "webroot" -Source $webrootSourcePath -Target $WebrootOutputPath
     
-    $dataSourcePath = $Package.FullPath + "\Data"
-    Copy-PackageFolder -PackageName $packageName -SourceFriendlyName "data" -Source $dataSourcePath -Target $DataOutputPath
+    $dataSourcePath = [System.IO.Path]::Combine($packageDirectory, "Data")
+    Copy-PackageFolder -SourceFriendlyName "data" -Source $dataSourcePath -Target $DataOutputPath
+}
+
+Function Get-PackageDirectory {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
+    )
+    Write-Verbose "Determining package directory."
+    $packageDirectory = $Null
+    If ([System.IO.Path]::IsPathRooted($Package.FullPath)) {
+        $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.FullPath)
+        Write-Verbose "Using `$Package.FullPath as file source ('$packageDirectory')."
+        return $packageDirectory
+    }
+    If ([System.IO.Path]::IsPathRooted($Package.Source)) {
+        $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
+        Write-Verbose "Using `$Package.Source as file source ('$packageDirectory')."
+        return $packageDirectory
+    }
+    Throw "Unable to determine package directory."
 }
 
 Function Copy-PackageFolder {
     Param (        
-        [Parameter(Mandatory = $True)]
-        [string]$PackageName,
-        
         [Parameter(Mandatory = $True)]
         [string]$SourceFriendlyName,
                 
@@ -165,12 +184,12 @@ Function Copy-PackageFolder {
         [string]$Target
     )
 
-    Write-Verbose "Checking if package '$PackageName' has a $SourceFriendlyName folder '$Source'."
+    Write-Verbose "Checking if package has a $SourceFriendlyName folder '$Source'."
     if (Test-Path -Path $Source -PathType Container) {
-        Write-Verbose "Copying '$PackageName' $SourceFriendlyName files from '$Source' to '$Target'."
+        Write-Verbose "Copying $SourceFriendlyName files from '$Source' to '$Target'."
         robocopy "$Source" "$Target" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
     }
     else {
-        Write-Verbose "No $SourceFriendlyName folder '$Source' found in package '$PackageName'."
+        Write-Verbose "No $SourceFriendlyName folder found."
     }
 }

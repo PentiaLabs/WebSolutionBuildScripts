@@ -83,7 +83,7 @@ Describe "Copy-RuntimeDependencyPackageContents" {
         $dataOutputPath = "$TestDrive\not-used-in-this-test"
 
         # Act
-        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath -Verbose
 
         # Assert
         $files = Get-ChildItem -Path $webrootOutputPath | Select-Object -ExpandProperty "Name"
@@ -97,7 +97,7 @@ Describe "Copy-RuntimeDependencyPackageContents" {
         $dataOutputPath = "$TestDrive\my-data-folder"
 
         # Act
-        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+        Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath -Verbose
 
         # Assert
         $files = Get-ChildItem -Path $dataOutputPath | Select-Object -ExpandProperty "Name"
@@ -115,5 +115,22 @@ Describe "Publish-RuntimeDependencyPackage" {
 
         # Assert
         $helpText.Synopsis | Should Be "Publishes the contents of a runtime dependency package to a website. Requires -RunAsAdministrator."
+    }
+
+    It "publishes package contents" {
+        # Arrange
+        $packageName = "sample-runtime-dependency"
+        $packageVersion = "1.0.0"
+        $packageSource = "$PSScriptRoot\TestPackages\"
+        $webrootOutputPath = "$TestDrive\my-webroot-folder"
+        $dataOutputPath = "$TestDrive\my-data-folder"
+        $expectedFileNames = @("DataSampleFile.txt", "WebrootSampleFile.txt")
+
+        # Act
+        Publish-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+
+        # Assert
+        $files = Get-ChildItem -Path $TestDrive -Recurse -File | Select-Object -ExpandProperty "Name"
+        $files | Should Be $expectedFileNames
     }
 }
