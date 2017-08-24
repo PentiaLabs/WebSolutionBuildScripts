@@ -159,16 +159,24 @@ Function Get-PackageDirectory {
     )
     Write-Verbose "Determining package directory."
     $packageDirectory = $Null
+    # The full path points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\"
     If ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
         $packageDirectory = $Package.FullPath
         Write-Verbose "Using '$packageDirectory' as package directory."
         return $packageDirectory
     }
-    # If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.Directory]::Exists($Package.Source)) {
-    #     $packageDirectory = [System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($Package.Source), $Package.PackageFilename)
-    #     Write-Verbose "Using `$Package.Source as file source ('$packageDirectory')."
-    #     return $packageDirectory
-    # }
+    # The source points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\"
+    If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.Directory]::Exists($Package.Source)) {
+        $packageDirectory = $Package.Source
+        Write-Verbose "Using '$packageDirectory' as package directory."
+        return $packageDirectory
+    }
+    # The source points to the NuGet package file *inside* the "unpack directory", e.g. "<package root>\My-Package.1.0.0\My-Package.1.0.0.nupgk"
+    If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.File]::Exists($Package.Source)) {
+        $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
+        Write-Verbose "Using '$packageDirectory' as package directory."
+        return $packageDirectory
+    }
     Throw "Unable to determine package directory."
 }
 
