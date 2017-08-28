@@ -19,3 +19,5 @@ Function Get-MSBuild {
 	}
 	$msBuildExecutable | Select-Object -ExpandProperty "FullName"
 }
+
+Export-ModuleMember -Function Get-MSBuild
