@@ -23,3 +23,17 @@ Function Publish-HelixSolution {
 
     # 4. Invoke configuration transforms
 }
+
+Function Get-RuntimeDependencies {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$ConfigurationFilePath
+    )
+
+    If (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
+        Throw "File '$ConfigurationFilePath' not found. Runtime dependencies are expected to be defined in '$ConfigurationFilePath' by convention."
+    }
+
+    $configuration = Get-Content -Path $ConfigurationFilePath | ConvertFrom-Json
+    $configuration | Select-Object -ExpandProperty "packages"
+}
