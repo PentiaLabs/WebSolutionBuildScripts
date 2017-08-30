@@ -24,7 +24,7 @@ Function Publish-HelixSolution {
 
     $runtimeDependencies = Get-RuntimeDependencies -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, "runtime-dependencies.config")
     foreach($runtimeDependency in $runtimeDependencies) {
-        Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id $PackageVersion $runtimeDependency.version
+        Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version
     }
     # 2. Install packages
     # 2.1 Read "runtime-dependencies.json"
