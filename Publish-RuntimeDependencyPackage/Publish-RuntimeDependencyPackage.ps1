@@ -51,7 +51,7 @@ Function Publish-RuntimeDependencyPackage {
         [Parameter(Mandatory = $True)]
         [string]$PackageVersion,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [string]$PackageSource,
         
         [Parameter(Mandatory = $False)]
@@ -110,7 +110,7 @@ Function Install-RuntimeDependencyPackage {
         [Parameter(Mandatory = $True)]
         [string]$PackageVersion,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [string]$PackageSource,
     
         [Parameter(Mandatory = $False)]

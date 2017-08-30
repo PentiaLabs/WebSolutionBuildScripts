@@ -5,15 +5,27 @@ Import-Module "$PSScriptRoot\Invoke-ConfigurationTransform\Invoke-ConfigurationT
 
 Function Publish-HelixSolution {
     Param (
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
-        
+
         [Parameter(Mandatory = $True)]
-        [string]$PublishToPath
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
     )
 
+    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
+        $SolutionRootPath = $MyInvocation.PSCommandPath
+        Write-Verbose "`$SolutionRootPath not set. Using '$SolutionRootPath'."
+    }
+
     # 1. Delete $PublishToPath
-    
+
+    $runtimeDependencies = Get-RuntimeDependencies -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, "runtime-dependencies.config")
+    foreach($runtimeDependency in $runtimeDependencies) {
+        Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id $PackageVersion $runtimeDependency.version
+    }
     # 2. Install packages
     # 2.1 Read "runtime-dependencies.json"
     # 2.2 Throw error when "runtime-dependencies.json" doesn't match JSON definition
@@ -76,8 +88,8 @@ Function Get-RuntimeDependencies {
     If (!($configuration.packages)) {
         Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
     }
-    
-    $packages = $configuration.packages.package | Select-Object -Property "id","version"
+
+    $packages = $configuration.packages.package | Select-Object -Property "id", "version"
     Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
     $packages
 }
