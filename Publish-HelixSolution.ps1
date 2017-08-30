@@ -56,7 +56,7 @@ Function Get-RuntimeDependencies {
     )
 
     If (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
-        $message = "File '$ConfigurationFilePath' not found. Runtime dependencies are expected to be defined in '$ConfigurationFilePath' by convention."
+        $message = "File '$ConfigurationFilePath' not found."
         $ex = (New-Object "System.ArgumentException" $message, $_.Exception)
         Throw $ex
     }
@@ -72,5 +72,10 @@ Function Get-RuntimeDependencies {
         }
         Throw $_.Exception
     }
-    $configuration | Select-Xml -XPath "/packages/package"
+    If (!($configuration.packages)) {
+        Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
+    }
+    $packages = $configuration.packages.package | Select-Object -Property "id","version"
+    Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
+    $packages
 }

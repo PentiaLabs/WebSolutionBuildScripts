@@ -10,7 +10,7 @@ Describe "Get-RuntimeDependencies" {
         $invocation = { Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
 
         # Assert
-        $invocation | Should Throw "File '$runtimeDependencyConfigurationFilePath' not found. Runtime dependencies are expected to be defined in '$runtimeDependencyConfigurationFilePath' by convention."
+        $invocation | Should Throw "File '$runtimeDependencyConfigurationFilePath' not found."
     }
     
     It "should throw an exception if the file isn't valid XML" {
@@ -34,7 +34,7 @@ Describe "Get-RuntimeDependencies" {
         $invocation = { Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
 
         # Assert
-        $invocation | Should Throw "No 'packages' element found in '$runtimeDependencyConfigurationFilePath'. Run 'Get-Help XYZ' for correct usage."
+        $invocation | Should Throw "No 'packages' root element found in '$runtimeDependencyConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencies -Full' for expected usage."
     }
 
     It "should return all package references found in the configuration file" {
@@ -49,10 +49,14 @@ Describe "Get-RuntimeDependencies" {
 
         # Act
         $runtimeDependencies = Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath
+        $jQuery = $runtimeDependencies | Select-Object -First 1
+        $NLog = $runtimeDependencies | Select-Object -Last 1
 
         # Assert
         $runtimeDependencies.Count | Should Be 2
-        $runtimeDependencies[0].id | Should Be "jQuery"
-        $runtimeDependencies[0].version | Should Be "3.1.1"
+        $jQuery.id | Should Be "jQuery"
+        $jQuery.version | Should Be "3.1.1"
+        $NLog.id | Should Be "NLog"
+        $NLog.version | Should Be "4.3.10"
     }
 }
