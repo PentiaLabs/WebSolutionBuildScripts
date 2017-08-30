@@ -15,7 +15,7 @@ All of the above are optional.
 The following steps are performed during package publishing:
 
 1. Check if the required package is cached locally.
-1.1 If the package isn't found locally, install it from the specified package source.
+1.1 If the package isn't found locally, it's installed from a package source defined in the applicable NuGet configuration (see https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior for details).
 2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
 
