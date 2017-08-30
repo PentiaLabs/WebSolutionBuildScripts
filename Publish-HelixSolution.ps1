@@ -72,9 +72,11 @@ Function Get-RuntimeDependencies {
         }
         Throw $_.Exception
     }
+
     If (!($configuration.packages)) {
         Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
     }
+    
     $packages = $configuration.packages.package | Select-Object -Property "id","version"
     Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
     $packages
