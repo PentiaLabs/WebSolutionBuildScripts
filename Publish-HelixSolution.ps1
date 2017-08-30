@@ -1,7 +1,7 @@
-. ".\Publish-HelixSolution\Get-SitecoreHelixProject.psm1" -Force
-. ".\Publish-HelixSolution\Publish-WebProject.psm1" -Force
-. ".\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.ps1" -Force
-. ".\Invoke-ConfigurationTransform\Invoke-ConfigurationTransform.psm1" -Force
+Import-Module "$PSScriptRoot\Publish-HelixSolution\Get-SitecoreHelixProject.psm1" -Force
+Import-Module "$PSScriptRoot\Publish-HelixSolution\Publish-WebProject.psm1" -Force
+Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.ps1" -Force
+Import-Module "$PSScriptRoot\Invoke-ConfigurationTransform\Invoke-ConfigurationTransform.psm1" -Force
 
 Function Publish-HelixSolution {
     Param (
@@ -24,6 +24,31 @@ Function Publish-HelixSolution {
     # 4. Invoke configuration transforms
 }
 
+<#
+.SYNOPSIS
+Gets all NuGet package references from a well formed NuGet packages.config-file.
+
+.DESCRIPTION
+See https://docs.microsoft.com/en-us/nuget/schema/packages-config for the correct file format.
+Only the "id" and "version" attributes are used.
+
+.PARAMETER ConfigurationFilePath
+The path of the packages.config file.
+
+.EXAMPLE
+Get-RuntimeDependencies -ConfigurationFilePath my-solution\runtime-dependencies.config
+
+Contents of "runtime-dependencies.config":
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="jQuery" version="3.1.1" />
+  <package id="NLog" version="4.3.10" />
+</packages>
+
+Returns:
+[{id:"jQuery",version:"3.1.1"},{id:"NLog",version:"4.3.10"}]
+
+#>
 Function Get-RuntimeDependencies {
     Param(
         [Parameter(Mandatory = $True)]
@@ -31,9 +56,21 @@ Function Get-RuntimeDependencies {
     )
 
     If (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
-        Throw "File '$ConfigurationFilePath' not found. Runtime dependencies are expected to be defined in '$ConfigurationFilePath' by convention."
+        $message = "File '$ConfigurationFilePath' not found. Runtime dependencies are expected to be defined in '$ConfigurationFilePath' by convention."
+        $ex = (New-Object "System.ArgumentException" $message, $_.Exception)
+        Throw $ex
     }
 
-    $configuration = Get-Content -Path $ConfigurationFilePath | ConvertFrom-Json
-    $configuration | Select-Object -ExpandProperty "packages"
+    Try {
+        [xml]$configuration = Get-Content -Path $ConfigurationFilePath        
+    }
+    Catch [System.Management.Automation.RuntimeException] {
+        If ($_.Exception.Message -match "Cannot convert value .* to type ""System\.Xml\.XmlDocument""\.") {
+            $message = "File '$ConfigurationFilePath' isn't valid XML. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
+            $ex = (New-Object "System.ArgumentException" $message, $_.Exception)
+            Throw $ex
+        }
+        Throw $_.Exception
+    }
+    $configuration | Select-Xml -XPath "/packages/package"
 }
