@@ -23,7 +23,11 @@ Function Publish-HelixSolution {
         Write-Verbose "`$SolutionRootPath not set. Using '$SolutionRootPath'."
     }
 
-    # 1. Delete $PublishToPath
+    # If output is set to "Verbose", set "$PSDefaultParameterValues:['*:Verbose'] = $True"
+    # If output is set to "Debug", set "$PSDefaultParameterValues:['*:Debug'] = $True"
+    # etc.
+
+    # 1. Delete $WebrootOutputPath
     Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
 
     # 2. Publish runtime dependencies
@@ -31,7 +35,8 @@ Function Publish-HelixSolution {
     $runtimeDependencyConfigurationFilePath = [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
     IF (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf) {
         Publish-RuntimeDependency -RuntimeDependencyConfigurationFilePath $runtimeDependencyConfigurationFilePath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
-    } Else {
+    }
+    Else {
         Write-Verbose "No '$runtimeDependencyConfigurationFileName' file found in '$SolutionRootPath'. Skipping runtime package installation."
     }
 
