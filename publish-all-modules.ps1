@@ -1,1 +1,1 @@
-get-module -Name .\* -ListAvailable | Publish-Module -NuGetApiKey ***REMOVED*** -Repository Tund
+get-module -Name .\**\*.psd1 -ListAvailable | Select-Object -ExpandProperty ModuleBase | % { Publish-Module -Path $_ -NuGetApiKey ***REMOVED*** -Repository Tund -Force }
