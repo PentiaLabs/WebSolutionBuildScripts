@@ -24,6 +24,7 @@ Returns:
 
 #>
 Function Get-RuntimeDependencyPackage {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationFilePath
@@ -47,6 +48,7 @@ Function Get-RuntimeDependencyPackage {
 }
 
 Function Get-PackageConfiguration {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationFilePath
@@ -68,6 +70,7 @@ Function Get-PackageConfiguration {
 }
 
 Function Test-XmlParseException {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [System.Management.Automation.RuntimeException]$Exception

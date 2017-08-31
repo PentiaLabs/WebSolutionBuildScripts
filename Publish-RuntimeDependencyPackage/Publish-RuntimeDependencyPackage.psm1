@@ -44,6 +44,7 @@ The path where the contents of "<package>\Data" will be copied to.
 Deploy-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/feeds/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
 #>
 Function Publish-RuntimeDependencyPackage {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -79,6 +80,7 @@ Function Publish-RuntimeDependencyPackage {
 }
 
 Function Get-RuntimeDependencyPackageFromCache {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -95,6 +97,7 @@ Function Get-RuntimeDependencyPackageFromCache {
 }
 
 Function Test-PackageProvider {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$Name
@@ -102,7 +105,8 @@ Function Test-PackageProvider {
     (Get-PackageProvider | Select-Object -ExpandProperty "Name") -contains $Name
 }
 
-Function Install-RuntimeDependencyPackage {    
+Function Install-RuntimeDependencyPackage {   
+    [CmdletBinding()] 
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -129,6 +133,7 @@ Function Install-RuntimeDependencyPackage {
 }
 
 Function Copy-RuntimeDependencyPackageContents {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package,
@@ -153,6 +158,7 @@ Function Copy-RuntimeDependencyPackageContents {
 }
 
 Function Get-PackageDirectory {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
@@ -174,6 +180,7 @@ Function Get-PackageDirectory {
 }
 
 Function Copy-PackageFolder {
+    [CmdletBinding()]
     Param (        
         [Parameter(Mandatory = $True)]
         [string]$SourceFriendlyName,
