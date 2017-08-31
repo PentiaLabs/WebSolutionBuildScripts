@@ -22,7 +22,7 @@ Function Publish-HelixSolution {
 
     # 1. Delete $PublishToPath
 
-    $runtimeDependencies = Get-RuntimeDependencies -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, "runtime-dependencies.config")
+    $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, "runtime-dependencies.config")
     foreach($runtimeDependency in $runtimeDependencies) {
         Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version
     }
@@ -48,7 +48,7 @@ Only the "id" and "version" attributes are used.
 The path of the packages.config file.
 
 .EXAMPLE
-Get-RuntimeDependencies -ConfigurationFilePath my-solution\runtime-dependencies.config
+Get-RuntimeDependency -ConfigurationFilePath my-solution\runtime-dependencies.config
 
 Contents of "runtime-dependencies.config":
 <?xml version="1.0" encoding="utf-8"?>
@@ -61,7 +61,7 @@ Returns:
 [{id:"jQuery",version:"3.1.1"},{id:"NLog",version:"4.3.10"}]
 
 #>
-Function Get-RuntimeDependencies {
+Function Get-RuntimeDependency {
     Param(
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationFilePath

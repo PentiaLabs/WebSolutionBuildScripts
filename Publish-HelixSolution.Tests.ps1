@@ -1,13 +1,13 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Publish-HelixSolution.ps1" -Force
 
-Describe "Get-RuntimeDependencies" {
+Describe "Get-RuntimeDependency" {
     It "should throw an exception if the file doesn't exist" {
         # Arrange
         $runtimeDependencyConfigurationFilePath = "$TestDrive\test-configuration-file.config"
 
         # Act
-        $invocation = { Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
+        $invocation = { Get-RuntimeDependency -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
 
         # Assert
         $invocation | Should Throw "File '$runtimeDependencyConfigurationFilePath' not found."
@@ -19,10 +19,10 @@ Describe "Get-RuntimeDependencies" {
         Set-Content -Path $runtimeDependencyConfigurationFilePath -Value "This isn't XML"
     
         # Act
-        $invocation = { Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
+        $invocation = { Get-RuntimeDependency -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
     
         # Assert
-        $invocation | Should Throw "File '$runtimeDependencyConfigurationFilePath' isn't valid XML. Run 'Get-Help Get-RuntimeDependencies -Full' for expected usage."
+        $invocation | Should Throw "File '$runtimeDependencyConfigurationFilePath' isn't valid XML. Run 'Get-Help Get-RuntimeDependency -Full' for expected usage."
     }
 
     It "should throw an exception if the 'packages' element doesn't exist" {
@@ -31,10 +31,10 @@ Describe "Get-RuntimeDependencies" {
         Set-Content -Path $runtimeDependencyConfigurationFilePath -Value "<root></root>"
 
         # Act
-        $invocation = { Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
+        $invocation = { Get-RuntimeDependency -ConfigurationFilePath $runtimeDependencyConfigurationFilePath }
 
         # Assert
-        $invocation | Should Throw "No 'packages' root element found in '$runtimeDependencyConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencies -Full' for expected usage."
+        $invocation | Should Throw "No 'packages' root element found in '$runtimeDependencyConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependency -Full' for expected usage."
     }
 
     It "should return all package references found in the configuration file" {
@@ -48,7 +48,7 @@ Describe "Get-RuntimeDependencies" {
         Set-Content -Path $runtimeDependencyConfigurationFilePath -Value $packagesConfig
 
         # Act
-        $runtimeDependencies = Get-RuntimeDependencies -ConfigurationFilePath $runtimeDependencyConfigurationFilePath
+        $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath $runtimeDependencyConfigurationFilePath
         $jQuery = $runtimeDependencies | Select-Object -First 1
         $NLog = $runtimeDependencies | Select-Object -Last 1
 
