@@ -24,13 +24,47 @@ Function Publish-HelixSolution {
     }
 
     # 1. Delete $PublishToPath
+    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+
+    # 2. Publish runtime dependencies
     $runtimeDependencyConfigurationFileName = "runtime-dependencies.config"
-    $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
+    $runtimeDependencyConfigurationFilePath = [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
+    IF (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf) {
+        Publish-RuntimeDependency -RuntimeDependencyConfigurationFilePath $runtimeDependencyConfigurationFilePath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    } Else {
+        Write-Verbose "No '$runtimeDependencyConfigurationFileName' file found in '$SolutionRootPath'. Skipping runtime package installation."
+    }
+
+    # 3. Publish all web projects on top of runtime dependencies
+    
+
+    # 4. Invoke configuration transforms
+}
+
+Function Remove-WebrootOutputPath {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath
+    )
+    If (Test-Path $WebrootOutputPath -PathType Container) {
+        Write-Verbose "Deleting '$WebrootOutputPath' and all contents."
+        Remove-Item -Path $WebrootOutputPath -Recurse -Force
+    }
+}
+
+Function Publish-RuntimeDependency {
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$RuntimeDependencyConfigurationFilePath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
+    $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath $RuntimeDependencyConfigurationFilePath
     foreach ($runtimeDependency in $runtimeDependencies) {
         Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version
     }
-
-    # 3. Publish all web projects
-
-    # 4. Invoke configuration transforms
 }
