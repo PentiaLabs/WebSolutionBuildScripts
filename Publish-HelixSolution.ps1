@@ -21,15 +21,11 @@ Function Publish-HelixSolution {
     }
 
     # 1. Delete $PublishToPath
-
-    $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, "runtime-dependencies.config")
-    foreach($runtimeDependency in $runtimeDependencies) {
+    $runtimeDependencyConfigurationFileName = "runtime-dependencies.config"
+    $runtimeDependencies = Get-RuntimeDependency -ConfigurationFilePath [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
+    foreach ($runtimeDependency in $runtimeDependencies) {
         Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version
     }
-    # 2. Install packages
-    # 2.1 Read "runtime-dependencies.json"
-    # 2.2 Throw error when "runtime-dependencies.json" doesn't match JSON definition
-    # 2.3 Install each package
 
     # 3. Publish all web projects
 
@@ -69,27 +65,46 @@ Function Get-RuntimeDependency {
 
     If (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
         $message = "File '$ConfigurationFilePath' not found."
-        $ex = (New-Object "System.ArgumentException" $message, $_.Exception)
-        Throw $ex
+        $argumentException = (New-Object "System.ArgumentException" $message, $_.Exception)
+        Throw $argumentException
     }
 
-    Try {
-        [xml]$configuration = Get-Content -Path $ConfigurationFilePath        
-    }
-    Catch [System.Management.Automation.RuntimeException] {
-        If ($_.Exception.Message -match "Cannot convert value .* to type ""System\.Xml\.XmlDocument""\.") {
-            $message = "File '$ConfigurationFilePath' isn't valid XML. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
-            $ex = (New-Object "System.ArgumentException" $message, $_.Exception)
-            Throw $ex
-        }
-        Throw $_.Exception
-    }
+    $configuration = Get-PackageConfiguration -ConfigurationFilePath $ConfigurationFilePath
 
     If (!($configuration.packages)) {
-        Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help $($MyInvocation.MyCommand) -Full' for expected usage."
+        Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependency -Full' for expected usage."
     }
 
     $packages = $configuration.packages.package | Select-Object -Property "id", "version"
     Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
     $packages
+}
+
+Function Get-PackageConfiguration {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$ConfigurationFilePath
+    )
+
+    Try {
+        [xml]$configuration = Get-Content -Path $ConfigurationFilePath
+    }
+    Catch [System.Management.Automation.RuntimeException] {
+        If (Test-XmlParseException $_.Exception) {
+            $message = "File '$ConfigurationFilePath' isn't valid XML. Run 'Get-Help Get-RuntimeDependency -Full' for expected usage."
+            $argumentException = (New-Object "System.ArgumentException" $message, $_.Exception)
+            Throw $argumentException
+        }
+        Throw $_.Exception
+    }
+
+    $configuration
+}
+
+Function Test-XmlParseException {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [System.Management.Automation.RuntimeException]$Exception
+    )
+    $Exception.Message -match "Cannot convert value .* to type ""System\.Xml\.XmlDocument""\."
 }
