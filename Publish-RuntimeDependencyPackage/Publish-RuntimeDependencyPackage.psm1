@@ -128,8 +128,9 @@ Function Install-RuntimeDependencyPackage {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
     
+    $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials
     Write-Verbose "Installing package '$PackageName'."
-    Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials | Install-Package -Credential $credentials -Force
+    $package | Install-Package -Credential $credentials -Force
 }
 
 Function Copy-RuntimeDependencyPackageContents {
