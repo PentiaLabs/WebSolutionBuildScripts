@@ -1,0 +1,1 @@
+get-module -Name .\* -ListAvailable | Publish-Module -NuGetApiKey ***REMOVED*** -Repository Tund
