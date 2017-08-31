@@ -18,6 +18,7 @@ Describe "Publish-HelixSolution" {
         Publish-HelixSolution -SolutionRootPath $solution -WebrootOutputPath $webroot -DataOutputPath $data
 
         # Assert
+        Test-Path $webroot | Should Be $False
         Test-Path $existingContent | Should Be $False
     }
 }

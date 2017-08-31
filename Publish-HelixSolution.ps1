@@ -54,7 +54,7 @@ Function Remove-WebrootOutputPath {
 
 Function Publish-RuntimeDependency {
     Param (
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $True)]
         [string]$RuntimeDependencyConfigurationFilePath,
 
         [Parameter(Mandatory = $True)]
