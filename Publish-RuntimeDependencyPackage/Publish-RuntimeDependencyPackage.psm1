@@ -194,3 +194,5 @@ Function Copy-PackageFolder {
         Write-Verbose "No $SourceFriendlyName folder found."
     }
 }
+
+Export-ModuleMember -Function Publish-RuntimeDependencyPackage
