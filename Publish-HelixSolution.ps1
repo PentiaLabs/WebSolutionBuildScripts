@@ -1,5 +1,5 @@
-Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage\Get-RuntimeDependencyPackage.ps1" -Force
-Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.ps1" -Force
+Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage\Get-RuntimeDependencyPackage.psm1" -Force
+Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.psm1" -Force
 
 Import-Module "$PSScriptRoot\Publish-HelixSolution\Get-SitecoreHelixProject.psm1" -Force
 Import-Module "$PSScriptRoot\Publish-HelixSolution\Publish-WebProject.psm1" -Force
