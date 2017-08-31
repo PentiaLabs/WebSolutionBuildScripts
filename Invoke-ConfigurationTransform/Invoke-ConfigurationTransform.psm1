@@ -22,6 +22,7 @@ E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.config".
 E.g. "D:\websites\AAB.Intranet\www".
 #>
 Function Get-PathOfFileToTransform {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath,
@@ -35,6 +36,7 @@ Function Get-PathOfFileToTransform {
 }
 
 Function Get-RelativeConfigurationDirectory {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
@@ -51,6 +53,7 @@ Function Get-RelativeConfigurationDirectory {
 }
 
 Function Get-NameOfFileToTransform {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
@@ -71,6 +74,7 @@ Function Get-NameOfFileToTransform {
 }
 
 Function Invoke-ConfigurationTransform {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$XmlFilePath,        

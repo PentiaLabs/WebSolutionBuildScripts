@@ -15,7 +15,7 @@ All of the above are optional.
 The following steps are performed during package publishing:
 
 1. Check if the required package is cached locally.
-1.1 If the package isn't found locally, install it from the specified package source.
+1.1 If the package isn't found locally, it's installed from a package source defined in the applicable NuGet configuration (see https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior for details).
 2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
 
@@ -44,6 +44,7 @@ The path where the contents of "<package>\Data" will be copied to.
 Deploy-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/feeds/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
 #>
 Function Publish-RuntimeDependencyPackage {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -51,7 +52,7 @@ Function Publish-RuntimeDependencyPackage {
         [Parameter(Mandatory = $True)]
         [string]$PackageVersion,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [string]$PackageSource,
         
         [Parameter(Mandatory = $False)]
@@ -79,6 +80,7 @@ Function Publish-RuntimeDependencyPackage {
 }
 
 Function Get-RuntimeDependencyPackageFromCache {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -95,6 +97,7 @@ Function Get-RuntimeDependencyPackageFromCache {
 }
 
 Function Test-PackageProvider {
+    [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$Name
@@ -102,7 +105,8 @@ Function Test-PackageProvider {
     (Get-PackageProvider | Select-Object -ExpandProperty "Name") -contains $Name
 }
 
-Function Install-RuntimeDependencyPackage {    
+Function Install-RuntimeDependencyPackage {   
+    [CmdletBinding()] 
     Param(
         [Parameter(Mandatory = $True)]
         [string]$PackageName,
@@ -110,7 +114,7 @@ Function Install-RuntimeDependencyPackage {
         [Parameter(Mandatory = $True)]
         [string]$PackageVersion,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False)]
         [string]$PackageSource,
     
         [Parameter(Mandatory = $False)]
@@ -124,11 +128,13 @@ Function Install-RuntimeDependencyPackage {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
     
+    $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials
     Write-Verbose "Installing package '$PackageName'."
-    Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials | Install-Package -Credential $credentials -Force
+    $package | Install-Package -Credential $credentials -Force
 }
 
 Function Copy-RuntimeDependencyPackageContents {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package,
@@ -153,6 +159,7 @@ Function Copy-RuntimeDependencyPackageContents {
 }
 
 Function Get-PackageDirectory {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
@@ -174,6 +181,7 @@ Function Get-PackageDirectory {
 }
 
 Function Copy-PackageFolder {
+    [CmdletBinding()]
     Param (        
         [Parameter(Mandatory = $True)]
         [string]$SourceFriendlyName,
@@ -194,3 +202,5 @@ Function Copy-PackageFolder {
         Write-Verbose "No $SourceFriendlyName folder found."
     }
 }
+
+Export-ModuleMember -Function Publish-RuntimeDependencyPackage

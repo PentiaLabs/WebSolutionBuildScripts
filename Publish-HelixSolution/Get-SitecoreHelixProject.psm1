@@ -54,6 +54,7 @@ Function Get-SitecoreHelixProject {
 }
 
 Function Test-WebProject {
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ProjectFilePath
