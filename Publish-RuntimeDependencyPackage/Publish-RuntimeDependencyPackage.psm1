@@ -19,6 +19,10 @@ The following steps are performed during package publishing:
 2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
 
+.PARAMETER Package
+Optional package definition, as found in a NuGet packages.config file. 
+If set, "$Package.id" will be used instead of "$PackageName", and "$Package.version" instead of "$PackageVersion".
+
 .PARAMETER PackageName
 The name of the package to install.
 
@@ -66,8 +70,7 @@ Function Publish-RuntimeDependencyPackage {
 
         [Parameter(Mandatory = $True)]
         [string]$DataOutputPath
-    ) 
-
+    )
     Write-Host "Publishing package '$PackageName'."
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
     $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
@@ -76,7 +79,7 @@ Function Publish-RuntimeDependencyPackage {
         Install-RuntimeDependencyPackage -PackageName $PackageName -PackageVersion $PackageVersion -PackageSource $PackageSource -Username $Username -Password $Password
         $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
-    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath    
 }
 
 Function Get-RuntimeDependencyPackageFromCache {

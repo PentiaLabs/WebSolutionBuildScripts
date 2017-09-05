@@ -1,9 +1,12 @@
 <#
 .SYNOPSIS
-Determines the location of a configuration file in a target directory based on the location of a XDT file in a source directory, relative to the "App_Config" directory.
+Determines the location of a configuration file in a target directory based 
+on the location of a XDT file in a source directory.
 
 .DESCRIPTION
-The location of the "configuration base file" is determined based on the location of the transform file relative to the "App_Config" directory.
+The location of the "configuration base file" is determined based 
+on the location of the transform file relative to the "App_Config" directory, 
+OR simply applied to "<WebrootOutputPath>\Web.config" in case of files named "Web.config".
 
 E.g.:
 Given the following project folder structure:
@@ -15,11 +18,14 @@ Given the following project folder structure:
 
     "C:\MyWebsite\www\App_Config\MyConfig.config"
 
-.PARAMETER ConfigurationTransformFilePath
-E.g. "C:\MySite\App_Config\Sitecore\Include\Web.Debug.config".
+.PARAMETER SolutionRootPath
+E.g. "C:\MySolution\".
 
-.PARAMETER WebrootDirectory
-E.g. "D:\websites\AAB.Intranet\www".
+.PARAMETER ConfigurationTransformFilePath
+E.g. "C:\MySolution\src\Foundation\Code\App_Config\Sitecore\Include\MyConfig.Debug.config".
+
+.PARAMETER WebrootOutputPath
+E.g. "D:\websites\MySolution\www".
 #>
 Function Get-PathOfFileToTransform {
     [CmdletBinding()]
@@ -27,11 +33,19 @@ Function Get-PathOfFileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath,
         [Parameter(Mandatory = $True)]
-        [string]$WebrootDirectory
+        [string]$WebrootOutputPath
     )
-    $relativeConfigurationDirectory = Get-RelativeConfigurationDirectory $ConfigurationTransformFilePath
-    $nameOfFileToTransform = Get-NameOfFileToTransform $ConfigurationTransformFilePath
-    $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootDirectory, $relativeConfigurationDirectory, $nameOfFileToTransform)
+    $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
+    If ($nameOfFileToTransform -eq "Web.config") {
+        Write-Verbose "Using path of the main 'Web.config' file."
+        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $nameOfFileToTransform)
+    }
+    Else {
+        Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."        
+        $relativeConfigurationDirectory = Get-RelativeConfigurationDirectory -ConfigurationTransformFilePath $ConfigurationTransformFilePath
+        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $relativeConfigurationDirectory, $nameOfFileToTransform)    
+    }
+    Write-Verbose "Found matching configuration file '$pathOfFileToTransform' for configuration transform '$ConfigurationTransformFilePath'."
     $pathOfFileToTransform
 }
 
@@ -58,18 +72,18 @@ Function Get-NameOfFileToTransform {
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath
     )
-    # "C:\MySite\App_Config\Sitecore\Include\Web.Debug.Config" -> "Web.Debug.Config"
+    # "C:\MySite\App_Config\Sitecore\Include\MyConfig.Debug.Config" -> "MyConfig.Debug.Config"
     $fileName = [System.IO.Path]::GetFileName($ConfigurationTransformFilePath)
     $fileNamePartSeparator = "."
-    # ["Web", "Debug", "config"]
+    # ["MyConfig", "Debug", "config"]
     [System.Collections.ArrayList]$fileNameParts = $fileName.Split($fileNamePartSeparator)
     $buildConfigurationIndex = $fileNameParts.Count - 2
     If ($buildConfigurationIndex -lt 1) {
         Throw "Can't determine file to transform based on file name '$fileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
     }
-    # ["Web", "Debug", "config"] -> ["Web", "config"]
+    # ["WeMyConfigb", "Debug", "config"] -> ["MyConfig", "config"]
     $fileNameParts.RemoveAt($buildConfigurationIndex)
-    # ["Web", "config"] -> "Web.config"
+    # ["MyConfig", "config"] -> "MyConfig.config"
     [string]::Join($fileNamePartSeparator, $fileNameParts.ToArray())
 }
 

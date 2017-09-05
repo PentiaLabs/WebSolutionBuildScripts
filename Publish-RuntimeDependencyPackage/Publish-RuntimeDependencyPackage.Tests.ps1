@@ -81,7 +81,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
     
         It "should copy 'Webroot' folder contents to the target webroot path" {
             # Arrange
-            $expectedFileNames = @("WebrootSampleFile.txt")
+            $expectedFileNames = @("Web.config", "WebrootSampleFile.txt")
             $webrootOutputPath = "$TestDrive\my-webroot"
             $dataOutputPath = "$TestDrive\not-used-in-this-test"
 
@@ -129,7 +129,7 @@ Describe "Publish-RuntimeDependencyPackage" {
         $packageSource = "$PSScriptRoot\TestPackages\"
         $webrootOutputPath = "$TestDrive\my-webroot-folder"
         $dataOutputPath = "$TestDrive\my-data-folder"
-        $expectedFileNames = @("DataSampleFile.txt", "WebrootSampleFile.txt")
+        $expectedFileNames = @("DataSampleFile.txt", "Web.config", "WebrootSampleFile.txt")
         Uninstall-Package -Name $packageName -ErrorAction SilentlyContinue
 
         # Act

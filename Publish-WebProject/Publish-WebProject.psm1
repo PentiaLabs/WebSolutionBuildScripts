@@ -1,4 +1,4 @@
-. "$PSScriptRoot\..\Shared\Get-MSBuild.ps1"
+Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1"
 
 <# 
  .SYNOPSIS
@@ -7,18 +7,18 @@
  .PARAMETER WebProjectFilePath
  Absolute or relative path of the web project file.
 
- .PARAMETER OutputDirectory
+ .PARAMETER OutputPath
  Absolute or relative path of the output directory.
 
  .PARAMETER MSBuildExecutablePath
  Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
 
  .EXAMPLE 
- Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputDirectory "C:\Websites\MyWebsite"
+ Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite"
  Publish a project.
 
  .EXAMPLE 
- Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputDirectory "C:\Websites\MyWebsite" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
+ Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
  Publish a project and specify which MSBuild.exe to use.
 #>   
 Function Publish-WebProject {
@@ -27,7 +27,7 @@ Function Publish-WebProject {
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline)]
         [string]$WebProjectFilePath,
         [Parameter(Position = 1, Mandatory = $True)]
-        [string]$OutputDirectory,
+        [string]$OutputPath,
         [Parameter(Position = 2, Mandatory = $False)]
         [string]$MSBuildExecutablePath
     )
@@ -44,9 +44,13 @@ Function Publish-WebProject {
             Throw "Path '$MSBuildExecutablePath' not found."
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
-        Write-Host "Publishing '$WebProjectFilePath' to '$OutputDirectory'."
-        & "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputDirectory" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true" | Write-Verbose
-        If($LASTEXITCODE -ne 0) {
+        Write-Host "Publishing '$WebProjectFilePath' to '$OutputPath'."
+        $output = (& "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputPath" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true") | Out-String
+        If ($LASTEXITCODE -eq 0) {
+            Write-Verbose $output
+        }
+        Else {
+            Write-Error $output
             Throw "Error publishing project '$WebProjectFilePath'."
         }
     }

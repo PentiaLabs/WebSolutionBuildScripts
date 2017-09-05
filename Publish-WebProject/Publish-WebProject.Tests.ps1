@@ -1,12 +1,12 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Publish-WebProject.psm1" -Force
-Import-Module "$PSScriptRoot\..\Shared\Get-MSBuild.ps1" -Force
+Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1" -Force
 
 Describe "Publish-WebProject" {
 
-    $WebProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\WebProject.csproj"
+    $WebProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\Project.WebProject.csproj"
     $PublishWebsitePath = "$TestDrive\Website"
-    $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\WebProject.csproj"
+    $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\Foundation.WebProject.csproj"
     
     Function CompileTestProject {
         Param(
@@ -28,7 +28,7 @@ Describe "Publish-WebProject" {
         CompileTestProject -ProjectFilePath $WebProjectFilePath
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $PublishWebsitePath
 
         # Assert
         Test-Path $PublishWebsitePath | Should Be $True
@@ -39,7 +39,7 @@ Describe "Publish-WebProject" {
         CompileTestProject -ProjectFilePath $WebProjectFilePath
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputDirectory $PublishWebsitePath
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $PublishWebsitePath
 
         # Assert
         $countOfPublishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
@@ -51,7 +51,7 @@ Describe "Publish-WebProject" {
         CompileTestProject -ProjectFilePath $FoundationWebProjectFilePath
         
         # Act
-        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputDirectory $PublishWebsitePath }
+        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputPath $PublishWebsitePath }
 
         # Assert
         $publishWebProject | Should Throw

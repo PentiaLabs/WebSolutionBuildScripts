@@ -8,13 +8,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Feature", "2. Feature", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Foundation", "3. Foundation", "{BD265CED-499C-446D-A952-537A12476F5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebProject", "src\Foundation\WebProject\Code\WebProject.csproj", "{0FB1667B-0325-4189-B7A0-69BBE2B40FFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.WebProject", "src\Foundation\WebProject\Code\Foundation.WebProject.csproj", "{0FB1667B-0325-4189-B7A0-69BBE2B40FFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebProject", "src\Feature\WebProject\Code\WebProject.csproj", "{C2E989A3-2A00-4DDE-B337-88CFC2CFF9F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Feature.WebProject", "src\Feature\WebProject\Code\Feature.WebProject.csproj", "{C2E989A3-2A00-4DDE-B337-88CFC2CFF9F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebProject", "src\Project\WebProject\Code\WebProject.csproj", "{8126628E-D2E4-4BF1-85ED-03FE1618B992}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project.WebProject", "src\Project\WebProject\Code\Project.WebProject.csproj", "{8126628E-D2E4-4BF1-85ED-03FE1618B992}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "src\Foundation\ClassLibrary\Code\ClassLibrary.csproj", "{1E4290B1-9E2E-453B-9040-D7B9B5653071}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Foundation.ClassLibrary", "src\Foundation\ClassLibrary\Code\Foundation.ClassLibrary.csproj", "{1E4290B1-9E2E-453B-9040-D7B9B5653071}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

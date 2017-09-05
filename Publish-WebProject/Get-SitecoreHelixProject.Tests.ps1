@@ -8,9 +8,9 @@ Describe "Get-SitecoreHelixProject" {
     It "Should return all web projects in the solution" {
         # Arrange 
         $expectedProjects = @(
-            "$solutionDirectory\src\Feature\WebProject\Code\WebProject.csproj",
-            "$solutionDirectory\src\Foundation\WebProject\Code\WebProject.csproj",
-            "$solutionDirectory\src\Project\WebProject\Code\WebProject.csproj"
+            "$solutionDirectory\src\Feature\WebProject\Code\Feature.WebProject.csproj",
+            "$solutionDirectory\src\Foundation\WebProject\Code\Foundation.WebProject.csproj",
+            "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj"
         )
 
         # Act
@@ -23,7 +23,7 @@ Describe "Get-SitecoreHelixProject" {
     It "Should return all web projects in the foundation layer" {
         # Arrange 
         $expectedProjects = @(
-            "$solutionDirectory\src\Foundation\WebProject\Code\WebProject.csproj"
+            "$solutionDirectory\src\Foundation\WebProject\Code\Foundation.WebProject.csproj"
         )
 
         # Act
@@ -36,7 +36,7 @@ Describe "Get-SitecoreHelixProject" {
     It "Should return all web projects in the feature layer" {
         # Arrange 
         $expectedProjects = @(
-            "$solutionDirectory\src\Feature\WebProject\Code\WebProject.csproj"
+            "$solutionDirectory\src\Feature\WebProject\Code\Feature.WebProject.csproj"
         )
 
         # Act
@@ -49,7 +49,7 @@ Describe "Get-SitecoreHelixProject" {
     It "Should return all web projects in the project layer" {
         # Arrange 
         $expectedProjects = @(
-            "$solutionDirectory\src\Project\WebProject\Code\WebProject.csproj"
+            "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj"
         )
 
         # Act
