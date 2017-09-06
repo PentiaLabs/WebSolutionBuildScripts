@@ -19,6 +19,19 @@ The following steps are performed during package publishing:
 2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
 
+Remember to configure all required NuGet feeds in an appropriate configuration file (see https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses).
+E.g.:
+
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="Sitecore" value="https://sitecore.myget.org/F/sc-packages/api/v3/index.json" />
+    <add key="Pentia A/S" value="http://tund/nuget/nuget" />
+  </packageSources>
+</configuration>
+
 .PARAMETER Package
 Optional package definition, as found in a NuGet packages.config file. 
 If set, "$Package.id" will be used instead of "$PackageName", and "$Package.version" instead of "$PackageVersion".
