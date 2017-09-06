@@ -130,10 +130,18 @@ Function Install-RuntimeDependencyPackage {
     if ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
-    
-    $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials
-    Write-Verbose "Installing package '$PackageName'."
-    $package | Install-Package -Credential $credentials -Force
+    try {
+        $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop
+        Write-Verbose "Installing package '$PackageName'."
+        $package | Install-Package -Credential $credentials -Force
+    }
+    catch {
+        if ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
+            Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. " + 
+            "Make sure that all required feeds are set up correctly. " + 
+            "See https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses."
+        }
+    }
 }
 
 Function Copy-RuntimeDependencyPackageContents {
