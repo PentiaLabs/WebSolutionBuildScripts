@@ -28,7 +28,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe "Get-RuntimeDependencyPackageFromCache" { 
+    Describe -Tag 'RequiresAdministrator' "Get-RuntimeDependencyPackageFromCache" { 
         It "should find package by name and version" {
             # Arrange
             $packageName = "jQuery"
@@ -56,7 +56,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe "Install-RuntimeDependencyPackage" {    
+    Describe -Tag 'RequiresAdministrator' "Install-RuntimeDependencyPackage" {    
         It "should throw a helpful error message if the package is not found" {
             # Arrange
             $packageName = "This-package-does-not-exist"
@@ -123,7 +123,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
 }
 
 # Test public functions
-Describe "Publish-RuntimeDependencyPackage" {
+Describe -Tag 'RequiresAdministrator' "Publish-RuntimeDependencyPackage" {
     It "offers proper help texts" {
         # Arrange
         $helpText = $Null
