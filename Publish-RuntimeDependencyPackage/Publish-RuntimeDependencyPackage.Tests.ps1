@@ -28,7 +28,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe "Get-RuntimeDependencyPackageFromCache" {  
+    Describe -Tag 'RequiresAdministrator' "Get-RuntimeDependencyPackageFromCache" { 
         It "should find package by name and version" {
             # Arrange
             $packageName = "jQuery"
@@ -56,7 +56,20 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe "Install-RuntimeDependencyPackage" {  
+    Describe -Tag 'RequiresAdministrator' "Install-RuntimeDependencyPackage" {    
+        It "should throw a helpful error message if the package is not found" {
+            # Arrange
+            $packageName = "This-package-does-not-exist"
+            $packageVersion = "1.0.0"
+            $packageSource = "$PSScriptRoot\TestPackages\"
+
+            # Act
+            $invocation = { Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource }
+
+            # Assert
+            $invocation | Should Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. Make sure that all required feeds are set up correctly. See https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses."
+        }  
+
         It "should install NuGet packages from the specified source" {
             # Arrange
             $packageName = "jquery"
@@ -110,7 +123,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
 }
 
 # Test public functions
-Describe "Publish-RuntimeDependencyPackage" {
+Describe -Tag 'RequiresAdministrator' "Publish-RuntimeDependencyPackage" {
     It "offers proper help texts" {
         # Arrange
         $helpText = $Null

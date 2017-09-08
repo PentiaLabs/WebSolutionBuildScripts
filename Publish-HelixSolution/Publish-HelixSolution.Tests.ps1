@@ -2,7 +2,7 @@
 Import-Module "$PSScriptRoot\Publish-HelixSolution.psm1" -Force
 Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1" -Force
 
-Describe "Publish-HelixSolution" {
+Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
     
     It "should delete any existing files from the publish location" {
         # Arrange
