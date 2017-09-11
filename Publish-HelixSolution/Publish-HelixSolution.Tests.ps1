@@ -121,7 +121,7 @@ Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
         Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
     }
     
-    It "should invoke all configuration transforms" {
+    It "should invoke all 'Always' configuration transforms" {
         # Arrange    
         $solutionRootPath = Initialize-TestSolution
         
@@ -130,8 +130,20 @@ Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
         
         # Assert
         $transformedWebConfig = Get-Content -Path "$TestDrive\Website\Web.config" | Out-String
-        $transformedWebConfig -match "Project.WebProject" | Should Be $True
-        $transformedWebConfig -match "Feature.WebProject" | Should Be $True
-        $transformedWebConfig -match "Foundation.WebProject" | Should Be $True        
+        $transformedWebConfig -match "value=""Project.WebProject.Always""" | Should Be $True
+    }
+    
+    It "should invoke all build configuration specific configuration transforms" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+        
+        # Act
+        Publish-TestSolution -SolutionRootPath $solutionRootPath
+        
+        # Assert
+        $transformedWebConfig = Get-Content -Path "$TestDrive\Website\Web.config" | Out-String
+        $transformedWebConfig -match "value=""Project.WebProject""" | Should Be $True
+        $transformedWebConfig -match "value=""Feature.WebProject""" | Should Be $True
+        $transformedWebConfig -match "value=""Foundation.WebProject""" | Should Be $True        
     }
 }
