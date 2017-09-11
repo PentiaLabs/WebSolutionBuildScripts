@@ -4,7 +4,7 @@ Import-Module "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\Publish-Runtime
 Import-Module "$PSScriptRoot\..\Publish-WebProject\Get-SitecoreHelixProject.psm1" -Force
 Import-Module "$PSScriptRoot\..\Publish-WebProject\Publish-WebProject.psm1" -Force
 
-Import-Module "$PSScriptRoot\..\ConfigurationTransformFile\Get-ConfigurationTransformFile.ps1" -Force
+Import-Module "$PSScriptRoot\..\Get-ConfigurationTransformFile\Get-ConfigurationTransformFile.psm1" -Force
 Import-Module "$PSScriptRoot\..\Invoke-ConfigurationTransform\Invoke-ConfigurationTransform.psm1" -Force
 
 Function Publish-HelixSolution {
