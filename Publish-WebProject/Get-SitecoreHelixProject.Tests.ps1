@@ -4,8 +4,16 @@ Import-Module "$PSScriptRoot\Get-SitecoreHelixProject.psm1" -Force
 Describe "Get-SitecoreHelixProject" {
     
     $solutionDirectory = "$PSScriptRoot\TestSolution"
+    
+    It "should return an array even if nothing is found" {
+        # Act
+        $actualProjects = Get-SitecoreHelixProject "$TestDrive"
+            
+        # Assert
+        $actualProjects.Count | Should Be 0
+    }
 
-    It "Should return all web projects in the solution" {
+    It "should return all web projects in the solution" {
         # Arrange 
         $expectedProjects = @(
             "$solutionDirectory\src\Feature\WebProject\Code\Feature.WebProject.csproj",
@@ -20,7 +28,7 @@ Describe "Get-SitecoreHelixProject" {
         $actualProjects | Should Be $expectedProjects
     }
     
-    It "Should return all web projects in the foundation layer" {
+    It "should return all web projects in the foundation layer" {
         # Arrange 
         $expectedProjects = @(
             "$solutionDirectory\src\Foundation\WebProject\Code\Foundation.WebProject.csproj"
@@ -33,7 +41,7 @@ Describe "Get-SitecoreHelixProject" {
         $actualProjects | Should Be $expectedProjects
     }    
     
-    It "Should return all web projects in the feature layer" {
+    It "should return all web projects in the feature layer" {
         # Arrange 
         $expectedProjects = @(
             "$solutionDirectory\src\Feature\WebProject\Code\Feature.WebProject.csproj"
@@ -46,7 +54,7 @@ Describe "Get-SitecoreHelixProject" {
         $actualProjects | Should Be $expectedProjects
     }
     
-    It "Should return all web projects in the project layer" {
+    It "should return all web projects in the project layer" {
         # Arrange 
         $expectedProjects = @(
             "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj"

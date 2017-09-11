@@ -42,9 +42,14 @@ Function Get-RuntimeDependencyPackage {
         Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencyPackage -Full' for expected usage."
     }
 
-    $packages = $configuration.packages.package | Select-Object -Property "id", "version"
+    $packages = $configuration.packages.package | ForEach-Object { 
+        $package = New-Object -TypeName "RuntimeDependencyPackage" 
+        $package.id = $_.id
+        $package.version = $_.version
+        $package
+    }
     Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
-    $packages
+    @($packages)
 }
 
 Function Get-PackageConfiguration {
@@ -76,6 +81,11 @@ Function Test-XmlParseException {
         [System.Management.Automation.RuntimeException]$Exception
     )
     $Exception.Message -match "Cannot convert value .* to type ""System\.Xml\.XmlDocument""\."
+}
+
+Class RuntimeDependencyPackage {
+    [string]$id;
+    [string]$version;
 }
 
 Export-ModuleMember -Function Get-RuntimeDependencyPackage
