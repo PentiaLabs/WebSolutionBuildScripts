@@ -1,4 +1,5 @@
 FROM nugardt/msbuild:12.0
+LABEL maintainer "Pentia Developers"
 
 SHELL ["PowerShell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
