@@ -18,4 +18,4 @@ RUN New-Item /TestResults -ItemType Directory
 # All Pester tests in '/Scripts' will be run. 
 # Test results are written to '/TestResults/TestResults.xml'. 
 # Use e.g. 'docker run -v=<absolute path to my scripts>:C:\Scripts -v=<absolute path to where I want test results>:C:\TestResults'.
-CMD Invoke-Pester -Path "/Scripts" -OutputFormat NUnitXml -OutputFile "/TestResults/TestResults.xml"
+CMD Invoke-Pester -Path "/Scripts" -OutputFormat NUnitXml -OutputFile "/TestResults/TestResults.xml" Invoke-Pester -CodeCoverage "**\*.psm1" -CodeCoverageOutputFile "/TestResults/TestCoverage.xml"
