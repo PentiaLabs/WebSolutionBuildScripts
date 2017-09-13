@@ -1,6 +1,6 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Publish-HelixSolution.psm1" -Force
-Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1" -Force
+Import-Module "$PSScriptRoot\..\Publish-WebProject\TestSolution\New-TestSolution.psm1" -Force
 
 Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
     
@@ -25,60 +25,18 @@ Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
         Test-Path $existingContent | Should Be $False
     }
     
-    Function CompileTestSolution {
-        Param(
-            [Parameter(Mandatory = $True)]
-            [string]$ProjectFilePath
-        )
-        $msBuildExecutable = Get-MSBuild
-        If (-not $msBuildExecutable) {
-            Throw "Didn't find MSBuild.exe. Can't compile solution for running tests."
-        }
-        & "$msBuildExecutable" "$ProjectFilePath" | Write-Verbose
-        If ($LASTEXITCODE -ne 0) {
-            Throw "Failed to build solution. Make sure you have ASP.NET features installed for Visual Studio."
-        }
+    Function Initialize-TestSolution {
+        $solution = New-TestSolution -TempPath $TestDrive
+        Initialize-TestPackageSource | Out-Null
+        $solution
     }
 
-    $IsTestSolutionInitialized = $False
-    $IsTestSolutionPublished = $False
-    
-    Function Initialize-TestSolution {
-        $solution = "$TestDrive\Solution"
-        If ($script:IsTestSolutionInitialized) {
-            Write-Host "Skipping test solution initialization."
-        }
-        Else {
-            . {
-                $script:IsTestSolutionInitialized = $False
-            
-                # $TestDrive is "Describe-block" scoped, hence we clean it here.
-                Remove-Item $TestDrive -Recurse -Force
-
-                # Copy solution
-                New-Item $solution -ItemType Directory
-                Copy-Item -Path "$PSScriptRoot\..\Publish-WebProject\TestSolution" -Recurse -Destination $solution
-        
-                # Add missing Web.config to foundation project for happy-path test.
-                Copy-Item -Path "$PSScriptRoot\..\Publish-WebProject\TestSolution\src\Project\WebProject\Code\Web.config" -Destination "$solution\TestSolution\src\Foundation\WebProject\Code\Web.config"
-                CompileTestSolution -ProjectFilePath "$solution\TestSolution\TestSolution.sln"
-        
-                # Create NuGet source config
-                $packageSource = "$TestDrive\RuntimePackages"
-                $nugetConfig = '<configuration><packageSources><clear /><add key="sample-source" value="{0}" /></configuration>' -F $packageSource
-                Set-Content "$solution\nuget.config" -Value $nugetConfig
-
-                # Create NuGet package config
-                Set-Content "$solution\TestSolution\runtime-dependencies.config" -Value '<packages><package id="sample-runtime-dependency" version="1.0.0" /></packages>'
-        
-                # Copy sample runtime dependency
-                New-Item $packageSource -ItemType Directory
-                Copy-Item -Path "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\TestPackages\sample-runtime-dependency.1.0.0.nupkg" -Destination $packageSource
-                $script:IsTestSolutionInitialized = $True
-            
-            } | Out-Null        
-        }
-        $solution + "\TestSolution"
+    Function Initialize-TestPackageSource {
+        $packageSource = "$TestDrive\RuntimePackages"
+        Remove-Item $packageSource -Force -Recurse -ErrorAction SilentlyContinue
+        Set-Content "$solution\runtime-dependencies.config" -Value ('<packages><package id="sample-runtime-dependency" version="1.0.0" source="{0}" /></packages>' -F $packageSource) -Encoding UTF8
+        New-Item $packageSource -ItemType Directory
+        Copy-Item -Path "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\TestPackages\sample-runtime-dependency.1.0.0.nupkg" -Destination $packageSource        
     }
 
     Function Publish-TestSolution {
@@ -86,14 +44,7 @@ Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
             [Parameter(Mandatory = $True)]
             [string]$SolutionRootPath
         )
-        If ($script:IsTestSolutionPublished) {
-            Write-Host "Skipping test solution publication."
-        }
-        Else {
-            $script:IsTestSolutionPublished = $False
-            Publish-HelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"            
-            $script:IsTestSolutionPublished = $True
-        }
+        Publish-HelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"            
     }
 
     It "should publish all runtime dependencies" {

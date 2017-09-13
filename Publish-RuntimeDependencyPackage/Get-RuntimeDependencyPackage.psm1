@@ -15,12 +15,17 @@ Get-RuntimeDependencyPackage -ConfigurationFilePath my-solution\runtime-dependen
 Contents of "runtime-dependencies.config":
 <?xml version="1.0" encoding="utf-8"?>
 <packages>
+  <package id="Sitecore.Full" version="8.1.1" source="http://tund/feeds/Pentia" />
   <package id="jQuery" version="3.1.1" />
   <package id="NLog" version="4.3.10" />
 </packages>
 
-Returns:
-[{id:"jQuery",version:"3.1.1"},{id:"NLog",version:"4.3.10"}]
+Returns an array of objects:
+[
+    {id:"Sitecore.Full", version:"8.2.170728", source:"http://tund/feeds/Pentia"},
+    {id:"jQuery", version:"3.1.1"},
+    {id:"NLog", version:"4.3.10"}
+]
 
 #>
 Function Get-RuntimeDependencyPackage {
@@ -46,6 +51,7 @@ Function Get-RuntimeDependencyPackage {
         $package = New-Object -TypeName "RuntimeDependencyPackage" 
         $package.id = $_.id
         $package.version = $_.version
+        $package.source = $_.source
         $package
     }
     Write-Verbose "Found $($packages.Count) package(s) in '$ConfigurationFilePath'."
@@ -86,6 +92,7 @@ Function Test-XmlParseException {
 Class RuntimeDependencyPackage {
     [string]$id;
     [string]$version;
+    [string]$source;
 }
 
 Export-ModuleMember -Function Get-RuntimeDependencyPackage

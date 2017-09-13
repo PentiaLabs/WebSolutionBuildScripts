@@ -1,1 +1,0 @@
-﻿The "Web.Debug.config" file has been removed on purpose to trigger a publish error.

@@ -85,7 +85,7 @@ Function Publish-AllRuntimeDependencies {
     for ($i = 0; $i -lt $runtimeDependencies.Count; $i++) {
         $runtimeDependency = $runtimeDependencies[$i]
         Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "$($runtimeDependency.id) $($runtimeDependency.version)"
-        Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version
+        Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version -PackageSource $runtimeDependency.source
     }
 }
 

@@ -42,8 +42,8 @@ Describe "Get-RuntimeDependencyPackage" {
         $runtimeDependencyConfigurationFilePath = "$TestDrive\test-configuration-file.config"
         $packagesConfig = '<?xml version="1.0" encoding="utf-8"?>
 <packages>
-    <package id="jQuery" version="3.1.1" />
-    <package id="NLog" version="4.3.10" />
+    <package id="jQuery" version="3.1.1" source="optional" />
+    <package id="NLog" version="4.3.10" source="optional too" />
 </packages>'
         Set-Content -Path $runtimeDependencyConfigurationFilePath -Value $packagesConfig
 
@@ -56,8 +56,10 @@ Describe "Get-RuntimeDependencyPackage" {
         $runtimeDependencies.Count | Should Be 2
         $jQuery.id | Should Be "jQuery"
         $jQuery.version | Should Be "3.1.1"
+        $jQuery.source | Should Be "optional"
         $NLog.id | Should Be "NLog"
         $NLog.version | Should Be "4.3.10"
+        $NLog.source | Should Be "optional too"
     }
     
     It "should return an array even if only one package reference is defined in the configuration file" {

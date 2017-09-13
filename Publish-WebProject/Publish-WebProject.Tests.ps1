@@ -1,34 +1,19 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 Import-Module "$PSScriptRoot\Publish-WebProject.psm1" -Force
-Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1" -Force
+Import-Module "$PSScriptRoot\TestSolution\New-TestSolution.psm1" -Force
 
 Describe "Publish-WebProject" {
 
-    $WebProjectFilePath = "$PSScriptRoot\TestSolution\src\Project\WebProject\Code\Project.WebProject.csproj"
+    $WebProjectFilePath = "\src\Project\WebProject\Code\Project.WebProject.csproj"
+    $FoundationWebProjectFilePath = "\src\Foundation\WebProject\Code\Foundation.WebProject.csproj"
     $PublishWebsitePath = "$TestDrive\Website"
-    $FoundationWebProjectFilePath = "$PSScriptRoot\TestSolution\src\Foundation\WebProject\Code\Foundation.WebProject.csproj"
-    
-    Function CompileTestProject {
-        Param(
-            [Parameter(Mandatory=$True)]
-            [string]$ProjectFilePath
-        )
-        $msBuildExecutable = Get-MSBuild
-        If (-not $msBuildExecutable) {
-            Throw "Didn't find MSBuild.exe. Can't compile solution for running tests."
-        }
-        & "$msBuildExecutable" "$ProjectFilePath"
-        If ($LASTEXITCODE -ne 0) {
-            Throw "Failed to build solution. Make sure you have ASP.NET features installed for Visual Studio."
-        }
-    }
     
     It "should create the output directory if it doesn't exist" {
         # Arrange
-        CompileTestProject -ProjectFilePath $WebProjectFilePath
+        $solutionPath = New-TestSolution -TempPath "$TestDrive"
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $PublishWebsitePath
+        Publish-WebProject -WebProjectFilePath ($solutionPath + $WebProjectFilePath) -OutputPath $PublishWebsitePath
 
         # Assert
         Test-Path $PublishWebsitePath | Should Be $True
@@ -36,22 +21,25 @@ Describe "Publish-WebProject" {
 
     It "should publish a web project to the target directory" {
         # Arrange
-        CompileTestProject -ProjectFilePath $WebProjectFilePath
+        $solutionPath = New-TestSolution -TempPath "$TestDrive"
 
         # Act
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $PublishWebsitePath
+        Publish-WebProject -WebProjectFilePath ($solutionPath + $WebProjectFilePath) -OutputPath $PublishWebsitePath
 
         # Assert
-        $countOfPublishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Measure-Object | Select-Object -ExpandProperty Count
-        $countOfPublishedFiles | Should Be 3
+        $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
+        $publishedFiles -contains "Web.config" | Should Be $True
+        $publishedFiles -contains "Project.WebProject.dll" | Should Be $True
+        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
     }
     
     It "should throw an exception when a project fails to publish" {
         # Arrange
-        CompileTestProject -ProjectFilePath $FoundationWebProjectFilePath
+        $solutionPath = New-TestSolution -TempPath "$TestDrive"
+        Remove-Item -Path ($solutionPath + "\src\Foundation\WebProject\Code\Web.config")
         
         # Act
-        $publishWebProject = { Publish-WebProject -WebProjectFilePath $FoundationWebProjectFilePath -OutputPath $PublishWebsitePath }
+        $publishWebProject = { Publish-WebProject -WebProjectFilePath ($solutionPath + $FoundationWebProjectFilePath) -OutputPath $PublishWebsitePath }
 
         # Assert
         $publishWebProject | Should Throw

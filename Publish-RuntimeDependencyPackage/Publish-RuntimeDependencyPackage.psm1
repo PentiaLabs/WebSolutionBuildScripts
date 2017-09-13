@@ -87,12 +87,15 @@ Function Publish-RuntimeDependencyPackage {
     Write-Host "Publishing package '$PackageName'."
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
     $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
-    if (-not $package) {
+    If (-not $package) {
         Write-Verbose "Package '$PackageName' version '$PackageVersion' not found locally. Installing from '$PackageSource'."
         Install-RuntimeDependencyPackage -PackageName $PackageName -PackageVersion $PackageVersion -PackageSource $PackageSource -Username $Username -Password $Password
         $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
-    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath    
+    If(-not $package) {
+        Throw "Unable to install package '$PackageName' version '$PackageVersion' from source '$PackageSource'."
+    }
+    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
 
 Function Get-RuntimeDependencyPackageFromCache {
