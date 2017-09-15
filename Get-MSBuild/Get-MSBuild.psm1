@@ -10,7 +10,7 @@ Requires the "VSSetup" module to be installed.
 #>
 Function Get-MSBuild {
 	Write-Verbose "Searching for MSBuild.exe."
-	$msBuildExecutable = . "$PSScriptRoot\bin\hMSBuild.bat" "-only-path"
+	$msBuildExecutable = . "$PSScriptRoot\lib\hMSBuild.bat" "-only-path"
 	if($msBuildExecutable -eq $Null -or !(Test-Path $msBuildExecutable)) {
 		Throw "Didn't find MSBuild.exe."
 	}
