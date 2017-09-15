@@ -1,18 +1,16 @@
-. "$PSScriptRoot\Test-ConfigurationTransformFile.ps1" -Force
-
 <#
 .SYNOPSIS
-Gets all .config-files in the specified directory.
+Gets all XDT-files in the specified directory.
 
 .DESCRIPTION
-Gets all .config-files in the specified directory, exluding files found in "obj" and "bin".
+Gets all XDT-files in the specified directory, exluding files found in "obj" and "bin".
 
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path to search through.
 
 .EXAMPLE
 Get-ConfigurationTransformFile -SolutionRootPath "C:\Path\To\MySolution"
-Returns all .config-files found in the "C:\Path\To\MySolution", recursively.
+Returns all XDT-files found in the "C:\Path\To\MySolution", recursively.
 #>
 Function Get-ConfigurationTransformFile {
     [CmdletBinding()]
@@ -38,3 +36,26 @@ Function Get-ConfigurationTransformFile {
     $ConfigurationTransformFiles | Select-Object -ExpandProperty "FullName"
 }
 
+<#
+.SYNOPSIS
+Check whether or not a given XML file is a configuration transform file, based on the value of the XDT-attribute.
+
+.PARAMETER AbsoluteFilePath
+The absolute path to the configuration file to check.
+
+.EXAMPLE
+Test-ConfigurationTransformFile -AbsoluteFilePath "C:\Path\To\MyConfiguration.Prod.config"
+#>
+Function Test-ConfigurationTransformFile {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Position = 0)]
+        [string]$AbsoluteFilePath
+    )
+
+    $xmlDocument = New-Object System.Xml.XmlDocument
+    $xmlDocument.Load($AbsoluteFilePath)
+    $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"
+}
+
+Export-ModuleMember -Function Get-ConfigurationTransformFile

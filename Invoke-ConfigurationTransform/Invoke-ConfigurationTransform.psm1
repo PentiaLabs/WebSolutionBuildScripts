@@ -87,6 +87,20 @@ Function Get-NameOfFileToTransform {
     [string]::Join($fileNamePartSeparator, $fileNameParts.ToArray())
 }
 
+<#
+.SYNOPSIS
+Applies a configuration transform to a configuration file, and returns the result.
+
+.PARAMETER XmlFilePath
+The path to the configuration file.
+
+.PARAMETER XdtFilePath
+The path to the configuration transform file.
+
+.EXAMPLE
+Invoke-ConfigurationTransform -XmlFilePath "C:\Solution\src\Web.config" -XdtFilePath "C:\Solution\src\Web.Debug.config" | Set-Content "C:\Website\Web.config"
+Note the call to "Set-Content", to use the resulting output for something meaningful.
+#>
 Function Invoke-ConfigurationTransform {
     [CmdletBinding()]
     Param (
@@ -102,7 +116,7 @@ Function Invoke-ConfigurationTransform {
         Throw "File '$XdtFilePath' not found."
     }
 
-    Add-Type -LiteralPath "$PSScriptRoot\Microsoft.Web.XmlTransform.dll"
+    Add-Type -LiteralPath "$PSScriptRoot\bin\Microsoft.Web.XmlTransform.dll"
 
     $xmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument
     $xmlDocument.PreserveWhitespace = $True

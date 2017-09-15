@@ -1,8 +1,14 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
+Import-Module "$PSScriptRoot\..\Get-RuntimeDependencyPackage\Get-RuntimeDependencyPackage.psm1" -Force
+Import-Module "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.psm1" -Force
+Import-Module "$PSScriptRoot\..\Get-SitecoreHelixProject\Get-SitecoreHelixProject.psm1" -Force
+Import-Module "$PSScriptRoot\..\Publish-WebProject\Publish-WebProject.psm1" -Force
+Import-Module "$PSScriptRoot\..\Get-ConfigurationTransformFile\Get-ConfigurationTransformFile.psm1" -Force
+Import-Module "$PSScriptRoot\..\Invoke-ConfigurationTransform\Invoke-ConfigurationTransform.psm1" -Force
 Import-Module "$PSScriptRoot\Publish-HelixSolution.psm1" -Force
-Import-Module "$PSScriptRoot\..\Publish-WebProject\TestSolution\New-TestSolution.psm1" -Force
+Import-Module "$PSScriptRoot\..\TestContent\TestSolution\New-TestSolution.psm1" -Force
 
-Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
+Describe "Publish-HelixSolution" {
     
     It "should delete any existing files from the publish location" {
         # Arrange
@@ -36,7 +42,7 @@ Describe "Publish-HelixSolution" -Tag 'RequiresAdministrator' {
         Remove-Item $packageSource -Force -Recurse -ErrorAction SilentlyContinue
         Set-Content "$solution\runtime-dependencies.config" -Value ('<packages><package id="sample-runtime-dependency" version="1.0.0" source="{0}" /></packages>' -F $packageSource) -Encoding UTF8
         New-Item $packageSource -ItemType Directory
-        Copy-Item -Path "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\TestPackages\sample-runtime-dependency.1.0.0.nupkg" -Destination $packageSource        
+        Copy-Item -Path "$PSScriptRoot\..\TestContent\TestPackages\sample-runtime-dependency.1.0.0.nupkg" -Destination $packageSource        
     }
 
     Function Publish-TestSolution {

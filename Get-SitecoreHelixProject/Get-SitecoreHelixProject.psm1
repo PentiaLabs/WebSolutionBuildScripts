@@ -16,7 +16,7 @@ Specifies which files do exclude in the search. Defaults to "*test*", to exclude
 
 .EXAMPLE
 Get-SitecoreHelixProject -SolutionRootPath "C:\Path\To\MySolution" -HelixLayer Foundation
-Get all projects in the "Foundation" layer.
+Get all web projects in the "Foundation" layer.
 
 #>
 Function Get-SitecoreHelixProject {

@@ -28,7 +28,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe -Tag 'RequiresAdministrator' "Get-RuntimeDependencyPackageFromCache" { 
+    Describe "Get-RuntimeDependencyPackageFromCache" { 
         It "should find package by name and version" {
             # Arrange
             $packageName = "jQuery"
@@ -56,12 +56,12 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe -Tag 'RequiresAdministrator' "Install-RuntimeDependencyPackage" {    
+    Describe "Install-RuntimeDependencyPackage" {    
         It "should throw a helpful error message if the package is not found" {
             # Arrange
             $packageName = "This-package-does-not-exist"
             $packageVersion = "1.0.0"
-            $packageSource = "$PSScriptRoot\TestPackages\"
+            $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
 
             # Act
             $invocation = { Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource }
@@ -74,7 +74,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             # Arrange
             $packageName = "jquery"
             $packageVersion = "3.1.1"
-            $packageSource = "$PSScriptRoot\TestPackages\"
+            $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
 
             # Act
             $installedPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource
@@ -88,7 +88,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
     Describe "Copy-RuntimeDependencyPackageContents" {
         $packageName = "sample-runtime-dependency"
         $packageVersion = "1.0.0"
-        $packageSource = "$PSScriptRoot\TestPackages\"
+        $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
         $destination = "$TestDrive"
         $installedPackage = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Destination $destination
     
@@ -123,7 +123,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
 }
 
 # Test public functions
-Describe -Tag 'RequiresAdministrator' "Publish-RuntimeDependencyPackage" {
+Describe "Publish-RuntimeDependencyPackage" {
     It "offers proper help texts" {
         # Arrange
         $helpText = $Null
@@ -139,7 +139,7 @@ Describe -Tag 'RequiresAdministrator' "Publish-RuntimeDependencyPackage" {
         # Arrange
         $packageName = "sample-runtime-dependency"
         $packageVersion = "1.0.0"
-        $packageSource = "$PSScriptRoot\TestPackages\"
+        $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
         $webrootOutputPath = "$TestDrive\my-webroot-folder"
         $dataOutputPath = "$TestDrive\my-data-folder"
         $expectedFileNames = @("DataSampleFile.txt", "Web.config", "WebrootSampleFile.txt")

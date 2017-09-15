@@ -3,7 +3,7 @@ Import-Module "$PSScriptRoot\Get-SitecoreHelixProject.psm1" -Force
 
 Describe "Get-SitecoreHelixProject" {
     
-    $solutionDirectory = "$PSScriptRoot\TestSolution"
+    $solutionDirectory = Resolve-Path "$PSScriptRoot\..\TestContent\TestSolution"
     
     It "should return an array even if nothing is found" {
         # Act

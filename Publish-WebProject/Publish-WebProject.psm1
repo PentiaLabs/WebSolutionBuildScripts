@@ -1,5 +1,3 @@
-Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1"
-
 <# 
  .SYNOPSIS
  Publishes a web project to the specified output directory using MSBuild.

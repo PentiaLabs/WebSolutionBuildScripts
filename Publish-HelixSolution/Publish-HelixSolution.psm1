@@ -1,12 +1,3 @@
-Import-Module "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\Get-RuntimeDependencyPackage.psm1" -Force
-Import-Module "$PSScriptRoot\..\Publish-RuntimeDependencyPackage\Publish-RuntimeDependencyPackage.psm1" -Force
-
-Import-Module "$PSScriptRoot\..\Publish-WebProject\Get-SitecoreHelixProject.psm1" -Force
-Import-Module "$PSScriptRoot\..\Publish-WebProject\Publish-WebProject.psm1" -Force
-
-Import-Module "$PSScriptRoot\..\Get-ConfigurationTransformFile\Get-ConfigurationTransformFile.psm1" -Force
-Import-Module "$PSScriptRoot\..\Invoke-ConfigurationTransform\Invoke-ConfigurationTransform.psm1" -Force
-
 Function Publish-HelixSolution {
     [CmdletBinding()]
     Param (
