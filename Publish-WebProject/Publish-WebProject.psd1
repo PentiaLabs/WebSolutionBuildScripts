@@ -25,10 +25,10 @@
     RequiredModules   = @( @{ModuleName = 'Get-MSBuild'; ModuleVersion = '0.2.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'; })
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @()
+    FunctionsToExport = @('Publish-WebProject')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = @('Publish-WebProject')
+    CmdletsToExport   = @()
 
     # Variables to export from this module
     VariablesToExport = @()

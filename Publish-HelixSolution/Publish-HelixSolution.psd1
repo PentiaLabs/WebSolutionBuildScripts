@@ -31,10 +31,10 @@
         @{ModuleName = 'Invoke-ConfigurationTransform'; ModuleVersion = '0.2.0'; Guid = '6277b189-3478-4e86-9e3b-782d74a70758' })
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @()
+    FunctionsToExport = @()'Publish-HelixSolution'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = @('Publish-HelixSolution')
+    CmdletsToExport   = @()
 
     # Variables to export from this module
     VariablesToExport = @()

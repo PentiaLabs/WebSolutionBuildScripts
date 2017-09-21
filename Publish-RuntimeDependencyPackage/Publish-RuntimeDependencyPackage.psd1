@@ -22,10 +22,10 @@
     Copyright         = '(c) 2017 Pentia Developers. All rights reserved.'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @()
+    FunctionsToExport = @('Publish-RuntimeDependencyPackage')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = @('Publish-RuntimeDependencyPackage')
+    CmdletsToExport   = @()
 
     # Variables to export from this module
     VariablesToExport = @()
