@@ -46,8 +46,8 @@ Function Get-SolutionRootPath {
     )
 
     If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
-        $SolutionRootPath = [System.IO.Path]::GetDirectoryName($MyInvocation.PSCommandPath)
-        Write-Verbose "`$SolutionRootPath not set. Using '$SolutionRootPath'."
+        $SolutionRootPath = "$PWD"
+        Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
     }
     $SolutionRootPath
 }

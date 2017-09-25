@@ -26,7 +26,7 @@ Describe "Publish-HelixSolution" {
         It "should determine the solution root path fallback correctly" {
             # Arrange 
             $solutionRootPath = $Null
-            $expectedSolutionRootPath = $PSScriptRoot
+            $expectedSolutionRootPath = "$PSScriptRoot"
 
             # Act
             $solutionRootPath = Get-SolutionRootPath -SolutionRootPath $solutionRootPath
