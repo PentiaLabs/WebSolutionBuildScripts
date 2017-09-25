@@ -118,15 +118,7 @@ Function Invoke-AllTransforms {
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
-    [System.Collections.ArrayList]$xdtFiles = @()
-    $alwaysApplicableXdts = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfiguration "Always")
-    If ($alwaysApplicableXdts -ne $Null) {
-        $xdtFiles.AddRange($alwaysApplicableXdts)
-    }
-    $buildConfigurationSpecificXdts = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfiguration $BuildConfiguration)
-    If ($buildConfigurationSpecificXdts -ne $Null) {
-        $xdtFiles.AddRange($buildConfigurationSpecificXdts)
-    }
+    $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
         Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
