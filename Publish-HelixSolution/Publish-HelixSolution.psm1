@@ -98,11 +98,12 @@ Function Publish-AllWebProjects {
         [Parameter(Mandatory = $True)]
         [string]$WebrootOutputPath
     )
+    $msBuildExecutablePath = Get-MSBuild
     $webProjects = Get-SitecoreHelixProject -SolutionRootPath $SolutionRootPath
     for ($i = 0; $i -lt $webProjects.Count; $i++) {
         Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $webProjects.Count * 100) -Status "Publishing web projects" -CurrentOperation "$webProject"
         $webProject = $webProjects[$i]
-        $webProject | Publish-WebProject -OutputPath $WebrootOutputPath
+        $webProject | Publish-WebProject -OutputPath $WebrootOutputPath -MSBuildExecutablePath $msBuildExecutablePath
     }
 }
 

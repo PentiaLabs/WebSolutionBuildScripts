@@ -23,6 +23,7 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules   = @( 
+        @{ModuleName = 'Get-MSBuild'; ModuleVersion = '0.2.6'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'},
         @{ModuleName = 'Get-RuntimeDependencyPackage'; ModuleVersion = '0.2.6'; Guid = '7e75a068-6847-4142-adb0-cf51e2ff8c21'},
         @{ModuleName = 'Publish-RuntimeDependencyPackage'; ModuleVersion = '0.2.6'; Guid = '04c76ad8-7c85-43cc-a1c4-765fc61b6100'},
         @{ModuleName = 'Get-SitecoreHelixProject'; ModuleVersion = '0.2.6'; Guid = 'a1c045f3-e740-4979-81f4-ac81ee39e5f0'}, 
