@@ -31,6 +31,7 @@ Function Get-ConfigurationTransformFile {
 
     If ($BuildConfigurations.Count -gt 0) {
         $ConfigurationTransformFiles = $ConfigurationTransformFiles | Where-Object { 
+            # "Web.Debug.config" -> "Debug"
             $buildConfigurationExtension = $_.Name.Split(".")[-2]
             $BuildConfigurations -contains $buildConfigurationExtension
         }
