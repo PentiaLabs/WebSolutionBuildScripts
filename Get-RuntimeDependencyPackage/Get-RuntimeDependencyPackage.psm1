@@ -15,14 +15,14 @@ Get-RuntimeDependencyPackage -ConfigurationFilePath my-solution\runtime-dependen
 Contents of "runtime-dependencies.config":
 <?xml version="1.0" encoding="utf-8"?>
 <packages>
-  <package id="Sitecore.Full" version="8.1.1" source="http://tund/feeds/Pentia" />
+  <package id="Sitecore.Full" version="8.2.170728" source="http://tund/nuget/NuGet" />
   <package id="jQuery" version="3.1.1" />
   <package id="NLog" version="4.3.10" />
 </packages>
 
 Returns an array of objects:
 [
-    {id:"Sitecore.Full", version:"8.2.170728", source:"http://tund/feeds/Pentia"},
+    {id:"Sitecore.Full", version:"8.2.170728", source:"http://tund/nuget/NuGet"},
     {id:"jQuery", version:"3.1.1"},
     {id:"NLog", version:"4.3.10"}
 ]

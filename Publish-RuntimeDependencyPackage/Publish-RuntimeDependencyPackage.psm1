@@ -15,22 +15,9 @@ All of the above are optional.
 The following steps are performed during package publishing:
 
 1. Check if the required package is cached locally.
-1.1 If the package isn't found locally, it's installed from a package source defined in the applicable NuGet configuration (see https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior for details).
+1.1 If the package isn't found locally, it's installed from a registered package source, or from the $PackageSource parameter.
 2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
-
-Remember to configure all required NuGet feeds in an appropriate configuration file (see https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses).
-E.g.:
-
-<?xml version="1.0" encoding="utf-8"?>
-<configuration>
-  <packageSources>
-    <clear />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="Sitecore" value="https://sitecore.myget.org/F/sc-packages/api/v3/index.json" />
-    <add key="Pentia A/S" value="http://tund/nuget/nuget" />
-  </packageSources>
-</configuration>
 
 .PARAMETER Package
 Optional package definition, as found in a NuGet packages.config file. 
@@ -58,7 +45,7 @@ The path where the contents of "<package>\Webroot" will be copied to.
 The path where the contents of "<package>\Data" will be copied to.
 
 .EXAMPLE
-Deploy-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/feeds/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
+Publish-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/nuget/nuget/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
 #>
 Function Publish-RuntimeDependencyPackage {
     [CmdletBinding()]
