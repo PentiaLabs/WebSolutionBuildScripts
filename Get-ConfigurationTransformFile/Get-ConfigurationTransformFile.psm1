@@ -53,9 +53,14 @@ Function Test-ConfigurationTransformFile {
         [string]$AbsoluteFilePath
     )
 
-    $xmlDocument = New-Object System.Xml.XmlDocument
-    $xmlDocument.Load($AbsoluteFilePath)
-    $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"
+    Try {
+        $xmlDocument = New-Object System.Xml.XmlDocument
+        $xmlDocument.Load($AbsoluteFilePath)
+        $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"        
+    }
+    Catch {
+        Write-Error -Message "Error reading XML file '$AbsoluteFilePath': $($_.Exception.Message)" -Exception $_.Exception
+    }
 }
 
 Export-ModuleMember -Function Get-ConfigurationTransformFile
