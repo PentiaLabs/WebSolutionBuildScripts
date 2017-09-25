@@ -2,7 +2,7 @@ $ErrorActionPreference = "Continue"
 
 $repositoryName = "Pentia PowerShell"
 
-Function Register-TundRepository {
+Function Register-PentiaPowerShellRepository {
     $repository = Get-PSRepository $repositoryName -ErrorAction SilentlyContinue
     if (-not $repository) {
         Register-PSRepository -Name $repositoryName -SourceLocation "http://tund/nuget/powershell/" -InstallationPolicy "Trusted" -Verbose
@@ -21,7 +21,7 @@ Function Publish {
     }
 }
 
-Register-TundRepository | Out-Null
+Register-PentiaPowerShellRepository | Out-Null
 
 $modules = Get-Module -Name ".\**\*.psd1" -ListAvailable
 
