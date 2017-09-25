@@ -4,7 +4,7 @@
     RootModule        = 'Publish-RuntimeDependencyPackage.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.2.4'
+    ModuleVersion     = '0.2.5'
 
     # ID used to uniquely identify this module
     GUID              = '04c76ad8-7c85-43cc-a1c4-765fc61b6100'

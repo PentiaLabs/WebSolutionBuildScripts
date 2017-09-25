@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebProject.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.2.4'
+    ModuleVersion     = '0.2.5'
 
     # ID used to uniquely identify this module
     GUID              = '0180313a-e7a1-401f-a9a6-5150c41eccc9'
@@ -22,7 +22,7 @@
     Description       = 'Publishes web projects using MSBuild.'
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @( @{ModuleName = 'Get-MSBuild'; ModuleVersion = '0.2.4'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'; })
+    RequiredModules   = @( @{ModuleName = 'Get-MSBuild'; ModuleVersion = '0.2.5'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'; })
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @('Publish-WebProject')
