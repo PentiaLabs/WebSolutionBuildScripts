@@ -14,10 +14,7 @@ Function Publish-HelixSolution {
         [string]$BuildConfiguration
     )
 
-    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
-        $SolutionRootPath = $MyInvocation.PSCommandPath
-        Write-Verbose "`$SolutionRootPath not set. Using '$SolutionRootPath'."
-    }
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
     # If output is set to "Verbose", set "$PSDefaultParameterValues:['*:Verbose'] = $True"
     # If output is set to "Debug", set "$PSDefaultParameterValues:['*:Debug'] = $True"
@@ -40,6 +37,19 @@ Function Publish-HelixSolution {
     Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
 
     Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
+}
+
+Function Get-SolutionRootPath {
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$SolutionRootPath
+    )
+
+    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
+        $SolutionRootPath = [System.IO.Path]::GetDirectoryName($MyInvocation.PSCommandPath)
+        Write-Verbose "`$SolutionRootPath not set. Using '$SolutionRootPath'."
+    }
+    $SolutionRootPath
 }
 
 Function Remove-WebrootOutputPath {

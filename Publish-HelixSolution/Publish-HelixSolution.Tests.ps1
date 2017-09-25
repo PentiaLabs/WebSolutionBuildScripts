@@ -9,7 +9,33 @@ Import-Module "$PSScriptRoot\Publish-HelixSolution.psm1" -Force
 Import-Module "$PSScriptRoot\..\TestContent\TestSolution\New-TestSolution.psm1" -Force
 
 Describe "Publish-HelixSolution" {
-    
+
+    InModuleScope "Publish-HelixSolution" {
+        It "should determine the solution root path correctly" {
+            # Arrange 
+            $solutionRootPath = "Some Path"
+            $expectedSolutionRootPath = $solutionRootPath
+
+            # Act
+            $solutionRootPath = Get-SolutionRootPath -SolutionRootPath $solutionRootPath
+
+            # Assert
+            $solutionRootPath | Should Be $expectedSolutionRootPath
+        }
+
+        It "should determine the solution root path fallback correctly" {
+            # Arrange 
+            $solutionRootPath = $Null
+            $expectedSolutionRootPath = $PSScriptRoot
+
+            # Act
+            $solutionRootPath = Get-SolutionRootPath -SolutionRootPath $solutionRootPath
+
+            # Assert
+            $solutionRootPath | Should Be $expectedSolutionRootPath
+        }
+    }
+
     It "should delete any existing files from the publish location" {
         # Arrange
         $solution = "$TestDrive\Solution"
