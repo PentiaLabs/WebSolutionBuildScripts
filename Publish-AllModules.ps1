@@ -1,9 +1,12 @@
-$ErrorActionPreference = Stop
+$ErrorActionPreference = "Continue"
+
+$repositoryName = "Pentia PowerShell"
 
 Function Register-TundRepository {
-    $repository = Get-PSRepository "Tund" -ErrorAction SilentlyContinue
+    $repository = Get-PSRepository $repositoryName -ErrorAction SilentlyContinue
     if (-not $repository) {
-        Register-PSRepository -Name "Tund" -SourceLocation "http://tund/nuget/powershell/" -PublishLocation "http://tund/nuget/powershell/" -Verbose
+        Register-PSRepository -Name $repositoryName -SourceLocation "http://tund/nuget/powershell/" -InstallationPolicy "Trusted" -Verbose
+        Set-PSRepository -Name $repositoryName -PublishLocation  "http://tund/nuget/powershell/"
     }
 }
 
@@ -14,7 +17,7 @@ Function Publish {
     )
     Process {
         Write-Host "Publishing '$modulePath'"
-        Publish-Module -Path $modulePath -NuGetApiKey "***REMOVED***" -Repository "Tund" -Force -ErrorAction Continue        
+        Publish-Module -Path $modulePath -NuGetApiKey "***REMOVED***" -Repository $repositoryName -Force -ErrorAction Continue        
     }
 }
 
@@ -31,7 +34,7 @@ $modulesWithoutDependencies = $modules | Where-Object { $_.RequiredModules.Count
 Write-Host "Publishing all modules without dependencies."
 $modulesWithoutDependencies | Select-Object -ExpandProperty "ModuleBase" | Publish
 Write-Host "Installing all modules without dependencies."
-$modulesWithoutDependencies | Install-Module -Repository "Tund" -Force
+$modulesWithoutDependencies | Install-Module -Repository $repositoryName -Force
 
 # Since these modules can have interdependencies, they need to be installed an published one by one.
 $modulesWithDependencies = $modules | Where-Object { $_.RequiredModules.Count -gt 0 } | Sort-Object -Property "RequiredModules"
@@ -39,7 +42,7 @@ foreach ($moduleWithDependencies in $modulesWithDependencies) {
     Write-Host "Publishing single module with dependencies."
     $moduleWithDependencies | Select-Object -ExpandProperty "ModuleBase" | Publish
     Write-Host "Installing single module with dependencies."
-    $moduleWithDependencies | Install-Module -Repository "Tund" -Force
+    $moduleWithDependencies | Install-Module -Repository $repositoryName -Force
 }
 
 Write-Host "Done."
