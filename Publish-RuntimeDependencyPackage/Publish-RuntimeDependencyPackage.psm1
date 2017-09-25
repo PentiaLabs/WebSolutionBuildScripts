@@ -141,8 +141,7 @@ Function Install-RuntimeDependencyPackage {
     catch {
         if ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
             Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. " + 
-            "Make sure that all required feeds are set up correctly. " + 
-            "See https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses."
+            "Make sure that all required package sources are set up correctly, e.g. 'Register-PackageSource -Name ""Pentia NuGet"" -Location ""http://tund/nuget/Nuget"" -Trusted -ProviderName ""NuGet""'."
         }
     }
 }

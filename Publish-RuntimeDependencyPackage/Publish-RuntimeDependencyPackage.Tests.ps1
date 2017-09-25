@@ -67,8 +67,8 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $invocation = { Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource }
 
             # Assert
-            $invocation | Should Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. Make sure that all required feeds are set up correctly. See https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#config-file-locations-and-uses."
-        }  
+            $invocation | Should Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. Make sure that all required package sources are set up correctly, e.g. 'Register-PackageSource -Name ""Pentia NuGet"" -Location ""http://tund/nuget/Nuget"" -Trusted -ProviderName ""NuGet""'."
+        }
 
         It "should install NuGet packages from the specified source" {
             # Arrange
