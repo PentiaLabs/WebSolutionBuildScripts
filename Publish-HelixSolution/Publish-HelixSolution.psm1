@@ -21,19 +21,19 @@ Function Publish-HelixSolution {
     # etc.
 
     # 1. Delete $WebrootOutputPath
-    Write-Progress -Activity "Publishing Helix solution" -PercentComplete 0 -Status "Cleaning webroot output path"
+    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
     Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
 
     # 2. Publish runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -PercentComplete 25 -Status "Publishing runtime dependency packages"    
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     # 3. Publish all web projects on top of the published runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -PercentComplete 50 -Status "Publishing web projects"
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
     Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath
 
     # 4. Invoke configuration transforms
-    Write-Progress -Activity "Publishing Helix solution" -PercentComplete 75 -Status "Applying XML transforms"
+    Write-Progress -Activity "Publishing Helix solution" -Status "Applying XML transforms"
     Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
 
     Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
