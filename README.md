@@ -13,3 +13,8 @@ Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nug
 ```powershell
 Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Verbose
 ```
+
+## Release management
+
+1. Increase the version numbers in all `.psd`-files. Ensure to update dependency references as well!
+2. Run `Publish-AllModules.ps1` to publish the updated modules to the Pentia PowerShell feed.
