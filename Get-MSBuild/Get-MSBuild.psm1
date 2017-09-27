@@ -10,12 +10,16 @@ Requires the "VSSetup" module to be installed.
 #>
 Function Get-MSBuild {
 	Write-Verbose "Searching for MSBuild.exe."
-	$msBuildExecutable = . "$PSScriptRoot\lib\hMSBuild.bat" "-only-path"
+	$msBuildExecutable = Invoke-hMSBuildBat
 	if($msBuildExecutable -eq $Null -or !(Test-Path $msBuildExecutable)) {
 		Throw "Didn't find MSBuild.exe."
 	}
 	Write-Verbose "Found MSBuild.exe at '$msBuildExecutable'."
 	$msBuildExecutable
+}
+
+Function Invoke-hMSBuildBat {
+	. "$PSScriptRoot\lib\hMSBuild.bat" "-only-path"
 }
 
 Export-ModuleMember -Function Get-MSBuild
