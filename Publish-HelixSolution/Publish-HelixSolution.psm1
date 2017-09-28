@@ -1,3 +1,38 @@
+<#
+.SYNOPSIS
+Used to publish a Sitecore Helix solution to a folder.
+
+.DESCRIPTION
+This function is used to publish a sitecore solution to a specific folder.
+The steps it runs through are:
+
+1. Delete $WebrootOutputPath.
+2. Publish runtime dependencies to $WebrootOutputPath.
+3. Publish all web projects to $WebrootOutputPath, on top of the published runtime dependencies.
+4. Invoke configuration transforms.
+
+.PARAMETER SolutionRootPath
+This is the absolute path to the root of your solution, usually the same directory as your `.sln` file is placed.
+Uses the current working directory as a fallback.
+
+.PARAMETER WebrootOutputPath
+The path to where you want your webroot to be published. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER DataOutputPath
+This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
+
+.PARAMETER BuildConfiguration
+The build configuration that will be passed to `MSBuild.exe`.
+
+.EXAMPLE
+Publish-HelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration
+
+.NOTES
+In order to enable verbose or debug output for the entire command, set these variables:
+    set "$PSDefaultParameterValues:['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues:['*:Debug'] = $True"
+#> 
 Function Publish-HelixSolution {
     [CmdletBinding()]
     Param (
@@ -13,7 +48,7 @@ Function Publish-HelixSolution {
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
-
+    
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
     # If output is set to "Verbose", set "$PSDefaultParameterValues:['*:Verbose'] = $True"
