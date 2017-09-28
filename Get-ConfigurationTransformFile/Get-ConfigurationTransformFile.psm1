@@ -63,7 +63,10 @@ Function Test-ConfigurationTransformFile {
         $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"        
     }
     Catch {
-        Write-Error -Message "Error reading XML file '$AbsoluteFilePath': $($_.Exception.Message)" -Exception $_.Exception
+        $message = "Error reading XML file '$AbsoluteFilePath': $($_.Exception.Message)"
+        $innerException = $_.Exception
+        $exception = New-Object "System.InvalidOperationException" -ArgumentList $message, $innerException
+        Throw $exception
     }
 }
 
