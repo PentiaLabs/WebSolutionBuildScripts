@@ -5,6 +5,7 @@ SHELL ["PowerShell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 
 RUN Install-PackageProvider NuGet -Force
 RUN Install-Module Pester -SkipPublisherCheck -Force
+RUN Install-Module -Name PSScriptAnalyzer -SkipPublisherCheck -Force
 
 # Create user with a short name, and use it to avoid "path too long" exceptions
 RUN NET USER a /add
