@@ -1,0 +1,1 @@
+docker run -v $PSScriptRoot\:C:\Scripts -v $PSScriptRoot\:C:\TestResults pentia/pester-test-runner:latest
