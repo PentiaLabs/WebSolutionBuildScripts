@@ -11,7 +11,7 @@ Requires the "VSSetup" module to be installed.
 Function Get-MSBuild {
 	Write-Verbose "Searching for MSBuild.exe."
 	$msBuildExecutable = Invoke-hMSBuildBat
-	if($msBuildExecutable -eq $Null -or !(Test-Path $msBuildExecutable)) {
+	if($Null -eq $msBuildExecutable -or !(Test-Path $msBuildExecutable)) {
 		Throw "Didn't find MSBuild.exe."
 	}
 	Write-Verbose "Found MSBuild.exe at '$msBuildExecutable'."

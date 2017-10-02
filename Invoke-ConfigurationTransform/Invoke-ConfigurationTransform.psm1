@@ -29,6 +29,7 @@ E.g. "D:\websites\MySolution\www".
 #>
 Function Get-PathOfFileToTransform {
     [CmdletBinding()]
+    [OutputType([System.String])]    
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath,
@@ -68,6 +69,7 @@ Function Get-RelativeConfigurationDirectory {
 
 Function Get-NameOfFileToTransform {
     [CmdletBinding()]
+    [OutputType([System.String])]        
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationTransformFilePath

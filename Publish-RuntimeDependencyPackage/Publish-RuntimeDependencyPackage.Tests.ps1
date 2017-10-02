@@ -85,7 +85,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         }
     }
 
-    Describe "Copy-RuntimeDependencyPackageContents" {
+    Describe "Copy-RuntimeDependencyPackageContent" {
         $packageName = "sample-runtime-dependency"
         $packageVersion = "1.0.0"
         $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
@@ -99,7 +99,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $dataOutputPath = "$TestDrive\not-used-in-this-test"
 
             # Act
-            Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+            Copy-RuntimeDependencyPackageContent -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
             # Assert
             $files = Get-ChildItem -Path $webrootOutputPath | Select-Object -ExpandProperty "Name"
@@ -113,7 +113,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $dataOutputPath = "$TestDrive\my-data-folder"
 
             # Act
-            Copy-RuntimeDependencyPackageContents -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
+            Copy-RuntimeDependencyPackageContent -Package $installedPackage -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
 
             # Assert
             $files = Get-ChildItem -Path $dataOutputPath | Select-Object -ExpandProperty "Name"

@@ -48,7 +48,7 @@ Function Publish-HelixSolution {
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
-    
+
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
     # If output is set to "Verbose", set "$PSDefaultParameterValues:['*:Verbose'] = $True"
@@ -88,15 +88,17 @@ Function Get-SolutionRootPath {
 }
 
 Function Remove-WebrootOutputPath {
-    [CmdletBinding()]
+	[CmdletBinding(SupportsShouldProcess = $true)]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$WebrootOutputPath
     )
+	if ($pscmdlet.ShouldProcess($WebrootOutputPath, "Removing all files in folder")) {
     If (Test-Path $WebrootOutputPath -PathType Container) {
         Write-Verbose "Deleting '$WebrootOutputPath' and all contents."
         Remove-Item -Path $WebrootOutputPath -Recurse -Force
     }
+}
 }
 
 Function Publish-AllRuntimeDependencies {

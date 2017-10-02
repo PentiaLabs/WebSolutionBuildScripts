@@ -30,6 +30,7 @@ Returns an array of objects:
 #>
 Function Get-RuntimeDependencyPackage {
     [CmdletBinding()]
+    [OutputType([System.Array])]
     Param(
         [Parameter(Mandatory = $True)]
         [string]$ConfigurationFilePath

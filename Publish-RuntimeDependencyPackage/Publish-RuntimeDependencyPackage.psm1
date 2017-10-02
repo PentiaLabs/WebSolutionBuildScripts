@@ -71,7 +71,7 @@ Function Publish-RuntimeDependencyPackage {
         [Parameter(Mandatory = $True)]
         [string]$DataOutputPath
     )
-    Write-Host "Publishing package '$PackageName'."
+    Write-Verbose "Publishing package '$PackageName'."
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
     $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     If (-not $package) {
@@ -82,7 +82,7 @@ Function Publish-RuntimeDependencyPackage {
     If(-not $package) {
         Throw "Unable to install package '$PackageName' version '$PackageVersion' from source '$PackageSource'."
     }
-    Copy-RuntimeDependencyPackageContents -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Copy-RuntimeDependencyPackageContent -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
 
 Function Get-RuntimeDependencyPackageFromCache {
@@ -104,6 +104,7 @@ Function Get-RuntimeDependencyPackageFromCache {
 
 Function Test-PackageProvider {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]        
     Param(
         [Parameter(Mandatory = $True)]
         [string]$Name
@@ -146,7 +147,7 @@ Function Install-RuntimeDependencyPackage {
     }
 }
 
-Function Copy-RuntimeDependencyPackageContents {
+Function Copy-RuntimeDependencyPackageContent {
     [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $True)]
@@ -173,6 +174,7 @@ Function Copy-RuntimeDependencyPackageContents {
 
 Function Get-PackageDirectory {
     [CmdletBinding()]
+    [OutputType([System.String])]        
     Param (
         [Parameter(Mandatory = $True)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
