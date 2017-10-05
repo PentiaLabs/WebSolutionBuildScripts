@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Gets the paths to web project files and allows filtering based on Helix solution layer.
+Gets the paths to web project files in the subdirectories of the solution root path, and allows filtering based on Helix solution layer.
 
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path.
@@ -12,7 +12,7 @@ The Helix layer in which to search for web projects. Defaults to $Null, which in
 Specifies which files do include in the search. Defaults to "*.csproj".
 
 .PARAMETER ExcludeFilter
-Specifies which files do exclude in the search. Defaults to "*test*", to exclude test projects.
+Specifies which files do exclude in the search. Defaults to "node_modules", "bower_components".
 
 .EXAMPLE
 Get-SitecoreHelixProject -SolutionRootPath "C:\Path\To\MySolution" -HelixLayer Foundation
@@ -30,10 +30,10 @@ Function Get-SitecoreHelixProject {
         [string]$HelixLayer = $Null,
 		
         [Parameter(Position = 2, Mandatory = $False)]
-        [string]$IncludeFilter = "*.csproj",
+        [string[]]$IncludeFilter = @("*.csproj"),
 		
         [Parameter(Position = 3, Mandatory = $False)]
-        [string]$ExcludeFilter = "*test*"
+        [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
     if ([string]::IsNullOrEmpty($SolutionRootPath)) {
@@ -49,7 +49,7 @@ Function Get-SitecoreHelixProject {
         Write-Verbose "Searching for projects matching '$IncludeFilter' in layer '$HelixLayer' ('$SolutionRootPath'), excluding '$ExcludeFilter'."
     }
 
-    $projectFilePaths = Get-ChildItem -Path "$SolutionRootPath" -Recurse -File -Include $IncludeFilter -Exclude $ExcludeFilter | Select-Object -ExpandProperty "FullName"
+    $projectFilePaths = Get-ChildItem -Path "$SolutionRootPath" -Directory -Recurse | Where-Object { -not ($ExcludeFilter -contains $_.Name) } | Get-ChildItem -Include $IncludeFilter -File | Select-Object -ExpandProperty "FullName"
     $projectFilePaths | Where-Object { Test-WebProject $_ }
 }
 

@@ -66,4 +66,18 @@ Describe "Get-SitecoreHelixProject" {
         # Assert
         $actualProjects | Should Be $expectedProjects
     }
+
+    It "should exclude irrelevant system folders by default" {
+        # Arrange
+        $nodeModules = New-Item -Path "$TestDrive\src\MyProject\code\node_modules" -ItemType Directory
+        Copy-Item "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj" -Destination $nodeModules
+        $bowerComponents = New-Item -Path "$TestDrive\src\MyProject\code\bower_components" -ItemType Directory
+        Copy-Item "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj" -Destination $bowerComponents
+        
+        # Act
+        $actualProjects = Get-SitecoreHelixProject $TestDrive
+        
+        # Assert
+        $actualProjects.Count | Should Be 0
+    }
 }

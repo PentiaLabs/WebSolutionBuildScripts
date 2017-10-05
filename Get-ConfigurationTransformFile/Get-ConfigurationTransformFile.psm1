@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Gets all XDT-files in the specified directory.
+Gets all XDT-files in the subdirectories of the specified directory.
 
 .DESCRIPTION
 Gets all XDT-files in the specified directory, exluding files found in "obj" and "bin".
@@ -14,30 +14,43 @@ Returns all XDT-files found in the "C:\Path\To\MySolution", recursively.
 #>
 Function Get-ConfigurationTransformFile {
     [CmdletBinding()]
+    [OutputType([System.String[]])]
     Param (
         [Parameter(Position = 0, Mandatory = $True)]
         [string]$SolutionRootPath,
+
         [Parameter(Position = 1, Mandatory = $False)]
-        [string[]]$BuildConfigurations
+        [string[]]$BuildConfigurations,
+		
+        [Parameter(Position = 2, Mandatory = $False)]
+        [string[]]$IncludeFilter = @("*.config"),
+		
+        [Parameter(Position = 3, Mandatory = $False)]
+        [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
-    If ($(Test-Path $SolutionRootPath) -eq $False) {
+    If (-not (Test-Path $SolutionRootPath)) {
         Throw "Path '$SolutionRootPath' not found."
     }
 
-    $ConfigurationFiles = Get-ChildItem "*.config" -Path "$SolutionRootPath" -Recurse -File 
-    $ConfigurationFilesNotInBinAndObj = $ConfigurationFiles | Where-Object { $_.FullName -NotLike "*\obj*" -and $_.FullName -notlike "*\bin*" }
-    $ConfigurationTransformFiles = $ConfigurationFilesNotInBinAndObj | Where-Object { Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName }
+    $configurationFiles = Get-ChildItem -Path $SolutionRootPath -Directory -Recurse | Where-Object { -not ($ExcludeFilter -contains $_.Name) } | Get-ChildItem -Include $IncludeFilter -File
+    $configurationFiles | Where-Object { Test-BuildConfiguration -BuildConfigurations $BuildConfigurations -FileName $_.Name } | Where-Object { Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName } | Select-Object -ExpandProperty "FullName"
+}
 
-    If ($BuildConfigurations.Count -gt 0) {
-        $ConfigurationTransformFiles = $ConfigurationTransformFiles | Where-Object { 
-            # "Web.Debug.config" -> "Debug"
-            $buildConfigurationExtension = $_.Name.Split(".")[-2]
-            $BuildConfigurations -contains $buildConfigurationExtension
-        }
+Function Test-BuildConfiguration {
+    [CmdletBinding()]
+    [OutputType([bool])]
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string[]]$BuildConfigurations,
+        [Parameter(Mandatory = $True)]
+        [string]$FileName
+    )
+    If ($BuildConfigurations.Count -lt 1) {
+        return $True
     }
-
-    $ConfigurationTransformFiles | Select-Object -ExpandProperty "FullName"
+    $buildConfigurationExtension = $FileName.Split(".")[-2]
+    $BuildConfigurations -contains $buildConfigurationExtension
 }
 
 <#
@@ -52,11 +65,17 @@ Test-ConfigurationTransformFile -AbsoluteFilePath "C:\Path\To\MyConfiguration.Pr
 #>
 Function Test-ConfigurationTransformFile {
     [CmdletBinding()]
+    [OutputType([bool])]
     Param (
         [Parameter(Position = 0)]
         [string]$AbsoluteFilePath
     )
-
+    If ([System.String]::IsNullOrWhiteSpace($AbsoluteFilePath)) {
+        return $False
+    }
+    If (-not (Test-Path $AbsoluteFilePath)) {
+        return $False
+    }
     Try {
         $xmlDocument = New-Object System.Xml.XmlDocument
         $xmlDocument.Load($AbsoluteFilePath)
