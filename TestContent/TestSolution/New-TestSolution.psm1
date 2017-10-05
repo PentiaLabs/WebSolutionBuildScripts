@@ -1,7 +1,7 @@
 Import-Module "$PSScriptRoot\..\..\Get-MSBuild\Get-MSBuild.psm1" -Force
 
 Function New-TestSolution {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     [OutputType([System.String])]            
     Param(
         [Parameter(Mandatory = $True)]
@@ -9,9 +9,13 @@ Function New-TestSolution {
     )
 
     $tempTestSolutionPath = "$TempPath\TestSolution"
-    if ($pscmdlet.ShouldProcess($tempTestSolutionPath, "Removing all files in folder")) {
-        Remove-Item -Path "$tempTestSolutionPath" -Recurse -Force -ErrorAction SilentlyContinue
+    If (-not $pscmdlet.ShouldProcess($tempTestSolutionPath, "Create clean test solution in directory")) {
+        return $tempTestSolutionPath
     }
+
+    # Ensure target directory is clean
+    Remove-Item -Path "$tempTestSolutionPath" -Recurse -Force -ErrorAction SilentlyContinue
+
     # Copy solution
     Copy-Item "$PSScriptRoot\src" -Destination "$tempTestSolutionPath\src" -Container -Recurse
     Copy-Item "$PSScriptRoot\TestSolution.sln" -Destination "$tempTestSolutionPath"

@@ -14,6 +14,12 @@ Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nug
 Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Verbose
 ```
 
+## Usage
+
+1. Open an elevated PowerShell prompt in a Sitecore Helix solution root directory.
+2. Run `Publish-HelixSolution`.
+3. When prompted, enter valid values for `WebrootOutputPath` (e.g. `D:\Websites\FOF.Website\www`), `DataOutputPath` (e.g. `D:\Websites\FOF.Website\data`) and `BuildConfiguration` (e.g. `Debug`). These settings are then stored as default values in `<solution root>\.pentia\user-settings.json` for future use. The `.pentia`-directory should *not* be under version control.
+
 ## Release management
 
 1. Increase the version numbers in all `.psd`-files. Ensure to update dependency references as well!

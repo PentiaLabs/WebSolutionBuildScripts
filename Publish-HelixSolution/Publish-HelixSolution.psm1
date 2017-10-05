@@ -1,10 +1,9 @@
 <#
 .SYNOPSIS
-Used to publish a Sitecore Helix solution to a folder.
+Used to publish a Sitecore Helix solution to disk.
 
 .DESCRIPTION
-This function is used to publish a sitecore solution to a specific folder.
-The steps it runs through are:
+Used to publish a Sitecore Helix solution to disk. The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
 2. Publish runtime dependencies to $WebrootOutputPath.
@@ -12,8 +11,8 @@ The steps it runs through are:
 4. Invoke configuration transforms.
 
 .PARAMETER SolutionRootPath
-This is the absolute path to the root of your solution, usually the same directory as your `.sln` file is placed.
-Uses the current working directory as a fallback.
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+Uses the current working directory ($PWD) as a fallback.
 
 .PARAMETER WebrootOutputPath
 The path to where you want your webroot to be published. E.g. "D:\Websites\SolutionSite\www".
@@ -22,38 +21,55 @@ The path to where you want your webroot to be published. E.g. "D:\Websites\Solut
 This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
 
 .PARAMETER BuildConfiguration
-The build configuration that will be passed to `MSBuild.exe`.
+The build configuration that will be passed to "MSBuild.exe".
 
 .EXAMPLE
+Publish-HelixSolution -IgnoreUserSettings -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration.
+
 Publish-HelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
+
+Publish-HelixSolution
+Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json".
 
 .NOTES
-In order to enable verbose or debug output for the entire command, set these variables:
+In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     set "$PSDefaultParameterValues:['*:Verbose'] = $True"
     set "$PSDefaultParameterValues:['*:Debug'] = $True"
 #> 
 Function Publish-HelixSolution {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
+        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
+        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $True)]
-        [string]$BuildConfiguration
+        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
+        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
+        [string]$BuildConfiguration,
+
+        [Parameter(ParameterSetName = "IgnoreUserSettings")]        
+        [switch]$IgnoreUserSettings
     )
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
-    # If output is set to "Verbose", set "$PSDefaultParameterValues:['*:Verbose'] = $True"
-    # If output is set to "Debug", set "$PSDefaultParameterValues:['*:Debug'] = $True"
-    # etc.
+    If ($PSCmdlet.ParameterSetName -eq "UseUserSettings") {
+        $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
+        $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
+        $WebrootOutputPath = $mergedSettings.webrootOutputPath
+        $DataOutputPath = $mergedSettings.dataOutputPath
+        $BuildConfiguration = $mergedSettings.buildConfiguration
+        Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
+    }
 
     # 1. Delete $WebrootOutputPath
     Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
@@ -88,17 +104,18 @@ Function Get-SolutionRootPath {
 }
 
 Function Remove-WebrootOutputPath {
-	[CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$WebrootOutputPath
     )
-	if ($pscmdlet.ShouldProcess($WebrootOutputPath, "Removing all files in folder")) {
+    If (-not $pscmdlet.ShouldProcess($WebrootOutputPath, "Delete the directory and all contents")) {
+        return
+    }
     If (Test-Path $WebrootOutputPath -PathType Container) {
         Write-Verbose "Deleting '$WebrootOutputPath' and all contents."
         Remove-Item -Path $WebrootOutputPath -Recurse -Force
     }
-}
 }
 
 Function Publish-AllRuntimeDependencies {
