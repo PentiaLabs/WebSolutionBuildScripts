@@ -49,6 +49,12 @@ Runtime dependencies like Sitecore and Sitecore modules are installed as so call
 
 [A full guide on installing runtime dependencies can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html)
 
+### Web.config and publishing
+
+The "Build Action" of all `web.config` files in the solution should be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `web.config` shipped with Sitecore is not overwritten.
+
+The only reason the `web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
+
 ## Integration
 
 ### Visual Studio Task Runner
@@ -138,12 +144,6 @@ Publish-HelixSolution -IgnoreUserSettings `
 -DataOutputPath ".\PackagePath\Data" `
 -BuildConfiguration "Debug"
 ```
-
-## Web.config and publishing
-
-The "Build Action" of all `web.config` files in the solution should be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `web.config` shipped with Sitecore is not overwritten.
-
-The only reason the `web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
 
 ## Troubleshooting
 
