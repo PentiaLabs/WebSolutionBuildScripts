@@ -53,6 +53,8 @@ Function Find-ConfigurationFile {
         [string[]]$ExcludeFilter
     )
     Push-Location $SolutionRootPath
+    # Note that we can't check the $LASTEXITCODE because it's != 0 both when 
+    # an error occurs and when no files are found (which we don't consider an error).
     $configurationFilePaths = (cmd.exe /c "dir /b /s *.config" | Out-String).Split([System.Environment]::NewLine, [System.StringSplitOptions]::RemoveEmptyEntries)
     Pop-Location
     $includedConfigurations = $configurationFilePaths | Where-Object { 

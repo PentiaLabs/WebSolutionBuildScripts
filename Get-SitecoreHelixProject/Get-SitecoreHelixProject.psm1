@@ -57,6 +57,8 @@ Function Find-Project {
         [string[]]$ExcludeFilter
     )
     Push-Location $SolutionRootPath
+    # Note that we can't check the $LASTEXITCODE because it's != 0 both when 
+    # an error occurs and when no files are found (which we don't consider an error).
     $projectFilePaths = (cmd.exe /c "dir /b /s *.csproj" | Out-String).Split([System.Environment]::NewLine, [System.StringSplitOptions]::RemoveEmptyEntries)
     Pop-Location
     $includedProjects = $projectFilePaths | Where-Object { 
