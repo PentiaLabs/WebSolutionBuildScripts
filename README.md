@@ -60,12 +60,12 @@ Use this [extension](https://marketplace.visualstudio.com/items?itemName=MadsKri
 
 ### NPM
 
-Add a script object to your package.json:
+Add a [script](https://docs.npmjs.com/misc/scripts) object to your package.json, if you're using [NPM as a build tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/):
 
 ```json
-	"scripts": {
-		"publish-solution": "powershell Publish-HelixSolution"
-	},
+"scripts": {
+    "publish-solution": "powershell Publish-HelixSolution"
+},
 ```
 
 Run it using:
