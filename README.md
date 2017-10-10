@@ -23,9 +23,13 @@ Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Ve
 
 ### Publishing a solution
 
+Run the following in the solution root directory:
+
 ```powershell
 Publish-HelixSolution
 ```
+
+You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use.
 
 #### Solution specific user settings
 
@@ -40,17 +44,10 @@ The `.pentia` directory should be added to the solution's `.gitignore` file:
 ```
 
 ### Runtime dependencies
-Your runtime dependencies should be placed in a file called `runtime-dependencies.config`, in the solution root. It conforms to the standard NuGet `packages.config` format.
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<packages>
-    <package id="Sitecore.Full" version="8.2.170728" />
-    <package id="Sitecore.Patch" version="8.2.170728" />
-</packages>
-```
+Runtime dependencies like Sitecore and Sitecore modules are installed as so called "runtime dependencies", and must be configured in a `runtime-dependencies.config` file. 
 
-[A short description of runtime packages can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Creating-NuGet-Packages.html#runtime-dependency-nuget-packages-solution-packagesjson--runtime-dependenciesconfig)
+[A full guide on installing runtime dependencies can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html)
 
 ## Integration
 
