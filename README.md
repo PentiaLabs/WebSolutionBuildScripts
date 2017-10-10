@@ -21,12 +21,6 @@ Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Ve
 
 ## Usage
 
-### Getting help
-
-```powershell 
-Get-Help Publish-HelixSolution -Full
-``` 
-
 ### Publishing a solution
 
 ```powershell
@@ -126,42 +120,6 @@ var powershell = require("./powershell");
 powershell.runAsync("C:\path\to\your\file.ps1", "-arguments here", callback);
 ```
 
-## Troubleshooting
-
-In order to enable verbose or debug output for the entire process, run this command in your PowerShell console:
-
-```powershell
-set "$PSDefaultParameterValues['*:Verbose'] = $True" # enables Verbose output
-```
-
-If you want to debug the build process, you can enable the debug flag:
-
-```powershell
-set "$PSDefaultParameterValues['*:Debug'] = $True" # enables Debug output
-```
-
-Piping build output to a file is done by using [redirects](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_redirection?view=powershell-5.1).
-
-### Piping all output to file
-```powershell
-Publish-HelixSolution *> build.txt
-```
-
-### Piping all error output to file
-```powershell
-Publish-HelixSolution 2> errors.txt
-```
-
-### Piping all verbose output to file
-```powershell
-Publish-HelixSolution 4> verbose.txt
-```
-
-### Piping all verbose and error output to file
-```powershell
-Publish-HelixSolution 4>&2 verbose.txt
-```
-
 ## Build Agent setup
 
 ### Installation
@@ -189,6 +147,49 @@ Publish-HelixSolution -IgnoreUserSettings `
 The "Build Action" of all `web.config` files in the solution should be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `web.config` shipped with Sitecore is not overwritten.
 
 The only reason the `web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
+
+## Troubleshooting
+
+### Getting help
+
+```powershell 
+Get-Help Publish-HelixSolution -Full
+``` 
+
+### Build log
+In order to enable verbose or debug output for the entire process, run this command in your PowerShell console:
+
+```powershell
+set "$PSDefaultParameterValues['*:Verbose'] = $True" # enables Verbose output
+```
+
+If you want to debug the build process, you can enable the debug flag:
+
+```powershell
+set "$PSDefaultParameterValues['*:Debug'] = $True" # enables Debug output
+```
+
+Piping build output to a file is done by using [redirects](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_redirection?view=powershell-5.1).
+
+#### Piping all output to file
+```powershell
+Publish-HelixSolution *> build.txt
+```
+
+#### Piping all error output to file
+```powershell
+Publish-HelixSolution 2> errors.txt
+```
+
+#### Piping all verbose output to file
+```powershell
+Publish-HelixSolution 4> verbose.txt
+```
+
+#### Piping all verbose and error output to file
+```powershell
+Publish-HelixSolution 4>&2 verbose.txt
+```
 
 ## Known errors
 
