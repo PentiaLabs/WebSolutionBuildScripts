@@ -1,4 +1,9 @@
-# Pentia Build Scripts for Sitecore Helix solutions
+# Pentia Build Scripts for Sitecore Helix Solutions
+
+In the following, all commands expect to be run from an elevated PowerShell prompt.
+
+## Build Status
+![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/11/badge)
 
 ## Prerequisites
 
@@ -16,21 +21,182 @@ Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Ve
 
 ## Usage
 
-1. Open an elevated PowerShell prompt in a Sitecore Helix solution root directory.
-2. Run `Publish-HelixSolution`.
-3. When prompted, enter valid values for `WebrootOutputPath` (e.g. `D:\Websites\FOF.Website\www`), `DataOutputPath` (e.g. `D:\Websites\FOF.Website\data`) and `BuildConfiguration` (e.g. `Debug`). These settings are then stored as default values in `<solution root>\.pentia\user-settings.json` for future use. The `.pentia`-directory should *not* be under version control.
+### Getting help
 
-## Release management
+```powershell 
+Get-Help Publish-HelixSolution -Full
+``` 
 
-1. Increase the version numbers in all `.psd`-files. Ensure to update dependency references as well!
-2. Run `Publish-AllModules.ps1` to publish the updated modules to the Pentia PowerShell feed.
+### Publishing a solution
 
-## Requirements and design decisions
+```powershell
+Publish-HelixSolution
+```
 
-* *NEED* Deploy files to webroot during web publish.
-* *NEED* Deploy files to data folder located outside of webroot during web publish.
-* *NEED* Support configuration management using XDTs, to make packages environment agnostic.
-* *NEED* Make the build process as transparent as possible, i.e. as a minimum, senior developers must be able to comprehend it.
-* *NICE* Tearing down and building up an entire Sitecore site must be fast, to avoid having stale config and DLL files laying around in the webroot, due to multiple builds, branch switches etc.
-* *NICE* Keep the deployment process consistent across environments, to minimize "works on my machine" errors.
-* *NICE* Use existing Windows technology to build and deploy solutions, to avoid .NET-only projects having to use e.g. Gulp modules for deployment.
+#### Solution specific user settings
+
+To avoid having to enter function parameters over and over, the parameters for `Publish-HelixSolution` are stored in a local file.
+
+It's placed here: `$SolutionRootPath/.pentia/user-settings.json`.
+
+The `.pentia` directory should be added to the solution's `.gitignore` file:
+
+```bash
+.pentia/
+```
+
+### Runtime dependencies
+Your runtime dependencies should be placed in a file called `runtime-dependencies.config`, in the solution root. It conforms to the standard NuGet `packages.config` format.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+    <package id="Sitecore.Full" version="8.2.170728" />
+    <package id="Sitecore.Patch" version="8.2.170728" />
+</packages>
+```
+
+[A short description of runtime packages can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Creating-NuGet-Packages.html#runtime-dependency-nuget-packages-solution-packagesjson--runtime-dependenciesconfig)
+
+## Integration
+
+### Visual Studio Task Runner
+
+Use this [extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CommandTaskRunner) to enable support for PowerShell scripts via the Task Runner.
+
+### NPM
+
+Add a script object to your package.json:
+
+```json
+	"scripts": {
+		"publish-solution": "powershell Publish-HelixSolution"
+	},
+```
+
+Run it using:
+
+```bash
+npm run publish-solution
+```
+
+### Gulp
+
+Using a module that looks like this: 
+
+```javascript
+/*jslint node: true */
+"use strict";
+
+function Powershell () {
+}
+
+Powershell.prototype.runAsync = function (pathToScriptFile, parameters, callback) {
+  console.log("Powershell - running: " + pathToScriptFile + " " + parameters);
+  var spawn = require("child_process").spawn;
+  var child = spawn("powershell.exe", [pathToScriptFile, parameters]);
+
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  
+  child.stdout.on("data", function (data) {
+    console.log(data);
+  });
+
+  child.stderr.on("data", function (data) {
+    console.log("Error: " + data);
+  });
+
+  child.on("exit", function () {
+    console.log("Powershell - done running " + pathToScriptFile);
+    if (callback)
+      callback();
+  });
+
+  child.stdin.end();
+}
+
+exports = module.exports = new Powershell();
+```
+
+You can use it in your `gulpfile.js` like so:
+
+```javascript
+var powershell = require("./powershell");
+powershell.runAsync("C:\path\to\your\file.ps1", "-arguments here", callback);
+```
+
+## Troubleshooting
+
+In order to enable verbose or debug output for the entire process, run this command in your PowerShell console:
+
+```powershell
+set "$PSDefaultParameterValues['*:Verbose'] = $True" # enables Verbose output
+```
+
+If you want to debug the build process, you can enable the debug flag:
+
+```powershell
+set "$PSDefaultParameterValues['*:Debug'] = $True" # enables Debug output
+```
+
+Piping build output to a file is done by using [redirects](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_redirection?view=powershell-5.1).
+
+### Piping all output to file
+```powershell
+Publish-HelixSolution *> build.txt
+```
+
+### Piping all error output to file
+```powershell
+Publish-HelixSolution 2> errors.txt
+```
+
+### Piping all verbose output to file
+```powershell
+Publish-HelixSolution 4> verbose.txt
+```
+
+### Piping all verbose and error output to file
+```powershell
+Publish-HelixSolution 4>&2 verbose.txt
+```
+
+## Build Agent setup
+
+### Installation
+
+See Installation instructions above - these are the same for build agents.
+
+### Usage
+
+1. Run `Publish-HelixSolution` with the `-IgnoreUserSettings` switch. This avoids writing user settings to disk.
+2. Specify all required parameters (e.g. `$SolutionRootPath`, `WebrootOutputPath`).
+3. Have the build agent publish the solution to a relative path. This allows e.g. TeamCity to create the output in a temporary build agent working directory which is cleaned up periodically.
+4. Make sure that the solution root path is set correctly. Usually the easiest way to do this is by ensuring that the build agent's working directory is the same as the VCS checkout root, as most of our solutions have the `.sln` file located in the VCS root.
+
+Example:
+```powershell
+Publish-HelixSolution -IgnoreUserSettings `
+-SolutionRootPath "." `
+-WebrootOutputPath ".\PackagePath\Webroot" `
+-DataOutputPath ".\PackagePath\Data" `
+-BuildConfiguration "Debug"
+```
+
+## Web.config and publishing
+
+The "Build Action" of all `web.config` files in the solution should be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `web.config` shipped with Sitecore is not overwritten.
+
+The only reason the `web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
+
+## Known errors
+
+### Path Too long
+
+```powershell
+Get-ChildItem : Could not find a part of the path 'D:\Projects\Solution\Website\src\Project\Frontend\code\node_modules\gulp-import-css\node_modules\gulp-util\node_modules\dateformat\node_modules\meow\node_modules\read-pkg-up\node_modules\read-pkg\node_modules\load-json-file\node_modules\pinkie-promise\node_modules'.
+```
+
+This is caused by the get-childitem call, when the path exceeds the windows NTFS path limitation of 255 characters.
+Reduce the path length to make it disappear.
