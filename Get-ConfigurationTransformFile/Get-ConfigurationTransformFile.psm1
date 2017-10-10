@@ -8,24 +8,27 @@ Gets all XDT-files in the specified directory, exluding files found in "obj" and
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path to search through.
 
+.PARAMETER BuildConfigurations
+Specifies which build configuration's files will be retrieved. E.g. "Debug" will return files like "Settings.Debug.config".
+
+.PARAMETER ExcludeFilter
+Specifies which folders do exclude in the search. Defaults to "node_modules", "bower_components", "obj" and "bin".
+
 .EXAMPLE
-Get-ConfigurationTransformFile -SolutionRootPath "C:\Path\To\MySolution"
-Returns all XDT-files found in the "C:\Path\To\MySolution", recursively.
+Get-ConfigurationTransformFile -SolutionRootPath "C:\Path\To\MySolution" -BuildConfigurations "Debug"
+Returns all XDT-files found in the "C:\Path\To\MySolution", recursively, for the "Debug" configuration.
 #>
 Function Get-ConfigurationTransformFile {
     [CmdletBinding()]
     [OutputType([System.String[]])]
     Param (
-        [Parameter(Position = 0, Mandatory = $True)]
+        [Parameter(Mandatory = $True)]
         [string]$SolutionRootPath,
 
-        [Parameter(Position = 1, Mandatory = $False)]
+        [Parameter(Mandatory = $False)]
         [string[]]$BuildConfigurations,
 		
-        [Parameter(Position = 2, Mandatory = $False)]
-        [string[]]$IncludeFilter = @("*.config"),
-		
-        [Parameter(Position = 3, Mandatory = $False)]
+        [Parameter(Mandatory = $False)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
@@ -33,8 +36,31 @@ Function Get-ConfigurationTransformFile {
         Throw "Path '$SolutionRootPath' not found."
     }
 
-    $configurationFiles = Get-ChildItem -Path $SolutionRootPath -Directory -Recurse | Where-Object { -not ($ExcludeFilter -contains $_.Name) } | Get-ChildItem -Include $IncludeFilter -File
-    $configurationFiles | Where-Object { Test-BuildConfiguration -BuildConfigurations $BuildConfigurations -FileName $_.Name } | Where-Object { Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName } | Select-Object -ExpandProperty "FullName"
+    $configurationFiles = Find-ConfigurationFile -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter
+    $configurationFiles | Where-Object { 
+        Test-BuildConfiguration -BuildConfigurations $BuildConfigurations -FileName $_.Name } | Where-Object { 
+        Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName } | Select-Object -ExpandProperty "FullName"
+}
+
+Function Find-ConfigurationFile {
+    [CmdletBinding()]
+    [OutputType([System.String[]])]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string[]]$ExcludeFilter
+    )
+    Push-Location $SolutionRootPath
+    $configurationFilePaths = (cmd.exe /c "dir /b /s *.config" | Out-String).Split([System.Environment]::NewLine, [System.StringSplitOptions]::RemoveEmptyEntries)
+    Pop-Location
+    $includedConfigurations = $configurationFilePaths | Where-Object { 
+        $pathParts = $_.Split([System.IO.Path]::DirectorySeparatorChar, [System.StringSplitOptions]::RemoveEmptyEntries)
+        $matchedFilters = $ExcludeFilter | Where-Object { $pathParts -contains $_ }
+        $matchedFilters.Count -lt 1
+    }
+    $includedConfigurations | Get-Item
 }
 
 Function Test-BuildConfiguration {
@@ -49,6 +75,7 @@ Function Test-BuildConfiguration {
     If ($BuildConfigurations.Count -lt 1) {
         return $True
     }
+    # "Web.Debug.config" -> "Debug"
     $buildConfigurationExtension = $FileName.Split(".")[-2]
     $BuildConfigurations -contains $buildConfigurationExtension
 }

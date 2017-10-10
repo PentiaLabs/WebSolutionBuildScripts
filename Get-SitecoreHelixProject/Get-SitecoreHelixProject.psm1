@@ -8,11 +8,8 @@ The absolute or relative solution root path.
 .PARAMETER HelixLayer
 The Helix layer in which to search for web projects. Defaults to $Null, which includes all layers.
 
-.PARAMETER IncludeFilter
-Specifies which files do include in the search. Defaults to "*.csproj".
-
 .PARAMETER ExcludeFilter
-Specifies which files do exclude in the search. Defaults to "node_modules", "bower_components".
+Specifies which folders do exclude in the search. Defaults to "node_modules", "bower_components", "obj" and "bin".
 
 .EXAMPLE
 Get-SitecoreHelixProject -SolutionRootPath "C:\Path\To\MySolution" -HelixLayer Foundation
@@ -30,9 +27,6 @@ Function Get-SitecoreHelixProject {
         [string]$HelixLayer = $Null,
 		
         [Parameter(Position = 2, Mandatory = $False)]
-        [string[]]$IncludeFilter = @("*.csproj"),
-		
-        [Parameter(Position = 3, Mandatory = $False)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
@@ -49,12 +43,33 @@ Function Get-SitecoreHelixProject {
         Write-Verbose "Searching for projects matching '$IncludeFilter' in layer '$HelixLayer' ('$SolutionRootPath'), excluding '$ExcludeFilter'."
     }
 
-    $projectFilePaths = Get-ChildItem -Path "$SolutionRootPath" -Directory -Recurse | Where-Object { -not ($ExcludeFilter -contains $_.Name) } | Get-ChildItem -Include $IncludeFilter -File | Select-Object -ExpandProperty "FullName"
-    $projectFilePaths | Where-Object { Test-WebProject $_ }
+    Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
+}
+
+Function Find-Project {
+    [CmdletBinding()]
+    [OutputType([System.String[]])]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string[]]$ExcludeFilter
+    )
+    Push-Location $SolutionRootPath
+    $projectFilePaths = (cmd.exe /c "dir /b /s *.csproj" | Out-String).Split([System.Environment]::NewLine, [System.StringSplitOptions]::RemoveEmptyEntries)
+    Pop-Location
+    $includedProjects = $projectFilePaths | Where-Object { 
+        $pathParts = $_.Split([System.IO.Path]::DirectorySeparatorChar, [System.StringSplitOptions]::RemoveEmptyEntries)
+        $matchedFilters = $ExcludeFilter | Where-Object { $pathParts -contains $_ }
+        $matchedFilters.Count -lt 1
+    }
+    $includedProjects
 }
 
 Function Test-WebProject {
     [CmdletBinding()]
+    [OutputType([System.Boolean])]
     Param (
         [Parameter(Mandatory = $True)]
         [string]$ProjectFilePath
