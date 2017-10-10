@@ -36,11 +36,11 @@ Function Get-SitecoreHelixProject {
     }
 	
     if ([string]::IsNullOrEmpty($HelixLayer)) {
-        Write-Verbose "Searching for projects matching '$IncludeFilter' in all layers ('$SolutionRootPath'), excluding '$ExcludeFilter'."
+        Write-Verbose "Searching for projects in all layers ('$SolutionRootPath'), excluding '$ExcludeFilter'."
     }
     else {
         $SolutionRootPath = [System.IO.Path]::Combine($SolutionRootPath, "src", $HelixLayer)
-        Write-Verbose "Searching for projects matching '$IncludeFilter' in layer '$HelixLayer' ('$SolutionRootPath'), excluding '$ExcludeFilter'."
+        Write-Verbose "Searching for projects in layer '$HelixLayer' ('$SolutionRootPath'), excluding '$ExcludeFilter'."
     }
 
     Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }

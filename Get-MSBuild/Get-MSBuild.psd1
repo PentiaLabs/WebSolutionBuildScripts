@@ -4,7 +4,7 @@
     RootModule        = 'Get-MSBuild.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.3.0'
+    ModuleVersion     = '0.4.0'
 
     # ID used to uniquely identify this module
     GUID              = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'
