@@ -198,5 +198,4 @@ The only reason the `web.config` is placed in the Visual Studio projects, is to 
 Get-ChildItem : Could not find a part of the path 'D:\Projects\Solution\Website\src\Project\Frontend\code\node_modules\gulp-import-css\node_modules\gulp-util\node_modules\dateformat\node_modules\meow\node_modules\read-pkg-up\node_modules\read-pkg\node_modules\load-json-file\node_modules\pinkie-promise\node_modules'.
 ```
 
-This is caused by the get-childitem call, when the path exceeds the windows NTFS path limitation of 255 characters.
-Reduce the path length to make it disappear.
+This is caused by the `Get-ChildItem` call, when a path in the solution exceeds the windows NTFS path limitation of 255 characters. Reduce the path length to solve the issue.
