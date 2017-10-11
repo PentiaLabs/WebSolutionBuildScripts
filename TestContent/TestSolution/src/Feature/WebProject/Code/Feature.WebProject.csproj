@@ -45,6 +45,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="App_Config\Include\Feature.WebProject.Pipelines.config">
+      <TransformOnBuild>true</TransformOnBuild>
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="App_Config\Include\Feature.WebProject.Pipelines.Debug.config">
+      <DependentUpon>Feature.WebProject.Pipelines.config</DependentUpon>
+      <IsTransformFile>True</IsTransformFile>
+    </None>
+    <None Include="App_Config\Include\Feature.WebProject.Pipelines.Release.config">
+      <DependentUpon>Feature.WebProject.Pipelines.config</DependentUpon>
+      <IsTransformFile>True</IsTransformFile>
+    </None>
     <None Include="packages.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
