@@ -79,7 +79,7 @@ Function Publish-RuntimeDependencyPackage {
         Install-RuntimeDependencyPackage -PackageName $PackageName -PackageVersion $PackageVersion -PackageSource $PackageSource -Username $Username -Password $Password
         $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
-    If(-not $package) {
+    If (-not $package) {
         Throw "Unable to install package '$PackageName' version '$PackageVersion' from source '$PackageSource'."
     }
     Copy-RuntimeDependencyPackageContent -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
@@ -131,18 +131,28 @@ Function Install-RuntimeDependencyPackage {
         [SecureString]$Password = [SecureString]::Empty
     )
     $credentials = [System.Management.Automation.PSCredential]::Empty
-    if ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
+    If ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
-    try {
-        $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop
+    Try {
+        If ([string]::IsNullOrWhiteSpace($PackageSource)) {
+            # There's currently a bug in the Find-Package cmdlet which requires us to manually pipe in all available package sources.
+            # See https://github.com/OneGet/oneget/issues/270 for details.
+            $package = Get-PackageSource -ProviderName "NuGet" | Find-Package -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop | Select-Object -First 1
+        }
+        Else {
+            $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop
+        }
         Write-Verbose "Installing package '$PackageName'."
         $package | Install-Package -Credential $credentials -Force
     }
-    catch {
-        if ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
-            Throw "The package '$packageName' version '$packageVersion' couldn't be found in the source '$packageSource'. " + 
+    Catch {
+        If ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
+            Throw "The package '$PackageName' version '$PackageVersion' couldn't be found in the source '$PackageSource'. " + 
             "Make sure that all required package sources are set up correctly, e.g. 'Register-PackageSource -Name ""Pentia NuGet"" -Location ""http://tund/nuget/Nuget"" -Trusted -ProviderName ""NuGet""'."
+        }
+        Else {
+            Throw $_.Exception
         }
     }
 }

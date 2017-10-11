@@ -83,6 +83,26 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $installedPackage.Name | Should Be $packageName
             $installedPackage.Version | Should Be $packageVersion
         }
+
+        It "should handle missing NuGet package sources by searching in all registered sources" {
+            # Arrange
+            $packageName = "jquery"
+            $packageVersion = "3.1.1"
+            $packageSourceName = "Publish-RuntimeDependencyPackage.Tests - nuget.org API v2"
+            Register-PackageSource -Name $packageSourceName -ProviderName "NuGet" -Location "https://www.nuget.org/api/v2" -ErrorAction SilentlyContinue
+        
+            Try {
+                # Act
+                $installedPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion
+            
+                # Assert
+                $installedPackage.Name | Should Be $packageName
+                $installedPackage.Version | Should Be $packageVersion                
+            }
+            Finally {
+                Unregister-PackageSource -Name $packageSourceName -ErrorAction SilentlyContinue
+            }
+        }
     }
 
     Describe "Copy-RuntimeDependencyPackageContent" {
