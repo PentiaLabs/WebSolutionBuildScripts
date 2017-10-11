@@ -212,4 +212,4 @@ Function Invoke-AllTransforms {
     }
 }
 
-Export-ModuleMember -Function Publish-HelixSolution
+Export-ModuleMember -Function Publish-HelixSolution, New-HelixSolutionPackage
