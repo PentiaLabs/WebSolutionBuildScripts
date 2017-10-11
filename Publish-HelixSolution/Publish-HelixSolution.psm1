@@ -87,7 +87,37 @@ Function Publish-HelixSolution {
     Write-Progress -Activity "Publishing Helix solution" -Status "Applying XML transforms"
     Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
 
+    # 5. Remove Configuration Transforms
+    Write-Progress -Activity "Removing All Configuration Transformfiles from destination directory" -Status "Deleting"
+    Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+
     Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
+}
+
+Function New-HelixSolutionPackage {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$SolutionRootPath,
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
+
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
+
+    # 1. Delete $WebrootOutputPath
+    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
+    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+
+    # 2. Publish runtime dependencies
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
+    Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+
+    # 3. Publish all web projects on top of the published runtime dependencies
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
+    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath
 }
 
 Function Get-SolutionRootPath {
