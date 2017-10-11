@@ -39,7 +39,7 @@ Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nug
 Install the `Publish-HelixSolution` module by running the following command in an elevated PowerShell prompt:
 
 ```powershell
-Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Verbose
+Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Force -Verbose
 ```
 
 ## Usage
