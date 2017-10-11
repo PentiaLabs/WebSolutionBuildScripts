@@ -101,6 +101,8 @@ E.g.:
 
 The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.config` files in the solution must be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `Web.config` shipped with Sitecore is not overwritten.
 
+The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (e.g. `Web.Debug.config`), must be set to "Content".
+
 The only reason the `Web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
 
 ## Migration guide
