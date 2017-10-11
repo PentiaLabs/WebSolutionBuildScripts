@@ -49,14 +49,14 @@
       <TransformOnBuild>true</TransformOnBuild>
       <SubType>Designer</SubType>
     </Content>
-    <None Include="App_Config\Include\Feature.WebProject.Pipelines.Debug.config">
+    <Content Include="App_Config\Include\Feature.WebProject.Pipelines.Debug.config">
       <DependentUpon>Feature.WebProject.Pipelines.config</DependentUpon>
       <IsTransformFile>True</IsTransformFile>
-    </None>
-    <None Include="App_Config\Include\Feature.WebProject.Pipelines.Release.config">
+    </Content>
+    <Content Include="App_Config\Include\Feature.WebProject.Pipelines.Release.config">
       <DependentUpon>Feature.WebProject.Pipelines.config</DependentUpon>
       <IsTransformFile>True</IsTransformFile>
-    </None>
+    </Content>
     <None Include="packages.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
