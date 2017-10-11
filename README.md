@@ -1,13 +1,34 @@
 # Pentia Build Scripts for Sitecore Helix Solutions
 
-In the following, all commands expect to be run from an elevated PowerShell prompt.
+Build scripts written in PowerShell, intended to publish Sitecore Helix compliant solutions. 
+
+## Table of contents
+
+* [Prerequisites](#prerequisites)
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Publishing a solution](#publishing-a-solution)
+  * [Solution specific user settings](#solution-specific-user-settings)
+  * [Sitecore and Sitecore modules - runtime dependencies](#sitecore-and-sitecore-modules---runtime-dependencies)
+  * [Configuration management](#configuration-management)
+* [Migration guide](#migration-guide)
+* [Development tool integration](#development-tool-integration)
+  * [Visual Studio Task Runner](#visual-studio-task-runner)
+  * [NPM](#npm)
+  * [Gulp](#gulp)
+* [Setting up Continuous Integration](#setting-up-continuous-integration)
+  * [Build Agent setup](#build-agent-setup)
+* [Troubleshooting](#troubleshooting)
+  * [Getting help](#getting-help)
+  * [Build log](#build-log)
+  * [Known issues](#known-issues)
 
 ## Build Status
 ![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/11/badge)
 
 ## Prerequisites
 
-If you haven't done so already, register the Pentia PowerShell NuGet feed by running the following command in an elevated PowerShell prompt:
+Register the Pentia PowerShell NuGet feed by running the following command in an elevated PowerShell prompt:
 
 ```powershell
 Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nuget/powershell/" -InstallationPolicy "Trusted" -Verbose
@@ -15,27 +36,35 @@ Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nug
 
 ## Installation
 
+Install the `Publish-HelixSolution` module by running the following command in an elevated PowerShell prompt:
+
 ```powershell
 Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Verbose
 ```
 
 ## Usage
 
+Historically, build scripts aim to do the following:
+
+1. Provision a clean Sitecore root. *The deprecated Pentia Builder did this by copying from Pentia's `\\buildlibrary`. The newer build scripts do this by installing "runtime dependency" NuGet packages.*
+2. Copy custom code on top of it. *The deprecated Pentia Builder did this using RoboCopy. The newer build scripts use web publish.*
+3. Copy custom configuration on top of it. *The deprecated Pentia Builder did this using custom NAnt tasks. The newer build scripts use [XDTs](https://msdn.microsoft.com/en-us/library/dd465326(v=vs.110).aspx).*
+
+I.e., while the implementations change, the intentions remain the same.
+
 ### Publishing a solution
 
-Run the following in the solution root directory:
+Open an elevated PowerShell prompt and run the following command in the solution root directory:
 
 ```powershell
 Publish-HelixSolution
 ```
 
-You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use.
+You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
-#### Solution specific user settings
+### Solution specific user settings
 
-To avoid having to enter function parameters over and over, the parameters for `Publish-HelixSolution` are stored in a local file.
-
-It's placed here: `$SolutionRootPath/.pentia/user-settings.json`.
+To avoid having to enter the function parameters over and over for the `Publish-HelixSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
 
 The `.pentia` directory should be added to the solution's `.gitignore` file:
 
@@ -43,19 +72,189 @@ The `.pentia` directory should be added to the solution's `.gitignore` file:
 .pentia/
 ```
 
-### Runtime dependencies
+### Sitecore and Sitecore modules - runtime dependencies
 
-Runtime dependencies like Sitecore and Sitecore modules are installed as so called "runtime dependencies", and must be configured in a `runtime-dependencies.config` file. 
+Runtime dependencies like Sitecore and Sitecore modules are installed as NuGet packages, and must be configured in a `runtime-dependencies.config` configuration file.
+They serve the same purpose as the corresponding Pentia `\\buildlibrary` modules.
 
 [A full guide on installing runtime dependencies can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html)
 
-### Web.config and publishing
+### Configuration management
 
-The "Build Action" of all `web.config` files in the solution should be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `web.config` shipped with Sitecore is not overwritten.
+Configuration management is done via [XML Document Transforms](https://msdn.microsoft.com/en-us/library/dd465326(v=vs.110).aspx), or "XDTs" for short.
 
-The only reason the `web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
+* Configuration files and XDTs must be placed in projects of type "web project".
+* Configuration files and XDTs must be placed in `<project root>\App_Config\[...]`, **except** for XDTs targeting `Web.config`, which must be placed directly in the project root.
 
-## Integration
+E.g.:
+
+```javascript
+// This transform will be applied to Web.config, regardless of the build configuration.
+[...]/Pentia.Feature.Search/code/Web.Always.config
+// This transform will be applied to Web.config if the build configuration is set to "debug". 
+[...]/Pentia.Feature.Search/code/Web.Debug.config 
+// This file will be copied to "<webroot>/App_Config/Include/[...]/ServiceConfigurator.config".
+[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config 
+// This file will be copied to "<webroot>/App_Config/Include/[...]/Serialization.config".
+[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/Serialization.config 
+```
+
+The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.config` files in the solution must be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `Web.config` shipped with Sitecore is not overwritten.
+
+The only reason the `Web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
+
+## Migration guide
+
+The following section is a short guide on how to migrate from Gulp-based build scripts.
+
+### `solution-config.json`
+
+* `configurationTransform.AlwaysApplyName` now defaults to "Always" by convention (case insensitive).
+* The latest version of `MSBuild.exe` installed on the system is now automatically used for compilation.
+* The `configs` section has been replaced with `./pentia/user-settings.json`. See [Solution specific user settings](#solution-specific-user-settings).
+
+#### Before - `solution-config.json`
+```json
+{
+    "configurationTransform": {
+      "AlwaysApplyName": "always"
+    },
+    "msbuild": {
+      "showError": true,
+      "showStandardOutput": true,
+      "toolsversion": 14.0,
+      "verbosity": "Minimal"
+    },
+    "configs": [
+      {
+        "name": "debug",
+        "rootFolder": "C:\\Websites\\HC.website",
+        "websiteRoot" :"C:\\Websites\\HC.website\\Website",
+        "websiteDataRoot" :"C:\\Websites\\HC.website\\Data"
+      },
+      {
+        "name": "development",
+        "rootFolder": "Websites",
+        "websiteRoot" :"Websites\\Website",
+        "websiteDataRoot" :"Websites\\Data"
+      }
+    ]
+}
+```
+
+#### After - `./pentia/user-settings.json`
+This file is automatically generated and updated.
+```json
+{
+    "webrootOutputPath":  "C:\\Websites\\HC.website\\Website",
+    "dataOutputPath":  "C:\\Websites\\HC.website\\Data",
+    "buildConfiguration":  "debug"
+}
+```
+
+### `solution-packages.json`
+
+This file has been replaced with `runtime-dependencies.config`. See [Runtime dependencies](#runtime-dependencies).
+
+#### Before - `solution-packages.json`
+```json
+{
+    "packages":[
+        {
+            "packageName": "Sitecore.Full",
+            "version": "8.2.170728",
+            "location": "http://tund/nuget/FullSitecore/"  
+        },
+        {
+            "packageName": "Sitecore.Publishing.Module",
+            "version": "2.0.0",
+            "location": "http://tund/nuget/sitecore/"  
+        }
+    ]
+}
+```
+
+#### After - `runtime-dependencies.config`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<packages>
+  <package id="Sitecore.Full" version="8.2.170728" />
+  <package id="Sitecore.Publishing.Module" version="2.0.0" />
+</packages>
+```
+
+### `gulpfile.js`
+
+The scripts called from within `gulpfile.js` (e.g. `Setup-Development-Environment`, which in turn calls `delete-website`, `install-packages` etc.) have been replaced with `Publish-HelixSolution`. 
+Hence these parts of `gulpfile.js` are largely obsolete.
+
+#### Before - `gulpfile.js`
+```javascript
+var gulp = require('gulp');
+var runSequence = require('run-sequence');
+var publish = require('@pentia/publish-projects');
+var packagemanager = require('@pentia/sitecore-package-manager');
+var configTransform = require('@pentia/configuration-transformer');
+var watchprojects = require('@pentia/watch-publish-projects');
+var powershell = require('./node_modules/@pentia/publish-projects/modules/powershell')
+var rimraf = require('rimraf');
+var fs = require('fs-extra');
+
+gulp.task('Setup-Development-Environment', function(callback) {
+  runSequence(
+    'delete-website',
+    'install-packages',
+    'publish-all-layers',
+    'apply-xml-transform',
+    'copy-license',
+    'sync',
+    callback);
+});
+
+gulp.task('sync', function(callback) {
+  powershell.runAsync("./autosync-scripts/autosync-unicorn.ps1", "", callback);
+});
+
+gulp.task('setup', function(callback) {
+  runSequence('Setup-Development-Environment',
+    callback);
+});
+
+gulp.task('delete-website', function(callback) {
+  rimraf('C:\\websites\\HC.website\\Website', callback);
+});
+
+gulp.task('copy-license', function() {
+  fs.copy('\\\\buildlibrary\\library\\Sitecore License\\Pentia 8.x\\www\\Data\\pentia.license.xml', 'C:\\Websites\\HC.website\\Data\\license.xml');
+});
+```
+
+#### After - `gulpfile.js`
+```javascript
+var gulp = require('gulp');
+var runSequence = require('run-sequence');
+var powershell = require('./node_modules/@pentia/publish-projects/modules/powershell');
+var fs = require('fs-extra');
+
+gulp.task('Setup-Development-Environment', function(callback) {
+  runSequence('publish-helix-solution', 'copy-license', 'sync',  callback);
+});
+
+gulp.task('publish-helix-solution', function(callback) {
+  powershell.runAsync("Publish-HelixSolution", "", callback);
+});
+
+gulp.task('copy-license', function() {
+  var licenseFile = '\\\\buildlibrary\\library\\Sitecore License\\Pentia 8.x\\www\\Data\\pentia.license.xml';
+  fs.copy(licenseFile, 'C:\\Websites\\HC.website\\Data\\license.xml');
+});
+
+gulp.task('sync', function(callback) {
+  powershell.runAsync("./autosync-scripts/autosync-unicorn.ps1", "", callback);
+});
+```
+
+## Development tool integration
 
 ### Visual Studio Task Runner
 
@@ -123,11 +322,11 @@ var powershell = require("./powershell");
 powershell.runAsync("C:\path\to\your\file.ps1", "-arguments here", callback);
 ```
 
-## Build Agent setup
+## Setting up Continuous Integration
 
-### Installation
+### Build Agent setup
 
-See Installation instructions above - these are the same for build agents.
+See [Installation](#installation) instructions above - these are the same for build agents.
 
 ### Usage
 
@@ -148,6 +347,8 @@ Publish-HelixSolution -IgnoreUserSettings `
 ## Troubleshooting
 
 ### Getting help
+
+You can get help for a specific PowerShell cmdlet by running `Get-Help <cmdlet> -Full`. E.g.:
 
 ```powershell 
 Get-Help Publish-HelixSolution -Full
@@ -188,9 +389,9 @@ Publish-HelixSolution 4> verbose.txt
 Publish-HelixSolution 4>&2 verbose.txt
 ```
 
-## Known errors
+### Known issues
 
-### Path Too long
+#### Path Too long
 
 ```powershell
 Get-ChildItem : Could not find a part of the path 'D:\Projects\Solution\Website\src\Project\Frontend\code\node_modules\gulp-import-css\node_modules\gulp-util\node_modules\dateformat\node_modules\meow\node_modules\read-pkg-up\node_modules\read-pkg\node_modules\load-json-file\node_modules\pinkie-promise\node_modules'.
