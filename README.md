@@ -94,23 +94,23 @@ Configuration files and XDTs must be placed according to the following conventio
 
 **Examples:**
 
-`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.config` - this file will be ignored, because it's Build Action should be "None".
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.config` - this file will be ignored, because it's `Build Action` should be `None`.
 
-`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config` - this transform will be applied to `Web.config`, regardless of the build configuration ("[...].Always.config").
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config` - this transform will be applied to `Web.config`, regardless of the build configuration (`[...].Always.config`).
 
-`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Debug.config` - this transform will be applied to Web.config, if the build configuration is set to "debug" ("[...].Debug.config").
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Debug.config` - this transform will be applied to `Web.config`, if the build configuration is set to `debug` (`[...].Debug.config`).
 
-`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's Build Action should be `Content`.
+`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's `Build Action` should be `Content`.
 
-`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.Debug.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's Build Action should be `Content`, and will be applied to `<webroot\>/App_Config/Include/[...]/ServiceConfigurator.config`, if the build configuration is set to "debug" due to the ending `[...].Debug.config`).
+`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.Debug.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's `Build Action` should be `Content`. It will be applied to `<webroot\>/App_Config/Include/[...]/ServiceConfigurator.config`, if the build configuration is set to `debug` (`[...].Debug.config`).
 
 #### Build Actions
 
-The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.<Project Name>.config` files in the solution should be set to "None", as they only serve as a way to group configuration transform files targeting the main `Web.config` file shipped with Sitecore.
+The [`Build Action`](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.<Project Name>.config` files in the solution should be set to `None`, as they only serve as a way to group configuration transform files targeting the main `Web.config` file shipped with Sitecore.
 
 ![Build Action of `Web.<Project Name>.config` convenience files](/docs/images/web.config-build-action.png)
 
-The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (i.e. `Web.<Project Name>.<Build Configuration>.config`), must be set to "Content".
+The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (i.e. `Web.<Project Name>.<Build Configuration>.config`), must be set to `Content`.
 
 ![Build Action of `Web.<Project Name>.<Build Configuration>.config` XDT files](/docs/images/web.config-xdt-build-action.png)
 
