@@ -4,7 +4,7 @@
     RootModule        = 'UserSettings.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.4.2'
+    ModuleVersion     = '0.5.0'
 
     # ID used to uniquely identify this module
     GUID              = '124f394a-8328-4f0e-9aa0-e6c027a02e2b'
