@@ -51,7 +51,7 @@ Describe "Publish-HelixSolution" {
         $buildConfiguration = "debug"
 
         # Act
-        Publish-HelixSolution -SolutionRootPath $solution -WebrootOutputPath $webroot -DataOutputPath $data -BuildConfiguration $buildConfiguration -IgnoreUserSettings
+        Publish-ConfiguredHelixSolution -SolutionRootPath $solution -WebrootOutputPath $webroot -DataOutputPath $data -BuildConfiguration $buildConfiguration
 
         # Assert
         Test-Path $webroot | Should Be $False
@@ -77,7 +77,7 @@ Describe "Publish-HelixSolution" {
             [Parameter(Mandatory = $True)]
             [string]$SolutionRootPath
         )
-        Publish-HelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -IgnoreUserSettings
+        Publish-ConfiguredHelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
     }
 
     It "should save function parameters as user settings by default" {
@@ -85,7 +85,7 @@ Describe "Publish-HelixSolution" {
         $solutionRootPath = Initialize-TestSolution
         
         # Act
-        Publish-HelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
+        Publish-ConfiguredHelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
 
         # Assert
         $userSettings = Get-UserSettings -SolutionRootPath $solutionRootPath
@@ -105,7 +105,7 @@ Describe "Publish-HelixSolution" {
         Set-UserSettings -SolutionRootPath $solutionRootPath -Settings $userSettings
 
         # Act
-        Publish-HelixSolution -SolutionRootPath $solutionRootPath
+        Publish-ConfiguredHelixSolution -SolutionRootPath $solutionRootPath
 
         # Assert
         $webrootOutputPathExists = Test-Path -Path $userSettings.webrootOutputPath -PathType Container
@@ -118,15 +118,15 @@ Describe "Publish-HelixSolution" {
     It "should update user settings by default" {
         # Arrange    
         $solutionRootPath = Initialize-TestSolution
-        Publish-HelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
+        Publish-ConfiguredHelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
         $updatedDataOutputPath = "$TestDrive\Data-" + [Guid]::NewGuid().ToString("D")
     
         # Act
-        Publish-HelixSolution -SolutionRootPath $solutionRootPath -DataOutputPath $updatedDataOutputPath
+        Publish-ConfiguredHelixSolution -SolutionRootPath $solutionRootPath -DataOutputPath $updatedDataOutputPath
 
         # Assert
         $userSettings = Get-UserSettings -SolutionRootPath $solutionRootPath
-        $userSettings.dataOutputPath | Should Be $updatedDataOutputPath "Didn't update user settings with parameters from call to 'Publish-HelixSolution'."
+        $userSettings.dataOutputPath | Should Be $updatedDataOutputPath "Didn't update user settings with parameters from call to 'Publish-ConfiguredHelixSolution'."
     }
     
     It "should ignore user settings when required" {
@@ -134,7 +134,7 @@ Describe "Publish-HelixSolution" {
         $solutionRootPath = Initialize-TestSolution
 
         # Act
-        Publish-HelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$solutionRootPath\www" -DataOutputPath "$solutionRootPath\data" -BuildConfiguration "Debug" -IgnoreUserSettings
+        Publish-UnconfiguredHelixSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$solutionRootPath\www" -DataOutputPath "$solutionRootPath\data"
 
         # Assert
         $userSettingsExist = Test-Path "$solutionRootPath/.pentia/user-settings.json"

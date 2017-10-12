@@ -1,14 +1,16 @@
 <#
 .SYNOPSIS
-Used to publish a Sitecore Helix solution to disk.
+Used to publish a Sitecore Helix solution to disk for a specific build configuration.
 
 .DESCRIPTION
-Used to publish a Sitecore Helix solution to disk. The steps it runs through are:
+Used to publish a Sitecore Helix solution to disk, applying and subsequently removing all relevant XDTs. 
+The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
 2. Publish runtime dependencies to $WebrootOutputPath.
 3. Publish all web projects to $WebrootOutputPath, on top of the published runtime dependencies.
-4. Invoke configuration transforms.
+4. Apply all XML Document Transform files found in $WebrootOutputPath.
+5. Delete all XML Document Transform files found in $WebrootOutputPath.
 
 .PARAMETER SolutionRootPath
 This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
@@ -24,53 +26,40 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 The build configuration that will be passed to "MSBuild.exe".
 
 .EXAMPLE
-Publish-HelixSolution -IgnoreUserSettings -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration.
+Publish-ConfiguredHelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the "Debug" build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
 
-Publish-HelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
-
-Publish-HelixSolution
-Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json".
+Publish-ConfiguredHelixSolution
+Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json", and prompts the user for any missing settings.
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     set "$PSDefaultParameterValues['*:Verbose'] = $True"
     set "$PSDefaultParameterValues['*:Debug'] = $True"
 #> 
-Function Publish-HelixSolution {
+Function Publish-ConfiguredHelixSolution {
     [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
-        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
+        [Parameter(Mandatory = $False)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
-        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
+        [Parameter(Mandatory = $False)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False, ParameterSetName = "UseUserSettings")]
-        [Parameter(Mandatory = $True, ParameterSetName = "IgnoreUserSettings")]
-        [string]$BuildConfiguration,
-
-        [Parameter(ParameterSetName = "IgnoreUserSettings")]        
-        [switch]$IgnoreUserSettings
+        [Parameter(Mandatory = $False)]
+        [string]$BuildConfiguration
     )
 
-    If ($PSCmdlet.ParameterSetName -eq "UseUserSettings") {
-        $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
-        $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
-        $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
-        $WebrootOutputPath = $mergedSettings.webrootOutputPath
-        $DataOutputPath = $mergedSettings.dataOutputPath
-        $BuildConfiguration = $mergedSettings.buildConfiguration
-        Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
-    }
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
+    $parameters = Get-ActualPublishParameters -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
+    $WebrootOutputPath = $parameters.webrootOutputPath
+    $DataOutputPath = $parameters.dataOutputPath
+    $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-HelixSolutionUnconfigured -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Publish-UnconfiguredHelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
     If (Test-Path $WebrootOutputPath) {
         Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
@@ -92,12 +81,44 @@ Function Get-SolutionRootPath {
     $SolutionRootPath
 }
 
+Function Get-ActualPublishParameters {
+    [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$DataOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$BuildConfiguration
+    )
+
+    $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
+    $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
+    If([string]::IsNullOrWhiteSpace($mergedSettings.webrootOutputPath)) {
+        $mergedSettings.webrootOutputPath = Read-Host "Enter value for `$WebrootOutputPath"
+    }
+    If([string]::IsNullOrWhiteSpace($mergedSettings.dataOutputPath)) {
+        $mergedSettings.dataOutputPath = Read-Host "Enter value for `$DataOutputPath"
+    }
+    If([string]::IsNullOrWhiteSpace($mergedSettings.buildConfiguration)) {
+        $mergedSettings.buildConfiguration = Read-Host "Enter value for `$BuildConfiguration"
+    }
+    Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
+    $mergedSettings
+}
+
 <#
 .SYNOPSIS
 Publishes a Helix solution, without applying any XDTs.
 
 .DESCRIPTION
-Used to publish a Sitecore Helix solution to disk. The steps it runs through are:
+Used to publish a Sitecore Helix solution to disk, without applying or removing any XDTs. 
+The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
 2. Publish runtime dependencies to $WebrootOutputPath.
@@ -114,7 +135,7 @@ The path to where you want your webroot to be published. E.g. "D:\Websites\Solut
 This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
 
 .EXAMPLE
-Publish-HelixSolutionUnconfigured -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
+Publish-UnconfiguredHelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
 
 .NOTES
@@ -122,7 +143,7 @@ In order to enable verbose or debug output for the entire command, run the follo
     set "$PSDefaultParameterValues['*:Verbose'] = $True"
     set "$PSDefaultParameterValues['*:Debug'] = $True"
 #>
-Function Publish-HelixSolutionUnconfigured {
+Function Publish-UnconfiguredHelixSolution {
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $False)]
@@ -280,4 +301,4 @@ Function Invoke-AllTransforms {
     }
 }
 
-Export-ModuleMember -Function Publish-HelixSolution, Publish-HelixSolutionUnconfigured, Set-HelixSolutionConfiguration
+Export-ModuleMember -Function Publish-ConfiguredHelixSolution, Publish-UnconfiguredHelixSolution, Set-HelixSolutionConfiguration

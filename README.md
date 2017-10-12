@@ -57,14 +57,14 @@ I.e., while the implementations change, the intentions remain the same.
 Open an elevated PowerShell prompt and run the following command in the solution root directory:
 
 ```powershell
-Publish-HelixSolution
+Publish-ConfiguredHelixSolution
 ```
 
 You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
 ### Solution specific user settings
 
-To avoid having to enter the function parameters over and over for the `Publish-HelixSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
+To avoid having to enter the function parameters over and over for the `Publish-ConfiguredHelixSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
 
 The `.pentia` directory should be added to the solution's `.gitignore` file:
 
@@ -198,7 +198,7 @@ This file has been replaced with `runtime-dependencies.config`. See [Runtime dep
 
 ### `gulpfile.js`
 
-The scripts called from within `gulpfile.js` (e.g. `Setup-Development-Environment`, which in turn calls `delete-website`, `install-packages` etc.) have been replaced with `Publish-HelixSolution`. 
+The scripts called from within `gulpfile.js` (e.g. `Setup-Development-Environment`, which in turn calls `delete-website`, `install-packages` etc.) have been replaced with `Publish-ConfiguredHelixSolution`. 
 Hence these parts of `gulpfile.js` are largely obsolete.
 
 #### Before - `gulpfile.js`
@@ -254,7 +254,7 @@ gulp.task('Setup-Development-Environment', function(callback) {
 });
 
 gulp.task('publish-helix-solution', function(callback) {
-  powershell.runAsync("Publish-HelixSolution", "", callback);
+  powershell.runAsync("Publish-ConfiguredHelixSolution", "", callback);
 });
 
 gulp.task('copy-license', function() {
@@ -279,7 +279,7 @@ Add a [script](https://docs.npmjs.com/misc/scripts) object to your package.json,
 
 ```json
 "scripts": {
-    "publish-solution": "powershell Publish-HelixSolution"
+    "publish-solution": "powershell Publish-ConfiguredHelixSolution"
 },
 ```
 
@@ -343,18 +343,17 @@ See [Installation](#installation) instructions above - these are the same for bu
 
 ### Usage
 
-1. Run `Publish-HelixSolution` with the `-IgnoreUserSettings` switch. This avoids writing user settings to disk.
-2. Specify all required parameters (e.g. `$SolutionRootPath`, `WebrootOutputPath`).
+1. Run `Publish-UnconfiguredHelixSolution`.
+2. Specify all required parameters.
 3. Have the build agent publish the solution to a relative path. This allows e.g. TeamCity to create the output in a temporary build agent working directory which is cleaned up periodically.
 4. Make sure that the solution root path is set correctly. Usually the easiest way to do this is by ensuring that the build agent's working directory is the same as the VCS checkout root, as most of our solutions have the `.sln` file located in the VCS root.
 
 Example:
 ```powershell
-Publish-HelixSolution -IgnoreUserSettings `
+Publish-UnconfiguredHelixSolution `
 -SolutionRootPath "." `
 -WebrootOutputPath ".\PackagePath\Webroot" `
--DataOutputPath ".\PackagePath\Data" `
--BuildConfiguration "Debug"
+-DataOutputPath ".\PackagePath\Data"
 ```
 
 ## Troubleshooting
@@ -364,7 +363,9 @@ Publish-HelixSolution -IgnoreUserSettings `
 You can get help for a specific PowerShell cmdlet by running `Get-Help <cmdlet> -Full`. E.g.:
 
 ```powershell 
-Get-Help Publish-HelixSolution -Full
+Get-Help Publish-ConfiguredHelixSolution -Full
+
+Get-Help Publish-UnconfiguredHelixSolution -Full
 ``` 
 
 ### Build log
@@ -384,22 +385,22 @@ Piping build output to a file is done by using [redirects](https://docs.microsof
 
 #### Piping all output to file
 ```powershell
-Publish-HelixSolution *> build.txt
+Publish-ConfiguredHelixSolution *> build.txt
 ```
 
 #### Piping all error output to file
 ```powershell
-Publish-HelixSolution 2> errors.txt
+Publish-ConfiguredHelixSolution 2> errors.txt
 ```
 
 #### Piping all verbose output to file
 ```powershell
-Publish-HelixSolution 4> verbose.txt
+Publish-ConfiguredHelixSolution 4> verbose.txt
 ```
 
 #### Piping all verbose and error output to file
 ```powershell
-Publish-HelixSolution 4>&2 verbose.txt
+Publish-ConfiguredHelixSolution 4>&2 verbose.txt
 ```
 
 ### Known issues

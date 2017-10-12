@@ -144,17 +144,6 @@ InModuleScope Publish-RuntimeDependencyPackage {
 
 # Test public functions
 Describe "Publish-RuntimeDependencyPackage" {
-    It "offers proper help texts" {
-        # Arrange
-        $helpText = $Null
-
-        # Act
-        $helpText = Get-Help Publish-RuntimeDependencyPackage
-
-        # Assert
-        $helpText.Synopsis | Should Be "Publishes the contents of a runtime dependency package to a website. Requires -RunAsAdministrator."
-    }
-
     It "publishes package contents" {
         # Arrange
         $packageName = "sample-runtime-dependency"

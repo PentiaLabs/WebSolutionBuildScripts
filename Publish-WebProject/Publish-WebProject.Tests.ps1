@@ -33,19 +33,21 @@ Describe "Publish-WebProject" {
         $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
     }
 
-    It "should respect Build Actions configuration of XDT files" {
+    It "should respect Build Actions of XDT files" {
         # Arrange
         $solutionPath = New-TestSolution -TempPath "$TestDrive"
+        [xml]$projectFileXml = Get-Content -Path ($solutionPath + $WebProjectFilePath)
+        $contentFiles = $projectFileXml.SelectNodes("//*[local-name()='Content']/@Include") | Select-Object -ExpandProperty "Value"
         
         # Act
         Publish-WebProject -WebProjectFilePath ($solutionPath + $WebProjectFilePath) -OutputPath $PublishWebsitePath
         
         # Assert
+        $contentFiles.Count | Should BeGreaterThan 0 "Didn't find any files with Build Action 'Content'."
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
-        $publishedFiles -contains "Web.Project.WebProject.config" | Should Be $False
-        $publishedFiles -contains "Web.Project.WebProject.Always.config" | Should Be $True
-        $publishedFiles -contains "Web.Project.WebProject.Debug.config" | Should Be $True
-        $publishedFiles -contains "Web.Project.WebProject.Release.config" | Should Be $True
+        foreach ($contentFile in $contentFiles) {
+            $publishedFiles -contains $contentFile | Should Be $True "Didn't find file '$contentFile' in publish output."
+        }
     }
     
     It "should throw an exception when a project fails to publish" {
