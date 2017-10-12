@@ -4,19 +4,24 @@ Determines the location of a configuration file in a target directory based
 on the location of a XDT file in a source directory.
 
 .DESCRIPTION
-The location of the "configuration base file" is determined based 
-on the location of the transform file relative to the "App_Config" directory, 
-OR simply applied to "<WebrootOutputPath>\Web.config" in case of files named "Web.config".
+The location of the "configuration target file" is determined based on:
+EITHER the location of the transform file relative to the "App_Config" directory,
+OR in case of files named "Web.config", "Web.Feature.MyProject.config" etc., defaults to "<WebrootOutputPath>\Web.config".
 
 E.g.:
 Given the following project folder structure:
     
     "C:\MySolution\src\Foundation\MyProject\App_Config\MyConfig.Debug.config"
+    "C:\MySolution\src\Foundation\MyProject\Web.MyProject.Debug.config"
 
 ... and given the webroot "C:\MyWebsite\www"
-... the XDT file "MyConfig.Debug.config" would match the following configuration file:
+... the XDT file "MyConfig.Debug.config" would match the configuration file:
 
     "C:\MyWebsite\www\App_Config\MyConfig.config"
+
+... and the XDT file "Web.MyProject.Debug.config" would match the configuration file:
+
+    "C:\MyWebsite\www\Web.config"
 
 .PARAMETER SolutionRootPath
 E.g. "C:\MySolution\".
@@ -37,9 +42,9 @@ Function Get-PathOfFileToTransform {
         [string]$WebrootOutputPath
     )
     $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
-    If ($nameOfFileToTransform -eq "Web.config") {
+    If ($nameOfFileToTransform -imatch "Web\.?.*\.config") {
         Write-Verbose "Using path of the main 'Web.config' file."
-        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $nameOfFileToTransform)
+        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
     }
     Else {
         Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."        
@@ -83,7 +88,7 @@ Function Get-NameOfFileToTransform {
     If ($buildConfigurationIndex -lt 1) {
         Throw "Can't determine file to transform based on file name '$fileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
     }
-    # ["WeMyConfigb", "Debug", "config"] -> ["MyConfig", "config"]
+    # ["MyConfig", "Debug", "config"] -> ["MyConfig", "config"]
     $fileNameParts.RemoveAt($buildConfigurationIndex)
     # ["MyConfig", "config"] -> "MyConfig.config"
     [string]::Join($fileNamePartSeparator, $fileNameParts.ToArray())

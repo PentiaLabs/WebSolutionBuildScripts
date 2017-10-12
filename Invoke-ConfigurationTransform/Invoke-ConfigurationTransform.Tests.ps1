@@ -17,7 +17,7 @@ Describe "Get-PathOfFileToTransform" {
     
     It "should return the path of the Web.config file to transform" {
         # Arrange
-        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Debug.config"
+        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Feature.WebProject.Debug.config"
         $webrootOutputPath = "C:\webroot"
         $expectedPath = "C:\webroot\Web.config"
 
