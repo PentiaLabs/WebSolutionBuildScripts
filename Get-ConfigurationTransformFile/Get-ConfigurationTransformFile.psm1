@@ -3,7 +3,7 @@
 Gets all XDT-files in the subdirectories of the specified directory.
 
 .DESCRIPTION
-Gets all XDT-files in the specified directory, exluding files found in "obj" and "bin".
+Gets all XDT-files in the specified directory, exluding files in system folders like "bin" and "node_modules".
 
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path to search through.
@@ -77,7 +77,7 @@ Function Test-BuildConfiguration {
     If ($BuildConfigurations.Count -lt 1) {
         return $True
     }
-    # "Web.Debug.config" -> "Debug"
+    # "Solr.Default.Index.Debug.config" -> "Debug"
     $buildConfigurationExtension = $FileName.Split(".")[-2]
     $BuildConfigurations -contains $buildConfigurationExtension
 }

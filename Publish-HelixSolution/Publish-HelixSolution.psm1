@@ -25,18 +25,18 @@ The build configuration that will be passed to "MSBuild.exe".
 
 .EXAMPLE
 Publish-HelixSolution -IgnoreUserSettings -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration.
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration.
 
 Publish-HelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
 
 Publish-HelixSolution
 Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json".
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
-    set "$PSDefaultParameterValues:['*:Verbose'] = $True"
-    set "$PSDefaultParameterValues:['*:Debug'] = $True"
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
 #> 
 Function Publish-HelixSolution {
     [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
@@ -60,9 +60,8 @@ Function Publish-HelixSolution {
         [switch]$IgnoreUserSettings
     )
 
-    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
-
     If ($PSCmdlet.ParameterSetName -eq "UseUserSettings") {
+        $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
         $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
         $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
         $WebrootOutputPath = $mergedSettings.webrootOutputPath
@@ -71,23 +70,13 @@ Function Publish-HelixSolution {
         Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
     }
 
-    # 1. Delete $WebrootOutputPath
-    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
-    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
-
-    # 2. Publish runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
-    Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
-
-    # 3. Publish all web projects on top of the published runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
-    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath
-
-    # 4. Invoke configuration transforms
-    Write-Progress -Activity "Publishing Helix solution" -Status "Applying XML transforms"
-    Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
-
-    Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
+    Publish-HelixSolutionUnconfigured -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    If (Test-Path $WebrootOutputPath) {
+        Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    }
+    Else {
+        Write-Warning "'$WebrootOutputPath' not found. Skipping solution configuration."
+    }
 }
 
 Function Get-SolutionRootPath {
@@ -101,6 +90,63 @@ Function Get-SolutionRootPath {
         Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
     }
     $SolutionRootPath
+}
+
+<#
+.SYNOPSIS
+Publishes a Helix solution, without applying any XDTs.
+
+.DESCRIPTION
+Used to publish a Sitecore Helix solution to disk. The steps it runs through are:
+
+1. Delete $WebrootOutputPath.
+2. Publish runtime dependencies to $WebrootOutputPath.
+3. Publish all web projects to $WebrootOutputPath, on top of the published runtime dependencies.
+
+.PARAMETER SolutionRootPath
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+Uses the current working directory ($PWD) as a fallback.
+
+.PARAMETER WebrootOutputPath
+The path to where you want your webroot to be published. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER DataOutputPath
+This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
+
+.EXAMPLE
+Publish-HelixSolutionUnconfigured -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
+
+.NOTES
+In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
+#>
+Function Publish-HelixSolutionUnconfigured {
+    [CmdletBinding(SupportsShouldProcess = $True)]
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$SolutionRootPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
+
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
+
+    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
+    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
+    Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+
+    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
+    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath    
+	
+    Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
 }
 
 Function Remove-WebrootOutputPath {
@@ -161,6 +207,58 @@ Function Publish-AllWebProjects {
     }
 }
 
+<#
+.SYNOPSIS
+Applies XDTs to a set of configuration files, then deletes the XDTs.
+
+.DESCRIPTION
+Applies all XML Document Transforms found in $WebrootOutputPath to their configuration file counterparts.
+
+.PARAMETER WebrootOutputPath
+The path to the webroot. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER BuildConfiguration
+The build configuration that will be used to select which transforms to apply.
+
+.EXAMPLE
+Set-HelixSolutionConfiguration -WebrootOutputPath "D:\Websites\SolutionSite\www" -BuildConfiguration "Debug"
+Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" directory, and applies them to their configuration file counterparts.
+
+.NOTES
+In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
+    
+We'd like to call this function "Configure-HelixSolution", but according 
+to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
+#>
+Function Set-HelixSolutionConfiguration {
+    [CmdletBinding(SupportsShouldProcess = $True)]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string]$BuildConfiguration
+    )
+	
+    If (-not (Test-Path $WebrootOutputPath)) {
+        Throw "Path '$WebrootOutputPath' not found."
+    }
+
+    Write-Progress -Activity "Configuring Helix solution" -Status "Applying XML Document Transforms"
+    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
+        Invoke-AllTransforms -SolutionRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    }
+
+    Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
+    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
+        Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+    }
+
+    Write-Progress -Activity "Configuring Helix solution" -Status "Done." -Completed
+}
+
 Function Invoke-AllTransforms {
     [CmdletBinding()]
     Param (
@@ -172,14 +270,14 @@ Function Invoke-AllTransforms {
         
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
-    )
+    )	
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
-        Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML transforms" -CurrentOperation "$xdtFile"
+        Write-Progress -Activity "Configuring Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
         $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
         Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform        
     }
 }
 
-Export-ModuleMember -Function Publish-HelixSolution
+Export-ModuleMember -Function Publish-HelixSolution, Publish-HelixSolutionUnconfigured, Set-HelixSolutionConfiguration

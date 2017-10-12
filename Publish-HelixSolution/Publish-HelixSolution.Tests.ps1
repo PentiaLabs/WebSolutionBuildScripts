@@ -165,6 +165,19 @@ Describe "Publish-HelixSolution" {
         Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True         
         Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
     }
+
+    It "should delete all configuration transform files in the output directory" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+
+        # Act
+        Publish-TestSolution -SolutionRootPath $solutionRootPath
+
+        # Assert
+        Test-Path -Path "$TestDrive\Website\Web.Debug.config" -PathType Leaf | Should Be $False
+        Test-Path -Path "$TestDrive\Website\Web.Release.config" -PathType Leaf | Should Be $False
+    }
+
     
     It "should invoke all 'Always' configuration transforms" {
         # Arrange    

@@ -4,7 +4,7 @@
     RootModule        = 'Get-ConfigurationTransformFile.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.4.1'
+    ModuleVersion     = '0.4.2'
 
     # ID used to uniquely identify this module
     GUID              = '87e9e091-cb36-40fa-8e3f-b7a54cc8c892'
