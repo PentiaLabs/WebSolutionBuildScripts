@@ -29,15 +29,29 @@ Describe "Publish-WebProject" {
 
         # Assert
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
-        $publishedFiles -contains "Web.config" | Should Be $True
         $publishedFiles -contains "Project.WebProject.dll" | Should Be $True
         $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
+    }
+
+    It "should respect Build Actions configuration of XDT files" {
+        # Arrange
+        $solutionPath = New-TestSolution -TempPath "$TestDrive"
+        
+        # Act
+        Publish-WebProject -WebProjectFilePath ($solutionPath + $WebProjectFilePath) -OutputPath $PublishWebsitePath
+        
+        # Assert
+        $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
+        $publishedFiles -contains "Web.config" | Should Be $False
+        $publishedFiles -contains "Web.Always.config" | Should Be $True
+        $publishedFiles -contains "Web.Debug.config" | Should Be $True
+        $publishedFiles -contains "Web.Release.config" | Should Be $True
     }
     
     It "should throw an exception when a project fails to publish" {
         # Arrange
         $solutionPath = New-TestSolution -TempPath "$TestDrive"
-        Remove-Item -Path ($solutionPath + "\src\Foundation\WebProject\Code\Web.config")
+        Remove-Item -Path ($solutionPath + "\src\Foundation\WebProject\Code\Web.Debug.config")
         
         # Act
         $publishWebProject = { Publish-WebProject -WebProjectFilePath ($solutionPath + $FoundationWebProjectFilePath) -OutputPath $PublishWebsitePath }

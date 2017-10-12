@@ -54,6 +54,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Web.Always.config" />
     <None Include="Web.config">
       <SubType>Designer</SubType>
     </None>
