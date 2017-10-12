@@ -92,24 +92,17 @@ Configuration files and XDTs must be placed according to the following conventio
 * XDTs targeting `Web.config` must be placed directly in the project root.
 * XDTs targeting `Web.config` must be named `Web.<Vendor Prefix>.<Helix Layer>(.<Project Group>).<Project Name>.<Build Configuration>.config`, e.g. `Web.Pentia.Feature.Navigation.ProdCM.config`.
 
-E.g.:
+**Examples:**
 
-```javascript
-// This file will be ignored, because it should not contain the "xmlns:xdt" XML namespace declaration.
-[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.config
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.config` - this file will be ignored, because it's Build Action should be "None".
 
-// This transform will be applied to Web.config, regardless of the build configuration.
-[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config` - this transform will be applied to `Web.config`, regardless of the build configuration ("[...].Always.config").
 
-// This transform will be applied to Web.config if the build configuration is set to "debug". 
-[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Debug.config 
+`[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Debug.config` - this transform will be applied to Web.config, if the build configuration is set to "debug" ("[...].Debug.config").
 
-// This file will be copied to "<webroot>/App_Config/Include/[...]/ServiceConfigurator.config".
-[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config 
+`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's Build Action should be `Content`.
 
-// This file will be copied to "<webroot>/App_Config/Include/[...]/Serialization.config".
-[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/Serialization.config 
-```
+`[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.Debug.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's Build Action should be `Content`, and will be applied to `<webroot\>/App_Config/Include/[...]/ServiceConfigurator.config`, if the build configuration is set to "debug" due to the ending `[...].Debug.config`).
 
 #### Build Actions
 
