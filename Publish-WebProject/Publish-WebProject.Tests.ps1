@@ -42,16 +42,16 @@ Describe "Publish-WebProject" {
         
         # Assert
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
-        $publishedFiles -contains "Web.config" | Should Be $False
-        $publishedFiles -contains "Web.Always.config" | Should Be $True
-        $publishedFiles -contains "Web.Debug.config" | Should Be $True
-        $publishedFiles -contains "Web.Release.config" | Should Be $True
+        $publishedFiles -contains "Web.Project.WebProject.config" | Should Be $False
+        $publishedFiles -contains "Web.Project.WebProject.Always.config" | Should Be $True
+        $publishedFiles -contains "Web.Project.WebProject.Debug.config" | Should Be $True
+        $publishedFiles -contains "Web.Project.WebProject.Release.config" | Should Be $True
     }
     
     It "should throw an exception when a project fails to publish" {
         # Arrange
         $solutionPath = New-TestSolution -TempPath "$TestDrive"
-        Remove-Item -Path ($solutionPath + "\src\Foundation\WebProject\Code\Web.Debug.config")
+        Remove-Item -Path ($solutionPath + "\src\Foundation\WebProject\Code\Web.Foundation.WebProject.Debug.config") -ErrorAction Stop
         
         # Act
         $publishWebProject = { Publish-WebProject -WebProjectFilePath ($solutionPath + $FoundationWebProjectFilePath) -OutputPath $PublishWebsitePath }

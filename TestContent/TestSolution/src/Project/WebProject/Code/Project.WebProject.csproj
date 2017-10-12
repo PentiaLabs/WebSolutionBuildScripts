@@ -52,11 +52,11 @@
     <Content Include="Web.Project.WebProject.Release.config">
       <DependentUpon>Web.Project.WebProject.config</DependentUpon>
     </Content>
+    <Content Include="Web.Project.WebProject.Always.config">
+	  <DependentUpon>Web.Project.WebProject.config</DependentUpon>
+	</Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Web.Always.config">
-      <SubType>Designer</SubType>
-    </Content>
     <None Include="Web.Project.WebProject.config">
       <SubType>Designer</SubType>
     </None>
