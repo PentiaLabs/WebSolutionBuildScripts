@@ -58,15 +58,15 @@
       <IsTransformFile>True</IsTransformFile>
     </Content>
     <None Include="packages.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
+    <Content Include="Web.Feature.WebProject.Debug.config">
+      <DependentUpon>Web.Feature.WebProject.config</DependentUpon>
     </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
+    <Content Include="Web.Feature.WebProject.Release.config">
+      <DependentUpon>Web.Feature.WebProject.config</DependentUpon>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Web.config" />
+    <None Include="Web.Feature.WebProject.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

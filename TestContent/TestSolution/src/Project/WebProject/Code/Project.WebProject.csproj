@@ -46,18 +46,18 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <Content Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
+    <Content Include="Web.Project.WebProject.Debug.config">
+      <DependentUpon>Web.Project.WebProject.config</DependentUpon>
     </Content>
-    <Content Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
+    <Content Include="Web.Project.WebProject.Release.config">
+      <DependentUpon>Web.Project.WebProject.config</DependentUpon>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.Always.config">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Web.config">
+    <None Include="Web.Project.WebProject.config">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
