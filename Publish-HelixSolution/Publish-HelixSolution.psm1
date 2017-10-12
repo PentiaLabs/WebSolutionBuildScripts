@@ -71,7 +71,7 @@ Function Publish-HelixSolution {
     }
 
     New-HelixSolutionPackage -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
-    Set-HelixSolutionConfiguration -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
 }
 
 Function Get-SolutionRootPath {
@@ -88,7 +88,7 @@ Function Get-SolutionRootPath {
 }
 
 Function New-HelixSolutionPackage {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
@@ -172,15 +172,30 @@ Function Publish-AllWebProjects {
     }
 }
 
-# I'd like to call this function "Configure-HelixSolution", 
-# but according to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx 
-# we should use the "Set" verb instead.
+<#
+.SYNOPSIS
+Applies XDTs to a set of configuration files, then deletes the XDTs.
+
+.DESCRIPTION
+Applies all XML Document Transforms found in $WebrootOutputPath to their configuration file counterparts.
+
+.PARAMETER WebrootOutputPath
+The path to the webroot. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER BuildConfiguration
+The build configuration that will be used to select which transforms to apply.
+
+.EXAMPLE
+Set-HelixSolutionConfiguration -WebrootOutputPath "D:\Websites\SolutionSite\www" -BuildConfiguration "Debug"
+Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" directory, and applies them to their configuration file counterparts.
+
+.NOTES
+We'd like to call this function "Configure-HelixSolution", but according 
+to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
+#>
 Function Set-HelixSolutionConfiguration {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
-        [Parameter(Mandatory = $False)]
-        [string]$SolutionRootPath,
-		
         [Parameter(Mandatory = $True)]
         [string]$WebrootOutputPath,
 		
@@ -188,14 +203,16 @@ Function Set-HelixSolutionConfiguration {
         [string]$BuildConfiguration
     )
 
-    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
-
     Write-Progress -Activity "Configuring Helix solution" -Status "Applying XML Document Transforms"
-    Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
+        Invoke-AllTransforms -SolutionRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    }
 
     If (Test-Path -Path $WebrootOutputPath) {
         Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
-        Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+        If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
+            Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+        }
     }
     Else {
         Write-Verbose "'$WebrootOutputPath' not found. Skipping removal of XML Document Transform files."
