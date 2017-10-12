@@ -90,20 +90,21 @@ E.g.:
 
 ```javascript
 // This transform will be applied to Web.config, regardless of the build configuration.
-[...]/Pentia.Feature.Search/code/Web.Always.config
+[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config
+
 // This transform will be applied to Web.config if the build configuration is set to "debug". 
-[...]/Pentia.Feature.Search/code/Web.Debug.config 
+[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Debug.config 
+
 // This file will be copied to "<webroot>/App_Config/Include/[...]/ServiceConfigurator.config".
 [...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config 
+
 // This file will be copied to "<webroot>/App_Config/Include/[...]/Serialization.config".
 [...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/Serialization.config 
 ```
 
-The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.config` files in the solution must be set to "None", to prevent them from being copied to the web publish output directory. This ensures that the default `Web.config` shipped with Sitecore is not overwritten.
+The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.<Project Name>.config` files in the solution should be set to "None", as they only serve as a way to group configuration transform files targeting the main `Web.config` file shipped with Sitecore.
 
 The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (e.g. `Web.Debug.config`), must be set to "Content".
-
-The only reason the `Web.config` is placed in the Visual Studio projects, is to help with grouping the configuration transform files, and to enable preview of configuration transforms.
 
 ## Migration guide
 
