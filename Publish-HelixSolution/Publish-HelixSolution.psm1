@@ -35,8 +35,8 @@ Publishes the solution using the saved user settings found in "<current director
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
-    set "$PSDefaultParameterValues:['*:Verbose'] = $True"
-    set "$PSDefaultParameterValues:['*:Debug'] = $True"
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
 #> 
 Function Publish-HelixSolution {
     [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
@@ -118,7 +118,9 @@ Publish-HelixSolutionUnconfigured -SolutionRootPath "D:\Project\Solution" -Webro
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
 
 .NOTES
-General notes
+In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
 #>
 Function Publish-HelixSolutionUnconfigured {
     [CmdletBinding(SupportsShouldProcess = $True)]
@@ -223,6 +225,10 @@ Set-HelixSolutionConfiguration -WebrootOutputPath "D:\Websites\SolutionSite\www"
 Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" directory, and applies them to their configuration file counterparts.
 
 .NOTES
+In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
+    set "$PSDefaultParameterValues['*:Verbose'] = $True"
+    set "$PSDefaultParameterValues['*:Debug'] = $True"
+    
 We'd like to call this function "Configure-HelixSolution", but according 
 to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
 #>
@@ -249,7 +255,7 @@ Function Set-HelixSolutionConfiguration {
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
         Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
     }
-    
+
     Write-Progress -Activity "Configuring Helix solution" -Status "Done." -Completed
 }
 
