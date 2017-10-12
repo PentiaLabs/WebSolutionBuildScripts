@@ -25,10 +25,10 @@ The build configuration that will be passed to "MSBuild.exe".
 
 .EXAMPLE
 Publish-HelixSolution -IgnoreUserSettings -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration.
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration.
 
 Publish-HelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
-Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the Debug build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
 
 Publish-HelixSolution
 Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json".
@@ -70,8 +70,13 @@ Function Publish-HelixSolution {
         Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
     }
 
-    New-HelixSolutionPackage -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
-    Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    Publish-HelixSolutionUnconfigured -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    If (Test-Path $WebrootOutputPath) {
+        Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+    }
+    Else {
+        Write-Warning "'$WebrootOutputPath' not found. Skipping solution configuration."
+    }
 }
 
 Function Get-SolutionRootPath {
@@ -87,7 +92,35 @@ Function Get-SolutionRootPath {
     $SolutionRootPath
 }
 
-Function New-HelixSolutionPackage {
+<#
+.SYNOPSIS
+Publishes a Helix solution, without applying any XDTs.
+
+.DESCRIPTION
+Used to publish a Sitecore Helix solution to disk. The steps it runs through are:
+
+1. Delete $WebrootOutputPath.
+2. Publish runtime dependencies to $WebrootOutputPath.
+3. Publish all web projects to $WebrootOutputPath, on top of the published runtime dependencies.
+
+.PARAMETER SolutionRootPath
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+Uses the current working directory ($PWD) as a fallback.
+
+.PARAMETER WebrootOutputPath
+The path to where you want your webroot to be published. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER DataOutputPath
+This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
+
+.EXAMPLE
+Publish-HelixSolutionUnconfigured -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
+Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
+
+.NOTES
+General notes
+#>
+Function Publish-HelixSolutionUnconfigured {
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $False)]
@@ -202,21 +235,21 @@ Function Set-HelixSolutionConfiguration {
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
+	
+    If (-not (Test-Path $WebrootOutputPath)) {
+        Throw "Path '$WebrootOutputPath' not found."
+    }
 
     Write-Progress -Activity "Configuring Helix solution" -Status "Applying XML Document Transforms"
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
         Invoke-AllTransforms -SolutionRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
 
-    If (Test-Path -Path $WebrootOutputPath) {
-        Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
-        If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
-            Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
-        }
+    Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
+    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
+        Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
     }
-    Else {
-        Write-Verbose "'$WebrootOutputPath' not found. Skipping removal of XML Document Transform files."
-    }
+    
     Write-Progress -Activity "Configuring Helix solution" -Status "Done." -Completed
 }
 
@@ -231,7 +264,7 @@ Function Invoke-AllTransforms {
         
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
-    )
+    )	
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
         Write-Progress -Activity "Configuring Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
@@ -241,4 +274,4 @@ Function Invoke-AllTransforms {
     }
 }
 
-Export-ModuleMember -Function Publish-HelixSolution, New-HelixSolutionPackage, Set-HelixSolutionConfiguration
+Export-ModuleMember -Function Publish-HelixSolution, Publish-HelixSolutionUnconfigured, Set-HelixSolutionConfiguration
