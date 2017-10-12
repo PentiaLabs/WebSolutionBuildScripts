@@ -60,9 +60,8 @@ Function Publish-HelixSolution {
         [switch]$IgnoreUserSettings
     )
 
-    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
-
     If ($PSCmdlet.ParameterSetName -eq "UseUserSettings") {
+        $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
         $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
         $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
         $WebrootOutputPath = $mergedSettings.webrootOutputPath
@@ -71,32 +70,21 @@ Function Publish-HelixSolution {
         Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
     }
 
-    # 1. Delete $WebrootOutputPath
-    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
-    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+    New-HelixSolutionPackage -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Set-HelixSolutionConfiguration -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+}
 
-    # 2. Publish runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
-    Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+Function Get-SolutionRootPath {
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$SolutionRootPath
+    )
 
-    # 3. Publish all web projects on top of the published runtime dependencies
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
-    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath
-
-    # 4. Invoke configuration transforms
-    Write-Progress -Activity "Publishing Helix solution" -Status "Applying XML transforms"
-    Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
-
-    # 5. Remove Configuration Transforms
-    If (Test-Path -Path $WebrootOutputPath) {
-        Write-Progress -Activity "Publishing Helix solution" -Status "Removing configuration transform files"
-        Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
+        $SolutionRootPath = "$PWD"
+        Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
     }
-    Else {
-        Write-Verbose "'$WebrootOutputPath' not found. Skipping removal of configuration transform files."
-    }
-    
-    Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
+    $SolutionRootPath
 }
 
 Function New-HelixSolutionPackage {
@@ -114,30 +102,16 @@ Function New-HelixSolutionPackage {
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
-    # 1. Delete $WebrootOutputPath
     Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
     Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
 
-    # 2. Publish runtime dependencies
     Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
-    # 3. Publish all web projects on top of the published runtime dependencies
     Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
-    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath
-}
-
-Function Get-SolutionRootPath {
-    Param (
-        [Parameter(Mandatory = $False)]
-        [string]$SolutionRootPath
-    )
-
-    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
-        $SolutionRootPath = "$PWD"
-        Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
-    }
-    $SolutionRootPath
+    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath    
+	
+    Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
 }
 
 Function Remove-WebrootOutputPath {
@@ -198,6 +172,37 @@ Function Publish-AllWebProjects {
     }
 }
 
+# I'd like to call this function "Configure-HelixSolution", 
+# but according to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx 
+# we should use the "Set" verb instead.
+Function Set-HelixSolutionConfiguration {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory = $False)]
+        [string]$SolutionRootPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+		
+        [Parameter(Mandatory = $True)]
+        [string]$BuildConfiguration
+    )
+
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
+
+    Write-Progress -Activity "Configuring Helix solution" -Status "Applying XML Document Transforms"
+    Invoke-AllTransforms -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+
+    If (Test-Path -Path $WebrootOutputPath) {
+        Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
+        Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+    }
+    Else {
+        Write-Verbose "'$WebrootOutputPath' not found. Skipping removal of XML Document Transform files."
+    }
+    Write-Progress -Activity "Configuring Helix solution" -Status "Done." -Completed
+}
+
 Function Invoke-AllTransforms {
     [CmdletBinding()]
     Param (
@@ -212,11 +217,11 @@ Function Invoke-AllTransforms {
     )
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
-        Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML transforms" -CurrentOperation "$xdtFile"
+        Write-Progress -Activity "Configuring Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
         $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
         Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform        
     }
 }
 
-Export-ModuleMember -Function Publish-HelixSolution, New-HelixSolutionPackage
+Export-ModuleMember -Function Publish-HelixSolution, New-HelixSolutionPackage, Set-HelixSolutionConfiguration
