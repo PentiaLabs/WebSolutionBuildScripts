@@ -83,12 +83,21 @@ They serve the same purpose as the corresponding Pentia `\\buildlibrary` modules
 
 Configuration management is done via [XML Document Transforms](https://msdn.microsoft.com/en-us/library/dd465326(v=vs.110).aspx), or "XDTs" for short.
 
+Whether or not a configuration file is a XDT, is determined by the existance of the XML namespace declaration "`xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform`".
+
+#### File placement
+Configuration files and XDTs must be placed according to the following conventions:
 * Configuration files and XDTs must be placed in projects of type "web project".
-* Configuration files and XDTs must be placed in `<project root>\App_Config\[...]`, **except** for XDTs targeting `Web.config`, which must be placed directly in the project root.
+* Sitecore configuration include files and their XDTs must be placed in `<project root>\App_Config\[...]`.
+* XDTs targeting `Web.config` must be placed directly in the project root.
+* XDTs targeting `Web.config` must be named `Web.<Vendor Prefix>.<Helix Layer>(.<Project Group>).<Project Name>.<Build Configuration>.config`, e.g. `Web.Pentia.Feature.Navigation.ProdCM.config`.
 
 E.g.:
 
 ```javascript
+// This file will be ignored, because it should not contain the "xmlns:xdt" XML namespace declaration.
+[...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.config
+
 // This transform will be applied to Web.config, regardless of the build configuration.
 [...]/Pentia.Feature.Search/code/Web.Pentia.Feature.Search.Always.config
 
@@ -102,9 +111,17 @@ E.g.:
 [...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/Serialization.config 
 ```
 
+#### Build Actions
+
 The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all `Web.<Project Name>.config` files in the solution should be set to "None", as they only serve as a way to group configuration transform files targeting the main `Web.config` file shipped with Sitecore.
 
-The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (e.g. `Web.Debug.config`), must be set to "Content".
+![Build Action of `Web.<Project Name>.config` convenience files](/docs/images/web.config-build-action.png)
+
+The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-various-build-action-settings-in-visual-studio-project-properties) of all XDTs, incl. those targeting `Web.config` (i.e. `Web.<Project Name>.<Build Configuration>.config`), must be set to "Content".
+
+![Build Action of `Web.<Project Name>.<Build Configuration>.config` XDT files](/docs/images/web.config-xdt-build-action.png)
+
+![Build Action of Sitecore include files](/docs/images/include.config-build-action.png)
 
 ## Migration guide
 
