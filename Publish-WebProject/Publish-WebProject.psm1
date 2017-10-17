@@ -43,7 +43,7 @@ Function Publish-WebProject {
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
-        $output = (& "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /verbosity:minimal /p:publishUrl="$OutputPath" /p:DeployOnBuild="true" /p:DeployDefaultTarget="WebPublish" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:_FindDependencies="false" /p:MSDeployUseChecksum="true") | Out-String
+        $output = (& "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /p:PublishUrl="$OutputPath" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:MSDeployUseChecksum="true") | Out-String
         If ($LASTEXITCODE -eq 0) {
             Write-Verbose $output
         }
