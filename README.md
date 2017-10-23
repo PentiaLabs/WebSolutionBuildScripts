@@ -19,7 +19,8 @@ Build scripts written in PowerShell, intended to publish Sitecore Helix complian
 * [Setting up Continuous Integration](#setting-up-continuous-integration)
   * [Build Agent setup](#build-agent-setup)
 * [Troubleshooting](#troubleshooting)
-  * [Getting help](#getting-help)
+  * [Getting help for PowerShell commands](#getting-help-for-powershell-commands)
+  * [Debugging project publishing](#debugging-project-publishing)
   * [Build log](#build-log)
   * [Known issues](#known-issues)
 
@@ -358,7 +359,7 @@ Publish-UnconfiguredHelixSolution `
 
 ## Troubleshooting
 
-### Getting help
+### Getting help for PowerShell commands
 
 You can get help for a specific PowerShell cmdlet by running `Get-Help <cmdlet> -Full`. E.g.:
 
@@ -367,6 +368,35 @@ Get-Help Publish-ConfiguredHelixSolution -Full
 
 Get-Help Publish-UnconfiguredHelixSolution -Full
 ``` 
+
+### Debugging project publishing
+
+Under the covers, the build scripts use the ["Publish to Folder"](https://www.google.dk/search?q=msbuild+publish+to+folder) feature of `MSBuild.exe`.
+
+This means that for the scripts to succeed, an important criteria is that all web projects in the solution must be publishable.
+
+You can check whether or not the criteria is fulfilled by opening the solution in Visual Studio, and publishing each web project in turn.
+
+![Publish project](/docs/images/publish-to-folder.png)
+
+#### Missing files
+
+Common causes:
+* The solution hasn't been compiled (with the underlying issue possibly being that NuGet packages haven't been restored).
+* A project contains one or more references to files which are missing from the filesyste, (most often someone has deleted them from the filesystem, but not removed them from the Visual Studio solution).
+
+E.g.:
+
+```
+CopyAllFilesToSingleFolderForPackage:
+  [...]
+  Copying bin\Debug\Netmester.Util.pdb to obj\Debug\Package\PackageTmp\bin\Debug\Netmester.Util.pdb.
+D:\VisualStudio2017\MSBuild\Microsoft\VisualStudio\v15.0\Web\Microsoft.Web.Publishing.targets(3007,5): error : Copying file bin\Debug\Netmester.Util.pdb to obj\Debug\Package\PackageTmp\bin\Debug\Netmester.Util.pdb failed. Could not find file 'bin\Debug\Netmester.Util.pdb
+Done Building Project "D:\Projects\FOF\src\Project\Legacy\FOF.Tests\FOF.Tests.csproj" (WebPublish target(s)) -- FAILED.
+Build FAILED.
+```
+
+![Missing files](/docs/images/missing-files.png)
 
 ### Build log
 In order to enable verbose or debug output for the entire process, run this command in your PowerShell console:
