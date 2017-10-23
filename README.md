@@ -11,6 +11,7 @@ Build scripts written in PowerShell, intended to publish Sitecore Helix complian
   * [Solution specific user settings](#solution-specific-user-settings)
   * [Sitecore and Sitecore modules - runtime dependencies](#sitecore-and-sitecore-modules---runtime-dependencies)
   * [Configuration management](#configuration-management)
+  * [Build script integration](#build-script-integration)
 * [Migration guide](#migration-guide)
 * [Development tool integration](#development-tool-integration)
   * [Visual Studio Task Runner](#visual-studio-task-runner)
@@ -116,6 +117,65 @@ The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-vario
 `[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's `Build Action` should be `Content`.
 
 `[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.Debug.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's `Build Action` should be `Content`. It will be applied to `<webroot\>/App_Config/Include/[...]/ServiceConfigurator.config`, if the build configuration is set to `debug` (`[...].Debug.config`).
+
+
+### Build script integration
+
+Shown below is a build script example which does the following:
+
+1. Restore NuGet packages using a [globally available `NuGet.exe`](https://docs.microsoft.com/en-us/nuget/tools/nuget-exe-cli-reference).
+2. Compile the solution using the latest version of `MSBuild.exe` available on the machine.
+3. Publish the solution to a designated webroot and data folder - the user is prompted for these values once, which are then stored as [solution specific user settings](#solution-specific-user-settings).
+4. Copy a Sitecore license from Pentia's buildlibrary NAS to the website's data folder.
+
+The script should be placed in the same directory as the solution's `.sln` file.
+
+```powershell
+Function RestoreNuGetPackages {
+    & "nuget.exe" "restore" "$PSScriptRoot" *>> $script:buildLogFilePath
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "NuGet packages restored successfully. Build log written to '$script:buildLogFilePath'"
+    }
+    else {
+        Throw "NuGet package restore failed. Build log written to '$script:buildLogFilePath'"
+    }
+}
+
+Function BuildSolution {    
+    $msBuild = Get-MSBuild
+    & "$msBuild" "$PSScriptRoot" *>> $script:buildLogFilePath
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Solution compilation succeeded. Build log written to '$script:buildLogFilePath'"
+    }
+    else {
+        Throw "Solution compilation failed. Build log written to '$script:buildLogFilePath'"
+    }
+}
+
+Try
+{
+    Import-Module Publish-HelixSolution -MinimumVersion "0.5.1" -Force -ErrorAction Stop
+
+    $buildLogFilePath = "$PSScriptRoot\.pentia\build-$(Get-Date -Format "yyyy-MM-dd.HH.mm.ss").log"
+
+    # Build and publish solution
+    RestoreNuGetPackages
+    BuildSolution
+    Publish-ConfiguredHelixSolution -SolutionRootPath $PSScriptRoot | Out-Null
+
+    # Load user settings
+    $settings = Get-UserSettings -SolutionRootPath $PSScriptRoot
+
+    # Copy Pentia Sitecore license
+    Copy-Item "\\buildlibrary.hq.pentia.dk\library\Sitecore License\Pentia 8.x\www\Data\pentia.license.xml" "$($settings.dataOutputPath)\license.xml" -ErrorAction Stop
+
+    Write-Host "Done."
+
+} Catch {
+    Write-Error -Exception $_.Exception
+    Exit 1
+}
+```
 
 ## Migration guide
 
