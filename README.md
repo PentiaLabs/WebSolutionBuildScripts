@@ -18,15 +18,44 @@ Build scripts written in PowerShell, intended to publish Sitecore Helix complian
   * [NPM](#npm)
   * [Gulp](#gulp)
 * [Setting up Continuous Integration](#setting-up-continuous-integration)
-  * [Build Agent setup](#build-agent-setup)
+  * [TeamCity CI](#teamcity-ci)
+* [Setting up Continuous Delivery](#setting-up-continuous-delivery)
+  * [TeamCity CD](#teamcity-cd)
+  * [Octopus Deploy](#octopus-deploy)
 * [Troubleshooting](#troubleshooting)
   * [Getting help for PowerShell commands](#getting-help-for-powershell-commands)
   * [Debugging project publishing](#debugging-project-publishing)
   * [Build log](#build-log)
   * [Known issues](#known-issues)
 
-## Build Status
+## Release management
 ![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/11/badge)
+
+To create a new release of the Sitecore Helix Build Scripts, do the following:
+
+1. Update all `.psd` files with the new script version as appropriate.
+2. Run `Publish-AllModules.ps1`.
+3. Update all TeamCity build agents using the script shown below.
+
+```powershell
+Function Invoke-CommandOnMachine {
+    Param (      
+      [string[]] $MachineNames,
+      [string] $UserName,
+      [string] $Password
+    )
+    
+    $passwordAsSecureString = ConvertTo-SecureString -AsPlainText $Password -Force
+    $credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $UserName,$passwordAsSecureString
+
+    Invoke-Command -ComputerName $MachineNames -ScriptBlock { 
+        Install-Module "Publish-HelixSolution" -Force
+        Get-Module "Publish-HelixSolution" -ListAvailable
+    } -Credential $credentials
+}
+
+Invoke-CommandOnMachine -MachineNames teambuild01 -UserName "teamcity" -Password "<PASSWORD GOES HERE>"
+```
 
 ## Prerequisites
 
@@ -398,24 +427,78 @@ powershell.runAsync("C:\path\to\your\file.ps1", "-arguments here", callback);
 
 ## Setting up Continuous Integration
 
-### Build Agent setup
+A typical CI build should do the following:
 
-See [Installation](#installation) instructions above - these are the same for build agents.
+1. Restore NuGet packages using `NuGet.exe`.
+2. Compile the solution using `MSBuild.exe`.
+3. Run `Publish-ConfiguredHelixSolution`, providing all required parameters.
+    * Have the build agent publish the solution to a subdirectory. This allows e.g. TeamCity to create the output in a temporary build agent working directory which is cleaned up periodically.
+    * Make sure that the solution root path is set correctly. Usually the easiest way to do this is by ensuring that the build agent's working directory is the same as the VCS checkout root, as most of our solutions have the `.sln` file located in the VCS root.
 
-### Usage
-
-1. Run `Publish-UnconfiguredHelixSolution`.
-2. Specify all required parameters.
-3. Have the build agent publish the solution to a relative path. This allows e.g. TeamCity to create the output in a temporary build agent working directory which is cleaned up periodically.
-4. Make sure that the solution root path is set correctly. Usually the easiest way to do this is by ensuring that the build agent's working directory is the same as the VCS checkout root, as most of our solutions have the `.sln` file located in the VCS root.
+### TeamCity CI
 
 Example:
+
 ```powershell
-Publish-UnconfiguredHelixSolution `
--SolutionRootPath "." `
--WebrootOutputPath ".\PackagePath\Webroot" `
--DataOutputPath ".\PackagePath\Data"
+Try {
+  Import-Module "Publish-HelixSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"
+  $VerbosePreference = "Continue" 
+  Publish-ConfiguredHelixSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\output\Webroot" -DataOutputPath "$PWD\output\Data" -BuildConfiguration "Debug" -Verbose
+} Catch {
+  Write-Error -Exception $_.Exception
+  Exit 1
+} Finally {
+  $VerbosePreference = "SilentlyContinue"
+}
 ```
+
+*[`$PWD`](https://www.google.dk/search?q=PowerShell+%24PWD) is the absolute path to the current directory.*
+
+![TeamCity CI configuration example](/docs/images/team-city-ci-example.png)
+
+## Setting up Continuous Delivery
+
+This is basically the same as for [CI](#setting-up-continuous-integration) described earlier:
+
+1. *Same*
+2. *Same*
+3. Run `Publish-UnconfiguredHelixSolution`, providing all required parameters.
+    * *Same*
+    * *Same*
+4. Create a package based on the output, using `NuGet.exe pack [...].nuspec`.
+5. Push the package to e.g. Octopus Deploy.
+
+### TeamCity CD
+
+```powershell
+Try {
+  Import-Module "Publish-HelixSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"  
+  Publish-UnconfiguredHelixSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\Output\Webroot" -DataOutputPath "$PWD\Output\Data"
+} Catch {
+  Write-Error -Exception $_.Exception
+  Exit 1
+}
+```
+
+![TeamCity CD configuration example](/docs/images/team-city-cd-example.png)
+
+### Octopus Deploy
+
+The [guidelines reg. configuration management](#configuration-management) dictate the way Octopus Deploy should apply additional XML Document Tranforms:
+
+1. Ensure the solution complies to the [configuration management guidelines](#configuration-management).
+2. Enable the "Configuration Transforms" feature in Octopus.
+3. Enable the "Automatically run configuration transform files" option.
+4. Add the following as additional transforms (this ensures that e.g. `web.Pentia.Foundation.Search.Always.config` and `web.Pentia.Foundation.Search.Debug.config` is applied to `web.config`): 
+    * `App_Config/**/*.Always.config => *.config`
+    * `web.*.Always.config => web.config`
+    * `web.*.#{Octopus.Environment.Name}.config => web.config`
+
+5. Add any additional transforms as required by the solution. *E.g. `web*.#{Octopus.Machine.Name}.config => web.config` - see the official documentation on [Octopus Deploy System Variables](https://octopus.com/docs/deploying-applications/variables/system-variables) for inspiration on how to split up configuration differences.*
+
+![Octopus Deploy enabled features](/docs/images/octopus-deploy-enabled-features.png)
+
+![Octopus Deploy additional transforms](/docs/images/octopus-deploy-additional-transforms.png)
 
 ## Troubleshooting
 
@@ -459,17 +542,15 @@ Build FAILED.
 ![Missing files](/docs/images/missing-files.png)
 
 ### Build log
-In order to enable verbose or debug output for the entire process, run this command in your PowerShell console:
+In order to enable verbose output for the entire process, run this command in your PowerShell console:
 
 ```powershell
-set "$PSDefaultParameterValues['*:Verbose'] = $True" # enables Verbose output
+$VerbosePreference = "Continue"
 ```
 
-If you want to debug the build process, you can enable the debug flag:
+Then run the `Publish-ConfiguredHelixSolution` or `Publish-UnconfiguredHelixSolution` commands with the `-Verbose` flag.
 
-```powershell
-set "$PSDefaultParameterValues['*:Debug'] = $True" # enables Debug output
-```
+![Verbose cmdlet output](/docs/images/verbose-output.png)
 
 Piping build output to a file is done by using [redirects](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_redirection?view=powershell-5.1).
 
