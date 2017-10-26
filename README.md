@@ -147,6 +147,17 @@ The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-vario
 
 `[...]/Pentia.Feature.Search/code/App_Config/Include/Pentia/Feature/Search/ServiceConfigurator.Debug.config` - this file will be copied to `<webroot>/App_Config/Include/[...]/ServiceConfigurator.config`, because it's `Build Action` should be `Content`. It will be applied to `<webroot\>/App_Config/Include/[...]/ServiceConfigurator.config`, if the build configuration is set to `debug` (`[...].Debug.config`).
 
+#### SlowCheetah NuGet package
+
+**Make sure SlowCheetah is not installed in any projects!**
+
+It's important that SlowCheetah is **not** installed as a NuGet package in any of the projects in the solution, as it will add a build target which is triggered each time the solution is built, including during publish. 
+
+This will usually cause the `Debug` XDT to be applied, even when another `BuildConfiguration` is specified from the command line when calling `Publish-ConfiguredHelixSolution` or `Publish-UnconfiguredHelixSolution`.
+
+![SlowCheetah NuGet package](/docs/images/slow-cheetah-nuget-package.png)
+
+![SlowCheetah build target in csproj](/docs/images/slow-cheetah-build-target.png)
 
 ### Build script integration
 

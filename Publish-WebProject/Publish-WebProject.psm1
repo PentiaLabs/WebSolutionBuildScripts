@@ -22,11 +22,13 @@
 Function Publish-WebProject {
     [CmdletBinding()]
     Param (
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline)]
+        [Parameter(Mandatory = $True, ValueFromPipeline)]
         [string]$WebProjectFilePath,
-        [Parameter(Position = 1, Mandatory = $True)]
+        
+        [Parameter(Mandatory = $True)]
         [string]$OutputPath,
-        [Parameter(Position = 2, Mandatory = $False)]
+
+        [Parameter(Mandatory = $False)]
         [string]$MSBuildExecutablePath
     )
 		
