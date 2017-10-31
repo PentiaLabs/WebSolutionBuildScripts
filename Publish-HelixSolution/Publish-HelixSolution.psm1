@@ -34,8 +34,8 @@ Publishes the solution using the saved user settings found in "<current director
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
-    set "$PSDefaultParameterValues['*:Verbose'] = $True"
-    set "$PSDefaultParameterValues['*:Debug'] = $True"
+    $VerbosePreference = "Continue"
+    $DebugPreference = "Continue"
 #> 
 Function Publish-ConfiguredHelixSolution {
     [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
@@ -140,8 +140,8 @@ Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionS
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
-    set "$PSDefaultParameterValues['*:Verbose'] = $True"
-    set "$PSDefaultParameterValues['*:Debug'] = $True"
+    $VerbosePreference = "Continue"
+    $DebugPreference = "Continue"
 #>
 Function Publish-UnconfiguredHelixSolution {
     [CmdletBinding(SupportsShouldProcess = $True)]
@@ -247,8 +247,8 @@ Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" dir
 
 .NOTES
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
-    set "$PSDefaultParameterValues['*:Verbose'] = $True"
-    set "$PSDefaultParameterValues['*:Debug'] = $True"
+    $VerbosePreference = "Continue"
+    $DebugPreference = "Continue"
     
 We'd like to call this function "Configure-HelixSolution", but according 
 to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
@@ -297,7 +297,7 @@ Function Invoke-AllTransforms {
         Write-Progress -Activity "Configuring Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
         $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
-        Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform        
+        Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform -Encoding UTF8
     }
 }
 

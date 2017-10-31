@@ -17,10 +17,9 @@ Describe "Assert-WebProjectConsistency" {
                     <Error Condition=`"!Exists('..\..\..\..\packages\SlowCheetah.2.5.48\build\SlowCheetah.targets')`" Text=`"`$([System.String]::Format('`$(ErrorText)', '..\..\..\..\packages\SlowCheetah.2.5.48\build\SlowCheetah.targets'))`" />
                   </Target>
                 </Project>"
-                $projectFileContents = [System.Xml.Linq.XDocument]::Parse($projectFileWithSlowCheetah)
   
                 # Act
-                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileContents
+                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileWithSlowCheetah
   
                 # Assert
                 $containsSlowCheetah | Should Be $True
@@ -38,10 +37,9 @@ Describe "Assert-WebProjectConsistency" {
                     <Error Condition=`"!Exists('..\..\..\..\packages\SlowCheetos.2.5.48\build\SlowCheetos.targets')`" Text=`"`$([System.String]::Format('`$(ErrorText)', '..\..\..\..\packages\SlowCheetos.2.5.48\build\SlowCheetos.targets'))`" />
                   </Target>
                 </Project>"
-                $projectFileContents = [System.Xml.Linq.XDocument]::Parse($projectFileWithoutSlowCheetah)
 
                 # Act
-                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileContents
+                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileWithoutSlowCheetah
 
                 # Assert
                 $containsSlowCheetah | Should Be $False
@@ -61,7 +59,7 @@ Describe "Assert-WebProjectConsistency" {
                 </Project>"
 
                 # Act
-                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Debug" -ProjectFileContents ([System.Xml.Linq.XDocument]::Parse($projectFileContents))
+                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Debug" -ProjectFileContents $projectFileContents
 
                 # Assert
                 $hasCorrectBuildAction | Should Be $False
@@ -79,7 +77,7 @@ Describe "Assert-WebProjectConsistency" {
                 </Project>"
 
                 # Act
-                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Release" -ProjectFileContents ([System.Xml.Linq.XDocument]::Parse($projectFileContents))
+                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Release" -ProjectFileContents $projectFileContents
 
                 # Assert
                 $hasCorrectBuildAction | Should Be $True
@@ -97,7 +95,7 @@ Describe "Assert-WebProjectConsistency" {
                 </Project>"
 
                 # Act
-                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents  ([System.Xml.Linq.XDocument]::Parse($projectFileContents))
+                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents $projectFileContents
 
                 # Assert
                 $containsFilesWithReservedName | Should Be $True
@@ -113,7 +111,7 @@ Describe "Assert-WebProjectConsistency" {
                 </Project>"
 
                 # Act
-                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents  ([System.Xml.Linq.XDocument]::Parse($projectFileContents))
+                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents $projectFileContents
 
                 # Assert
                 $containsFilesWithReservedName | Should Be $False

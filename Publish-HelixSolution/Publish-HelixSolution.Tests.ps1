@@ -79,6 +79,22 @@ Describe "Publish-HelixSolution" {
         )
         Publish-ConfiguredHelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
     }
+    
+    It "should save configuration files in the correct encoding" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution         
+        $ae = [char]0x00E6 # This avoid issues due to the encoding of the test file itself.
+        $oe = [char]0x00F8
+        $aa = [char]0x00E5
+            
+        # Act
+        Publish-TestSolution -SolutionRootPath $solutionRootPath
+            
+        # Assert
+        [xml]$transformedWebConfig = Get-Content -Path "$TestDrive\Website\Web.config" -Encoding UTF8
+        $utfChars = $transformedWebConfig | Select-Xml "//@utf-chars" | Select-Object -ExpandProperty "Node"
+        $utfChars.Value | Should Be "$ae$oe$aa"
+    }
 
     It "should save function parameters as user settings by default" {
         # Arrange    

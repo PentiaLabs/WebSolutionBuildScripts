@@ -30,20 +30,20 @@ Function Assert-WebProjectConsistency {
         Throw "File '$ProjectFilePath' not found."
     }
 
-    $ProjectFileContents = [System.Xml.Linq.XDocument]::Load($ProjectFilePath)
-    If (Test-SlowCheetah -ProjectFileContents $ProjectFileContents) {
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+    If (Test-SlowCheetah -ProjectFileContents $projectFileContents) {
         Write-Error "Found SlowCheetah references in the project '$ProjectFilePath'."
     }
     
-    If (Test-XdtBuildActionContent -ProjectFileContents $ProjectFileContents -BuildConfiguration $BuildConfiguration) {
+    If (Test-XdtBuildActionContent -ProjectFileContents $projectFileContents -BuildConfiguration $BuildConfiguration) {
         Write-Error "Found XDT with incorrect build action in the project '$ProjectFilePath'."
     }
 
-    If (Test-ReservedFileName -ProjectFileContents $ProjectFileContents) {
+    If (Test-ReservedFileName -ProjectFileContents $projectFileContents) {
         Write-Error "Found content with reserved file name in the project '$ProjectFilePath'."
     }
     
-    If (-not (Test-XmlFileEncoding -Path $ProjectFilePath)) {
+    If (-not (Test-XmlFileEncoding -Path $projectFileContents)) {
         Write-Error "Found files with incorrect encoding in the project '$ProjectFilePath'."
     }
 }
@@ -51,9 +51,9 @@ Function Assert-WebProjectConsistency {
 Function Test-SlowCheetah {
     Param(
         [Parameter(Mandatory = $True)]
-        [System.Xml.Linq.XDocument]$ProjectFileContents
+        [xml]$ProjectFileContents
     )
-    If ($ProjectFileContents.ToString() -match "SlowCheetah") {
+    If ($ProjectFileContents.OuterXml -match "SlowCheetah") {
         Write-Warning "Found SlowCheetah references in the project."
         return $True
     }
@@ -63,7 +63,7 @@ Function Test-SlowCheetah {
 Function Test-XdtBuildActionContent {
     Param(
         [Parameter(Mandatory = $True)]
-        [System.Xml.Linq.XDocument]$ProjectFileContents,
+        [xml]$ProjectFileContents,
 
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
@@ -89,15 +89,15 @@ Function Test-XdtBuildActionContent {
 Function Get-ElementsWithIncludeAttribute {
     Param(
         [Parameter(Mandatory = $True)]
-        [System.Xml.Linq.XDocument]$Xml
+        [xml]$Xml
     )
-    return Select-Xml -Xml ([xml]$Xml.ToString()) -XPath "//*[@Include != '']" | Select-Object -ExpandProperty "Node"
+    return Select-Xml -Xml $Xml -XPath "//*[@Include != '']" | Select-Object -ExpandProperty "Node"
 }
 
 Function Test-ReservedFileName {
     Param(
         [Parameter(Mandatory = $True)]
-        [System.Xml.Linq.XDocument]$ProjectFileContents
+        [xml]$ProjectFileContents
     )
     $reservedFileNames = @("Web.config")
     $elements = Get-ElementsWithIncludeAttribute -Xml $ProjectFileContents
@@ -119,14 +119,16 @@ Function Test-XmlFileEncoding {
         [Parameter(Mandatory = $True)]
         $Path
     )
-    $fileContents = Get-Content $Path
-    $xml = [System.Xml.Linq.XDocument]::Parse($fileContents)
-    $normalizedXmlEncoding = $xml.Declaration.Encoding -replace "\W", "" # "utf-8" -> "utf8"
+    [xml]$xml = Get-Content $Path
+    $xmlEncoding = $xml.ChildNodes | Where-Object { 
+        $_.NodeType -eq "XmlDeclaration" 
+    } | Select-Object -ExpandProperty "encoding"
+    $normalizedXmlEncoding = $xmlEncoding -replace "\W", "" # "utf-8" -> "utf8"
     $fileEncoding = Get-FileEncoding -Path $Path
     If ($normalizedXmlEncoding.Equals($fileEncoding, [System.StringComparison]::InvariantCultureIgnoreCase)) {
         return $True
     }
-    Write-Warning "Found file '$Path' saved as encoding '$fileEncoding', which doesn't match XML declaration encoding '$($xml.Declaration.Encoding)'."
+    Write-Warning "Found file '$Path' saved as encoding '$fileEncoding', which doesn't match XML declaration encoding '$xmlEncoding'."
     $False
 }
 

@@ -4,7 +4,7 @@
     RootModule        = 'Assert-WebProjectConsistency.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.5.1'
+    ModuleVersion     = '0.5.2'
 
     # ID used to uniquely identify this module
     GUID              = '3c3eabeb-7ac7-41b3-a1f9-74596966cfcb'
