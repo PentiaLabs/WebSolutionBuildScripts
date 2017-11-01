@@ -51,6 +51,7 @@ Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Fo
   * [Octopus Deploy](/docs/devops.md#octopus-deploy)
 * [Troubleshooting](/docs/troubleshooting.md)
   * [Getting help for PowerShell commands](/docs/troubleshooting.md#getting-help-for-powershell-commands)
+  * [Running sanity checks](/docs/troubleshooting.md#running-sanity-checks)
   * [Debugging project publishing](/docs/troubleshooting.md#debugging-project-publishing)
   * [Build log](/docs/troubleshooting.md#build-log)
   * [Known issues](/docs/troubleshooting.md#known-issues)
