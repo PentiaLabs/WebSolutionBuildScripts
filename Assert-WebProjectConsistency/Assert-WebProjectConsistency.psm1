@@ -19,32 +19,41 @@ The current build configuration.
 Assert-WebProjectConsistency -ProjectFilePath "D:\Projects\MySolution\src\MyProject\code\MyProject.csproj" -BuildConfiguration "Staging"
 #>
 Function Assert-WebProjectConsistency {
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Scope='Function')]
     Param(
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $True, ValueFromPipeline = $True)]
         [string]$ProjectFilePath,
         
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
-    If (-not (Test-Path $ProjectFilePath -PathType Leaf)) {
-        Throw "File '$ProjectFilePath' not found."
-    }
-
-    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
-    If (Test-SlowCheetah -ProjectFileContents $projectFileContents) {
-        Write-Error "Found SlowCheetah references in the project '$ProjectFilePath'."
-    }
+    Process {
+        If (-not (Test-Path $ProjectFilePath -PathType Leaf)) {
+            Throw "File '$ProjectFilePath' not found."
+        }
+        [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+        
+        Write-Host "Processing '$ProjectFilePath'..."
+        
+        Write-Host "Checking for SlowCheetah..."
+        If (-not (Test-SlowCheetah -ProjectFileContents $projectFileContents)) {
+            Write-Host "SlowCheetah is not installed." -ForegroundColor Green
+        }
     
-    If (Test-XdtBuildActionContent -ProjectFileContents $projectFileContents -BuildConfiguration $BuildConfiguration) {
-        Write-Error "Found XDT with incorrect build action in the project '$ProjectFilePath'."
-    }
-
-    If (Test-ReservedFileName -ProjectFileContents $projectFileContents) {
-        Write-Error "Found content with reserved file name in the project '$ProjectFilePath'."
-    }
+        Write-Host "Checking for XDT build actions..."
+        If (Test-XdtBuildActionContent -ProjectFileContents $projectFileContents -BuildConfiguration $BuildConfiguration) {
+            Write-Host "Build action of XDTs is 'Content'." -ForegroundColor Green
+        }
     
-    If (-not (Test-XmlFileEncoding -Path $projectFileContents)) {
-        Write-Error "Found files with incorrect encoding in the project '$ProjectFilePath'."
+        Write-Host "Checking for reserved file names..."
+        If (-not (Test-ReservedFileName -ProjectFileContents $projectFileContents)) {
+            Write-Host "Reserved file names are not used." -ForegroundColor Green
+        }
+    
+        Write-Host "Checking for correct file encoding..."
+        If (Test-XmlFileEncoding -Path $ProjectFilePath) {
+            Write-Host "File encoding matches encoding specified in XML declaration." -ForegroundColor Green
+        }
     }
 }
 
@@ -117,7 +126,7 @@ Function Test-ReservedFileName {
 Function Test-XmlFileEncoding {
     Param(
         [Parameter(Mandatory = $True)]
-        $Path
+        [string]$Path
     )
     [xml]$xml = Get-Content $Path
     $xmlEncoding = $xml.ChildNodes | Where-Object { 
@@ -136,7 +145,7 @@ Function Test-XmlFileEncoding {
 Function Get-FileEncoding {
     Param(
         [Parameter(Mandatory = $True)]
-        $Path
+        [string]$Path
     )
     $bytes = [byte[]](Get-Content $Path -Encoding byte -ReadCount 4 -TotalCount 4)
 

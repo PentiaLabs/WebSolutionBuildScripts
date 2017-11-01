@@ -10,6 +10,17 @@ Get-Help Publish-ConfiguredHelixSolution -Full
 Get-Help Publish-UnconfiguredHelixSolution -Full
 ``` 
 
+### Running sanity checks
+
+There are a variety of sanity checks which can be executed by running the following in the solution root:
+
+```powershell
+Install-Module "Assert-WebProjectConsistency" -Force
+Get-SitecoreHelixProject | Assert-WebProjectConsistency -BuildConfiguration "Staging"
+```
+
+![Sample output of Assert-WebProjectConsistency](/docs/images/assert-webprojectconsistency-example.png)
+
 ### Debugging project publishing
 
 Under the covers, the build scripts use the ["Publish to Folder"](https://www.google.dk/search?q=msbuild+publish+to+folder) feature of `MSBuild.exe`.
