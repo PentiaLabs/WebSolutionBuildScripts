@@ -46,7 +46,7 @@ Function Assert-WebProjectConsistency {
         }
     
         Write-Host "Checking for reserved file names..."
-        If (-not (Test-ReservedFileName -ProjectFileContents $projectFileContents)) {
+        If (-not (Test-ReservedFilePath -ProjectFileContents $projectFileContents)) {
             Write-Host "Reserved file names are not used." -ForegroundColor Green
         }
     
@@ -103,20 +103,19 @@ Function Get-ElementsWithIncludeAttribute {
     return Select-Xml -Xml $Xml -XPath "//*[@Include != '']" | Select-Object -ExpandProperty "Node"
 }
 
-Function Test-ReservedFileName {
+Function Test-ReservedFilePath {
     Param(
         [Parameter(Mandatory = $True)]
         [xml]$ProjectFileContents
     )
-    $reservedFileNames = @("Web.config")
+    $reservedFilePaths = @("Web.config")
     $elements = Get-ElementsWithIncludeAttribute -Xml $ProjectFileContents
     $containsReservedFileName = $False
     foreach ($element in $elements) {
         $filePath = $element.GetAttribute("Include")
-        $fileName = [System.IO.Path]::GetFileName($filePath)
         $buildAction = $element.LocalName
-        If ($reservedFileNames -contains $fileName -and $buildAction -eq "Content") {
-            Write-Warning "Found file reference '$filePath' using reserved name '$fileName' with build action '$buildAction'."
+        If ($reservedFilePaths -contains $filePath -and $buildAction -eq "Content") {
+            Write-Warning "Found file reference '$filePath' using reserved path '$filePath' with build action '$buildAction'."
             $containsReservedFileName = $True
         }
     }

@@ -84,21 +84,21 @@ Describe "Assert-WebProjectConsistency" {
             }
         }
 
-        Describe "Test-ReservedFileName" {
+        Describe "Test-ReservedFilePath" {
             It "should warn about files named ""Web.config""" {
                 # Arrange
                 $projectFileContents = "<?xml version=`"1.0`" encoding=`"utf-8`"?>
                 <Project ToolsVersion=`"14.0`" DefaultTargets=`"Build`" xmlns=`"http://schemas.microsoft.com/developer/msbuild/2003`">
                   <ItemGroup>
-                    <Content Include=`"App_Config\Web.config`"></Content>
+                    <Content Include=`"Web.config`"></Content>
                   </ItemGroup>
                 </Project>"
 
                 # Act
-                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents $projectFileContents
+                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFileContents $projectFileContents
 
                 # Assert
-                $containsFilesWithReservedName | Should Be $True
+                $containsFilesWithReservedPath | Should Be $True
             }
 
             It "should ignore irrelevant file names" {
@@ -106,15 +106,16 @@ Describe "Assert-WebProjectConsistency" {
                 $projectFileContents = "<?xml version=`"1.0`" encoding=`"utf-8`"?>
                 <Project ToolsVersion=`"14.0`" DefaultTargets=`"Build`" xmlns=`"http://schemas.microsoft.com/developer/msbuild/2003`">
                   <ItemGroup>
-                    <Content Include=`"App_Config\Website.config`"></Content>
+                    <Content Include=`"Views\Web.config`"></Content>
+                    <Content Include=`"App_Config\Web.config`"></Content>
                   </ItemGroup>
                 </Project>"
 
                 # Act
-                $containsFilesWithReservedName = Test-ReservedFileName -ProjectFileContents $projectFileContents
+                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFileContents $projectFileContents
 
                 # Assert
-                $containsFilesWithReservedName | Should Be $False
+                $containsFilesWithReservedPath | Should Be $False
             }
         }
 
