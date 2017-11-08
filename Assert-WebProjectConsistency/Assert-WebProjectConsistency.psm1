@@ -19,7 +19,7 @@ The current build configuration.
 Assert-WebProjectConsistency -ProjectFilePath "D:\Projects\MySolution\src\MyProject\code\MyProject.csproj" -BuildConfiguration "Staging"
 #>
 Function Assert-WebProjectConsistency {
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Scope='Function')]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingWriteHost', '', Scope = 'Function')]
     Param(
         [Parameter(Mandatory = $True, ValueFromPipeline = $True)]
         [string]$ProjectFilePath,
@@ -48,6 +48,11 @@ Function Assert-WebProjectConsistency {
         Write-Host "Checking for reserved file names..."
         If (-not (Test-ReservedFilePath -ProjectFileContents $projectFileContents)) {
             Write-Host "Reserved file names are not used." -ForegroundColor Green
+        }
+        
+        Write-Host "Checking for XML declaration..."
+        If (Test-XmlDeclaration -Path $ProjectFilePath) {
+            Write-Host "XML declaration found." -ForegroundColor Green
         }
     
         Write-Host "Checking for correct file encoding..."
@@ -122,18 +127,37 @@ Function Test-ReservedFilePath {
     $containsReservedFileName
 }
 
-Function Test-XmlFileEncoding {
+Function Test-XmlDeclaration {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$Path
+    )
+    $measurement = Get-XmlDeclaration $Path | Measure-Object
+    If ($measurement.Count -eq 0) {
+        Write-Warning "File '$Path' doesn't contain an XML declaration."
+        return $False
+    }
+    $True
+}
+
+Function Get-XmlDeclaration {
     Param(
         [Parameter(Mandatory = $True)]
         [string]$Path
     )
     [xml]$xml = Get-Content $Path
-    $xmlEncoding = $xml.ChildNodes | Where-Object { 
-        $_.NodeType -eq "XmlDeclaration" 
-    } | Select-Object -ExpandProperty "encoding"
+    $xml.ChildNodes | Where-Object { $_.NodeType -eq "XmlDeclaration" }
+}
+
+Function Test-XmlFileEncoding {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$Path
+    )
+    $xmlEncoding = Get-XmlDeclaration $Path | Select-Object -ExpandProperty "encoding"
     $normalizedXmlEncoding = $xmlEncoding -replace "\W", "" # "utf-8" -> "utf8"
     $fileEncoding = Get-FileEncoding -Path $Path
-    If ($normalizedXmlEncoding.Equals($fileEncoding, [System.StringComparison]::InvariantCultureIgnoreCase)) {
+    If ($fileEncoding.Equals($normalizedXmlEncoding, [System.StringComparison]::InvariantCultureIgnoreCase)) {
         return $True
     }
     Write-Warning "Found file '$Path' saved as encoding '$fileEncoding', which doesn't match XML declaration encoding '$xmlEncoding'."

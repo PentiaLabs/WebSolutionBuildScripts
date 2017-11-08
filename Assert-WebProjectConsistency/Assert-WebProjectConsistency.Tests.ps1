@@ -118,8 +118,46 @@ Describe "Assert-WebProjectConsistency" {
                 $containsFilesWithReservedPath | Should Be $False
             }
         }
+        
+        Describe "Test-XmlDeclaration" {
+            It "should detect existance of an XML declaration" {
+                # Arrange
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value "<?xml version=`"1.0`" encoding=`"utf-8`"?><Project />" -Encoding UTF8
+            
+                # Act
+                $hasXmlDeclaration = Test-XmlDeclaration -Path $filePath
+            
+                # Assert
+                $hasXmlDeclaration | Should Be $True
+            }
+        
+            It "should detect missing XML declaration" {
+                # Arrange
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value "<Project />" -Encoding UTF8
+        
+                # Act
+                $hasXmlDeclaration = Test-XmlDeclaration -Path $filePath
+        
+                # Assert
+                $hasXmlDeclaration | Should Be $False
+            }
+        }
 
-        Describe "Test-XmlFileEncoding" {
+        Describe "Test-XmlFileEncoding" {          
+            It "should handle missing XML declaration" {
+                # Arrange
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value "<Project />" -Encoding Ascii
+          
+                # Act
+                $hasCorrectEncoding = Test-XmlFileEncoding -Path $filePath
+
+                # Assert
+                $hasCorrectEncoding | Should Be $False
+            }
+
             It "should detect file encoding match" {
                 # Arrange
                 $filePath = "$TestDrive/sample.config"
