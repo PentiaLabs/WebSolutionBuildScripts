@@ -4,7 +4,7 @@ A typical CI build should do the following:
 
 1. Restore NuGet packages using `NuGet.exe`.
 2. Compile the solution using `MSBuild.exe`.
-3. Run `Publish-ConfiguredHelixSolution`, providing all required parameters.
+3. Run `Publish-ConfiguredWebSolution`, providing all required parameters.
     * Have the build agent publish the solution to a subdirectory. This allows e.g. TeamCity to create the output in a temporary build agent working directory which is cleaned up periodically.
     * Make sure that the solution root path is set correctly. Usually the easiest way to do this is by ensuring that the build agent's working directory is the same as the VCS checkout root, as most of our solutions have the `.sln` file located in the VCS root.
 
@@ -14,9 +14,9 @@ Example:
 
 ```powershell
 Try {
-  Import-Module "Publish-HelixSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"
+  Import-Module "Publish-WebSolution" -MinimumVersion "0.6.0" -Force -ErrorAction "Stop"
   $VerbosePreference = "Continue" 
-  Publish-ConfiguredHelixSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\output\Webroot" -DataOutputPath "$PWD\output\Data" -BuildConfiguration "Debug" -Verbose
+  Publish-ConfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\output\Webroot" -DataOutputPath "$PWD\output\Data" -BuildConfiguration "Debug" -Verbose
 } Catch {
   Write-Error -Exception $_.Exception
   Exit 1
@@ -35,7 +35,7 @@ This is basically the same as for [CI](#setting-up-continuous-integration) descr
 
 1. *Same*
 2. *Same*
-3. Run `Publish-UnconfiguredHelixSolution`, providing all required parameters.
+3. Run `Publish-UnconfiguredWebSolution`, providing all required parameters.
     * *Same*
     * *Same*
 4. Create a package based on the output, using `NuGet.exe pack [...].nuspec`.
@@ -45,8 +45,8 @@ This is basically the same as for [CI](#setting-up-continuous-integration) descr
 
 ```powershell
 Try {
-  Import-Module "Publish-HelixSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"  
-  Publish-UnconfiguredHelixSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\Output\Webroot" -DataOutputPath "$PWD\Output\Data"
+  Import-Module "Publish-WebSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"  
+  Publish-UnconfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\Output\Webroot" -DataOutputPath "$PWD\Output\Data"
 } Catch {
   Write-Error -Exception $_.Exception
   Exit 1

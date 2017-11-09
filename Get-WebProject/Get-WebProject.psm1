@@ -1,32 +1,25 @@
 <#
 .SYNOPSIS
-Gets the paths to web project files in the subdirectories of the solution root path, and allows filtering based on Helix solution layer.
+Gets the paths to web project files in the subdirectories of the solution root path.
 
 .PARAMETER SolutionRootPath
 The absolute or relative solution root path.
-
-.PARAMETER HelixLayer
-The Helix layer in which to search for web projects. Defaults to $Null, which includes all layers.
 
 .PARAMETER ExcludeFilter
 Specifies which folders do exclude in the search. Defaults to "node_modules", "bower_components", "obj" and "bin".
 
 .EXAMPLE
-Get-SitecoreHelixProject -SolutionRootPath "C:\Path\To\MySolution" -HelixLayer Foundation
-Get all web projects in the "Foundation" layer.
+Get-WebProject -SolutionRootPath "C:\Path\To\MySolution"
+Get all web projects in "C:\Path\To\MySolution" and it's subfolders.
 
 #>
-Function Get-SitecoreHelixProject {
+Function Get-WebProject {
     [CmdletBinding()]
     Param (
-        [Parameter(Position = 0, Mandatory = $False)]
+        [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
 		
-        [Parameter(Position = 1, Mandatory = $False)]
-        [ValidateSet('Project', 'Feature', 'Foundation')]
-        [string]$HelixLayer = $Null,
-		
-        [Parameter(Position = 2, Mandatory = $False)]
+        [Parameter(Mandatory = $False)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
@@ -35,14 +28,7 @@ Function Get-SitecoreHelixProject {
         $SolutionRootPath = $PWD;
     }
 	
-    if ([string]::IsNullOrEmpty($HelixLayer)) {
-        Write-Verbose "Searching for projects in all layers ('$SolutionRootPath'), excluding '$ExcludeFilter'."
-    }
-    else {
-        $SolutionRootPath = [System.IO.Path]::Combine($SolutionRootPath, "src", $HelixLayer)
-        Write-Verbose "Searching for projects in layer '$HelixLayer' ('$SolutionRootPath'), excluding '$ExcludeFilter'."
-    }
-
+    Write-Verbose "Searching for web projects in '$SolutionRootPath', excluding '$ExcludeFilter'."
     Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
 }
 
@@ -86,4 +72,4 @@ Function Test-WebProject {
     $projectFileContent.ToLowerInvariant().Contains($webApplicationProjectTypeGuid.ToLowerInvariant())
 }
 
-Export-ModuleMember -Function Get-SitecoreHelixProject
+Export-ModuleMember -Function Get-WebProject

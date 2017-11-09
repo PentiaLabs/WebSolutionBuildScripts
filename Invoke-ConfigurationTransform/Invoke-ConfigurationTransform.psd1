@@ -4,7 +4,7 @@
     RootModule        = 'Invoke-ConfigurationTransform.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.5.2'
+    ModuleVersion     = '1.0.0'
 
     # ID used to uniquely identify this module
     GUID              = '6277b189-3478-4e86-9e3b-782d74a70758'

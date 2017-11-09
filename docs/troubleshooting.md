@@ -5,9 +5,9 @@
 You can get help for a specific PowerShell cmdlet by running `Get-Help <cmdlet> -Full`. E.g.:
 
 ```powershell 
-Get-Help Publish-ConfiguredHelixSolution -Full
+Get-Help Publish-ConfiguredWebSolution -Full
 
-Get-Help Publish-UnconfiguredHelixSolution -Full
+Get-Help Publish-UnconfiguredWebSolution -Full
 ``` 
 
 ### Running sanity checks
@@ -16,7 +16,7 @@ There are a variety of sanity checks which can be executed by running the follow
 
 ```powershell
 Install-Module "Assert-WebProjectConsistency" -Force
-Get-SitecoreHelixProject | Assert-WebProjectConsistency -BuildConfiguration "Staging"
+Get-WebProject | Assert-WebProjectConsistency -BuildConfiguration "Staging"
 ```
 
 ![Sample output of Assert-WebProjectConsistency](/docs/images/assert-webprojectconsistency-example.png)
@@ -57,7 +57,7 @@ In order to enable verbose output for the entire process, run this command in yo
 $VerbosePreference = "Continue"
 ```
 
-Then run the `Publish-ConfiguredHelixSolution` or `Publish-UnconfiguredHelixSolution` commands with the `-Verbose` flag.
+Then run the `Publish-ConfiguredWebSolution` or `Publish-UnconfiguredWebSolution` commands with the `-Verbose` flag.
 
 ![Verbose cmdlet output](/docs/images/verbose-output.png)
 
@@ -65,22 +65,22 @@ Piping build output to a file is done by using [redirects](https://docs.microsof
 
 #### Piping all output to file
 ```powershell
-Publish-ConfiguredHelixSolution *> build.txt
+Publish-ConfiguredWebSolution *> build.txt
 ```
 
 #### Piping all error output to file
 ```powershell
-Publish-ConfiguredHelixSolution 2> errors.txt
+Publish-ConfiguredWebSolution 2> errors.txt
 ```
 
 #### Piping all verbose output to file
 ```powershell
-Publish-ConfiguredHelixSolution 4> verbose.txt
+Publish-ConfiguredWebSolution 4> verbose.txt
 ```
 
 #### Piping all verbose and error output to file
 ```powershell
-Publish-ConfiguredHelixSolution 4>&2 verbose.txt
+Publish-ConfiguredWebSolution 4>&2 verbose.txt
 ```
 
 ### Known issues

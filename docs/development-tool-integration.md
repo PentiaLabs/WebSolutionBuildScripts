@@ -10,7 +10,7 @@ Add a [script](https://docs.npmjs.com/misc/scripts) object to your package.json,
 
 ```json
 "scripts": {
-    "publish-solution": "powershell Publish-ConfiguredHelixSolution"
+    "publish-solution": "powershell Publish-ConfiguredWebSolution"
 },
 ```
 

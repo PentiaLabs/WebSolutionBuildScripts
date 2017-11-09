@@ -80,7 +80,7 @@ This file has been replaced with `runtime-dependencies.config`. See [Runtime dep
 
 ### `gulpfile.js`
 
-The scripts called from within `gulpfile.js` (e.g. `Setup-Development-Environment`, which in turn calls `delete-website`, `install-packages` etc.) have been replaced with `Publish-ConfiguredHelixSolution`. 
+The scripts called from within `gulpfile.js` (e.g. `Setup-Development-Environment`, which in turn calls `delete-website`, `install-packages` etc.) have been replaced with `Publish-ConfiguredWebSolution`. 
 Hence these parts of `gulpfile.js` are largely obsolete.
 
 #### Before - `gulpfile.js`
@@ -132,11 +132,11 @@ var powershell = require('./node_modules/@pentia/publish-projects/modules/powers
 var fs = require('fs-extra');
 
 gulp.task('Setup-Development-Environment', function(callback) {
-  runSequence('publish-helix-solution', 'copy-license', 'sync',  callback);
+  runSequence('publish-web-solution', 'copy-license', 'sync',  callback);
 });
 
-gulp.task('publish-helix-solution', function(callback) {
-  powershell.runAsync("Publish-ConfiguredHelixSolution", "", callback);
+gulp.task('publish-web-solution', function(callback) {
+  powershell.runAsync("Publish-ConfiguredWebSolution", "", callback);
 });
 
 gulp.task('copy-license', function() {

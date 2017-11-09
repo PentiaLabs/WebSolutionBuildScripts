@@ -1,6 +1,6 @@
-# Pentia Build Scripts for Sitecore Helix Solutions
+# Pentia Build Scripts for web solutions
 
-Build scripts written in PowerShell, intended to publish Sitecore Helix compliant solutions. 
+Build scripts written in PowerShell, intended to publish solutions containing web projects. 
 
 To release a new version of the build scripts, read the [release management guide](/docs/release-management.md).
 
@@ -18,7 +18,7 @@ Register-PackageSource -Name "Pentia NuGet" -Location "http://tund/nuget/NuGet" 
 Register-PSRepository -Name "Pentia PowerShell" -SourceLocation "http://tund/nuget/powershell/" -InstallationPolicy "Trusted" -Verbose
 
 # Install the latest version of the build scripts
-Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Force -Verbose
+Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Force -Verbose
 ```
 
 ## Updating
@@ -27,7 +27,7 @@ Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Fo
 2. Copy, paste and run the following commands: 
 ```powershell
 # Install the latest version of the build scripts
-Install-Module -Name "Publish-HelixSolution" -Repository "Pentia PowerShell" -Force -Verbose
+Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Force -Verbose
 ```
 
 ## Table of contents

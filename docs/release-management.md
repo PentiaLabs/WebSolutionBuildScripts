@@ -1,6 +1,6 @@
 ## Release management
 
-To create a new release of the Sitecore Helix Build Scripts, do the following:
+To create a new release of the Build Scripts, do the following:
 
 1. Update all `.psd` files with the new script version as appropriate.
 2. Run `Publish-AllModules.ps1`.
@@ -18,8 +18,8 @@ Function Invoke-CommandOnMachine {
     $credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $UserName, $passwordAsSecureString
 
     Invoke-Command -ComputerName $MachineNames -ScriptBlock { 
-        Install-Module "Publish-HelixSolution" -Force
-        Get-Module "Publish-HelixSolution" -ListAvailable
+        Install-Module "Publish-WebSolution" -Force
+        Get-Module "Publish-WebSolution" -ListAvailable
     } -Credential $credentials
 }
 

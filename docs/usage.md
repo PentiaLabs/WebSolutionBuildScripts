@@ -13,14 +13,14 @@ I.e., while the implementations change, the intentions remain the same.
 Open an elevated PowerShell prompt and run the following command in the solution root directory:
 
 ```powershell
-Publish-ConfiguredHelixSolution
+Publish-ConfiguredWebSolution
 ```
 
 You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
 ### Solution specific user settings
 
-To avoid having to enter the function parameters over and over for the `Publish-ConfiguredHelixSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
+To avoid having to enter the function parameters over and over for the `Publish-ConfiguredWebSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
 
 The `.pentia` directory should be added to the solution's `.gitignore` file:
 
@@ -78,7 +78,7 @@ The [Build Action](https://stackoverflow.com/questions/145752/what-are-the-vario
 
 It's important that SlowCheetah is **not** installed as a NuGet package in any of the projects in the solution, as it will add a build target which is triggered each time the solution is built, including during publish. 
 
-This will usually cause the `Debug` XDT to be applied, even when another `BuildConfiguration` is specified from the command line when calling `Publish-ConfiguredHelixSolution` or `Publish-UnconfiguredHelixSolution`.
+This will usually cause the `Debug` XDT to be applied, even when another `BuildConfiguration` is specified from the command line when calling `Publish-ConfiguredWebSolution` or `Publish-UnconfiguredWebSolution`.
 
 ![SlowCheetah NuGet package](/docs/images/slow-cheetah-nuget-package.png)
 
@@ -119,14 +119,14 @@ Function BuildSolution {
 
 Try
 {
-    Import-Module Publish-HelixSolution -MinimumVersion "0.5.1" -Force -ErrorAction Stop
+    Import-Module Publish-WebSolution -MinimumVersion "0.5.1" -Force -ErrorAction Stop
 
     $buildLogFilePath = "$PSScriptRoot\.pentia\build-$(Get-Date -Format "yyyy-MM-dd.HH.mm.ss").log"
 
     # Build and publish solution
     RestoreNuGetPackages
     BuildSolution
-    Publish-ConfiguredHelixSolution -SolutionRootPath $PSScriptRoot | Out-Null
+    Publish-ConfiguredWebSolution -SolutionRootPath $PSScriptRoot | Out-Null
 
     # Load user settings
     $settings = Get-UserSettings -SolutionRootPath $PSScriptRoot
@@ -147,5 +147,5 @@ Try
 To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
 
 ```powershell
-Get-SitecoreHelixProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
+Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
 ```

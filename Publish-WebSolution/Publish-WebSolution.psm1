@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-Used to publish a Sitecore Helix solution to disk for a specific build configuration.
+Used to publish a web solution to disk for a specific build configuration.
 
 .DESCRIPTION
-Used to publish a Sitecore Helix solution to disk, applying and subsequently removing all relevant XDTs. 
+Used to publish a web solution to disk, applying and subsequently removing all relevant XDTs. 
 The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
@@ -26,10 +26,10 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 The build configuration that will be passed to "MSBuild.exe".
 
 .EXAMPLE
-Publish-ConfiguredHelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
+Publish-ConfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the "Debug" build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
 
-Publish-ConfiguredHelixSolution
+Publish-ConfiguredWebSolution
 Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json", and prompts the user for any missing settings.
 
 .NOTES
@@ -37,7 +37,7 @@ In order to enable verbose or debug output for the entire command, run the follo
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
 #> 
-Function Publish-ConfiguredHelixSolution {
+Function Publish-ConfiguredWebSolution {
     [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
     Param (
         [Parameter(Mandatory = $False)]
@@ -59,9 +59,9 @@ Function Publish-ConfiguredHelixSolution {
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-UnconfiguredHelixSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
     If (Test-Path $WebrootOutputPath) {
-        Set-HelixSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+        Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
     Else {
         Write-Warning "'$WebrootOutputPath' not found. Skipping solution configuration."
@@ -114,10 +114,10 @@ Function Get-ActualPublishParameters {
 
 <#
 .SYNOPSIS
-Publishes a Helix solution, without applying any XDTs.
+Publishes a web solution, without applying any XDTs.
 
 .DESCRIPTION
-Used to publish a Sitecore Helix solution to disk, without applying or removing any XDTs. 
+Used to publish a Sitecore web solution to disk, without applying or removing any XDTs. 
 The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
@@ -135,7 +135,7 @@ The path to where you want your webroot to be published. E.g. "D:\Websites\Solut
 This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
 
 .EXAMPLE
-Publish-UnconfiguredHelixSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
+Publish-UnconfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
 
 .NOTES
@@ -143,7 +143,7 @@ In order to enable verbose or debug output for the entire command, run the follo
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
 #>
-Function Publish-UnconfiguredHelixSolution {
+Function Publish-UnconfiguredWebSolution {
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $False)]
@@ -158,16 +158,16 @@ Function Publish-UnconfiguredHelixSolution {
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
-    Write-Progress -Activity "Publishing Helix solution" -Status "Cleaning webroot output path"
+    Write-Progress -Activity "Publishing web solution" -Status "Cleaning webroot output path"
     Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
 
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing runtime dependency packages"    
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages"    
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
-    Write-Progress -Activity "Publishing Helix solution" -Status "Publishing web projects"
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
     Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath    
 	
-    Write-Progress -Activity "Publishing Helix solution" -Completed -Status "Done."
+    Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
 
 Function Remove-WebrootOutputPath {
@@ -206,7 +206,7 @@ Function Publish-AllRuntimeDependencies {
     $runtimeDependencies = Get-RuntimeDependencyPackage -ConfigurationFilePath $RuntimeDependencyConfigurationFilePath
     for ($i = 0; $i -lt $runtimeDependencies.Count; $i++) {
         $runtimeDependency = $runtimeDependencies[$i]
-        Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "$($runtimeDependency.id) $($runtimeDependency.version)"
+        Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "$($runtimeDependency.id) $($runtimeDependency.version)"
         Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version -PackageSource $runtimeDependency.source
     }
 }
@@ -220,9 +220,9 @@ Function Publish-AllWebProjects {
         [string]$WebrootOutputPath
     )
     $msBuildExecutablePath = Get-MSBuild
-    $webProjects = Get-SitecoreHelixProject -SolutionRootPath $SolutionRootPath
+    $webProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
     for ($i = 0; $i -lt $webProjects.Count; $i++) {
-        Write-Progress -Activity "Publishing Helix solution" -PercentComplete ($i / $webProjects.Count * 100) -Status "Publishing web projects" -CurrentOperation "$webProject"
+        Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $webProjects.Count * 100) -Status "Publishing web projects" -CurrentOperation "$webProject"
         $webProject = $webProjects[$i]
         $webProject | Publish-WebProject -OutputPath $WebrootOutputPath -MSBuildExecutablePath $msBuildExecutablePath
     }
@@ -242,7 +242,7 @@ The path to the webroot. E.g. "D:\Websites\SolutionSite\www".
 The build configuration that will be used to select which transforms to apply.
 
 .EXAMPLE
-Set-HelixSolutionConfiguration -WebrootOutputPath "D:\Websites\SolutionSite\www" -BuildConfiguration "Debug"
+Set-WebSolutionConfiguration -WebrootOutputPath "D:\Websites\SolutionSite\www" -BuildConfiguration "Debug"
 Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" directory, and applies them to their configuration file counterparts.
 
 .NOTES
@@ -250,10 +250,10 @@ In order to enable verbose or debug output for the entire command, run the follo
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
     
-We'd like to call this function "Configure-HelixSolution", but according 
+We'd like to call this function "Configure-WebSolution", but according 
 to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
 #>
-Function Set-HelixSolutionConfiguration {
+Function Set-WebSolutionConfiguration {
     [CmdletBinding(SupportsShouldProcess = $True)]
     Param (
         [Parameter(Mandatory = $True)]
@@ -267,17 +267,17 @@ Function Set-HelixSolutionConfiguration {
         Throw "Path '$WebrootOutputPath' not found."
     }
 
-    Write-Progress -Activity "Configuring Helix solution" -Status "Applying XML Document Transforms"
+    Write-Progress -Activity "Configuring web solution" -Status "Applying XML Document Transforms"
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
         Invoke-AllTransforms -SolutionRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
 
-    Write-Progress -Activity "Configuring Helix solution" -Status "Removing XML Document Transform files"
+    Write-Progress -Activity "Configuring web solution" -Status "Removing XML Document Transform files"
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
         Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
     }
 
-    Write-Progress -Activity "Configuring Helix solution" -Status "Done." -Completed
+    Write-Progress -Activity "Configuring web solution" -Status "Done." -Completed
 }
 
 Function Invoke-AllTransforms {
@@ -294,11 +294,11 @@ Function Invoke-AllTransforms {
     )	
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
-        Write-Progress -Activity "Configuring Helix solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
+        Write-Progress -Activity "Configuring web solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
         $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
         Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform -Encoding UTF8
     }
 }
 
-Export-ModuleMember -Function Publish-ConfiguredHelixSolution, Publish-UnconfiguredHelixSolution, Set-HelixSolutionConfiguration
+Export-ModuleMember -Function Publish-ConfiguredWebSolution, Publish-UnconfiguredWebSolution, Set-WebSolutionConfiguration

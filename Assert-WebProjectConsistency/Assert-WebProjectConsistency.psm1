@@ -184,4 +184,4 @@ Function Get-FileEncoding {
     }
 }
 
-Export-ModuleMember "Assert-WebProjectConsistency"
+Export-ModuleMember -Function Assert-WebProjectConsistency
