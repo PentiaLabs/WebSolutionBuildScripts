@@ -6,6 +6,11 @@ To release a new version of the build scripts, read the [release management guid
 
 ![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/11/badge)
 
+## Terminology
+* Solution root: Where your `.sln`-file and source code is located.
+* Website root: The folder where the IIS-site is pointed at.
+* Data root: The website's Sitecore data folder.
+
 ## Installation
 
 1. Open an elevated instance of PowerShell ISE.
