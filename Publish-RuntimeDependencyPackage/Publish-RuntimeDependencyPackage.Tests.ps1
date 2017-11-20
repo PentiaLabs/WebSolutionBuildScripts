@@ -46,13 +46,29 @@ InModuleScope Publish-RuntimeDependencyPackage {
         It "should return null when package is not found" {
             # Arrange
             $packageName = "This package is not installed"
-            $packageVersion = "1234567890"
+            $packageVersion = "1.0.0"
     
             # Act
             $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
     
             # Assert
             $cachedPackage | Should Be $Null
+        }        
+    
+        It "should install and find packages with numerical groups in name" {
+            # Arrange
+            $packageName = "sample.runtime.dependency.1.0.0"
+            $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
+            $olderPackageVersion = "1.0.0"
+            $olderPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $olderPackageVersion -PackageSource $packageSource
+            $newerPackageVersion = "1.0.1"
+            $newerPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $newerPackageVersion -PackageSource $packageSource
+    
+            # Act
+            $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $olderPackageVersion
+                
+            # Assert
+            $cachedPackage | Should Not Be $Null
         }
     }
 
@@ -143,7 +159,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
 }
 
 # Test public functions
-Describe "Publish-RuntimeDependencyPackage" {
+Describe "Publish-RuntimeDependencyPackage" {            
     It "publishes package contents" {
         # Arrange
         $packageName = "sample-runtime-dependency"

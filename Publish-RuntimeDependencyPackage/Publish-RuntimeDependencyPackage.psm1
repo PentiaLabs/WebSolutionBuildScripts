@@ -98,8 +98,8 @@ Function Get-RuntimeDependencyPackageFromCache {
     If (!(Test-PackageProvider $packageProvider)) {
         Throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
     }
-    $package = Get-Package -ProviderName $packageProvider -Name $PackageName -RequiredVersion $PackageVersion -ErrorAction SilentlyContinue
-    $package
+    # The "custom filtering" has been added specifically as a workaround for https://github.com/OneGet/oneget/issues/321.
+    Get-Package -ProviderName $packageProvider -AllVersions | Where-Object { ($_.Name -eq $PackageName) -and ($_.Version -eq $PackageVersion) } | Select-Object -First 1
 }
 
 Function Test-PackageProvider {
