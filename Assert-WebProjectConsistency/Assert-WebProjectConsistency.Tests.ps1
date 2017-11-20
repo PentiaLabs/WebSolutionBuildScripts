@@ -17,9 +17,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Error Condition=`"!Exists('..\..\..\..\packages\SlowCheetah.2.5.48\build\SlowCheetah.targets')`" Text=`"`$([System.String]::Format('`$(ErrorText)', '..\..\..\..\packages\SlowCheetah.2.5.48\build\SlowCheetah.targets'))`" />
                   </Target>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileWithSlowCheetah -Encoding UTF8
   
                 # Act
-                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileWithSlowCheetah
+                $containsSlowCheetah = Test-SlowCheetah -ProjectFilePath $filePath
   
                 # Assert
                 $containsSlowCheetah | Should Be $True
@@ -37,9 +39,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Error Condition=`"!Exists('..\..\..\..\packages\SlowCheetos.2.5.48\build\SlowCheetos.targets')`" Text=`"`$([System.String]::Format('`$(ErrorText)', '..\..\..\..\packages\SlowCheetos.2.5.48\build\SlowCheetos.targets'))`" />
                   </Target>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileWithoutSlowCheetah -Encoding UTF8
 
                 # Act
-                $containsSlowCheetah = Test-SlowCheetah -ProjectFileContents $projectFileWithoutSlowCheetah
+                $containsSlowCheetah = Test-SlowCheetah -ProjectFilePath $filePath
 
                 # Assert
                 $containsSlowCheetah | Should Be $False
@@ -57,9 +61,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Content Include=`"App_Config\ConnectionStrings.Release.config`"></Content>
                   </ItemGroup>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileContents -Encoding UTF8
 
                 # Act
-                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Debug" -ProjectFileContents $projectFileContents
+                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Debug" -ProjectFilePath $filePath
 
                 # Assert
                 $hasCorrectBuildAction | Should Be $False
@@ -75,9 +81,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Content Include=`"App_Config\ConnectionStrings.Release.config`"></Content>
                   </ItemGroup>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileContents -Encoding UTF8
 
                 # Act
-                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Release" -ProjectFileContents $projectFileContents
+                $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Release" -ProjectFilePath $filePath
 
                 # Assert
                 $hasCorrectBuildAction | Should Be $True
@@ -93,9 +101,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Content Include=`"Web.config`"></Content>
                   </ItemGroup>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileContents -Encoding UTF8
 
                 # Act
-                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFileContents $projectFileContents
+                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFilePath $filePath
 
                 # Assert
                 $containsFilesWithReservedPath | Should Be $True
@@ -110,9 +120,11 @@ Describe "Assert-WebProjectConsistency" {
                     <Content Include=`"App_Config\Web.config`"></Content>
                   </ItemGroup>
                 </Project>"
+                $filePath = "$TestDrive/sample.config"
+                Set-Content -Path $filePath -Value $projectFileContents -Encoding UTF8
 
                 # Act
-                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFileContents $projectFileContents
+                $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFilePath $filePath
 
                 # Assert
                 $containsFilesWithReservedPath | Should Be $False
@@ -183,5 +195,4 @@ Describe "Assert-WebProjectConsistency" {
             }
         }
     }
-
 }

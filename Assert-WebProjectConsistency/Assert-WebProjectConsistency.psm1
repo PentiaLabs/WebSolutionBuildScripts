@@ -31,33 +31,32 @@ Function Assert-WebProjectConsistency {
         If (-not (Test-Path $ProjectFilePath -PathType Leaf)) {
             Throw "File '$ProjectFilePath' not found."
         }
-        [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
         
-        Write-Host "Processing '$ProjectFilePath'..."
+        Write-Verbose "Processing '$ProjectFilePath'..."
         
-        Write-Host "Checking for SlowCheetah..."
-        If (-not (Test-SlowCheetah -ProjectFileContents $projectFileContents)) {
-            Write-Host "SlowCheetah is not installed." -ForegroundColor Green
+        Write-Verbose "Checking for SlowCheetah..."
+        If (-not (Test-SlowCheetah -ProjectFilePath $ProjectFilePath)) {
+            Write-Verbose "SlowCheetah is not installed."
         }
     
-        Write-Host "Checking for XDT build actions..."
-        If (Test-XdtBuildActionContent -ProjectFileContents $projectFileContents -BuildConfiguration $BuildConfiguration) {
-            Write-Host "Build action of XDTs is 'Content'." -ForegroundColor Green
+        Write-Verbose "Checking for XDT build actions..."
+        If (Test-XdtBuildActionContent -ProjectFilePath $ProjectFilePath -BuildConfiguration $BuildConfiguration) {
+            Write-Verbose "Build action of XDTs is 'Content'."
         }
     
-        Write-Host "Checking for reserved file names..."
-        If (-not (Test-ReservedFilePath -ProjectFileContents $projectFileContents)) {
-            Write-Host "Reserved file names are not used." -ForegroundColor Green
+        Write-Verbose "Checking for reserved file names..."
+        If (-not (Test-ReservedFilePath -ProjectFilePath $ProjectFilePath)) {
+            Write-Verbose "Reserved file names are not used."
         }
         
-        Write-Host "Checking for XML declaration..."
+        Write-Verbose "Checking for XML declaration..."
         If (Test-XmlDeclaration -Path $ProjectFilePath) {
-            Write-Host "XML declaration found." -ForegroundColor Green
+            Write-Verbose "XML declaration found."
         }
     
-        Write-Host "Checking for correct file encoding..."
+        Write-Verbose "Checking for correct file encoding..."
         If (Test-XmlFileEncoding -Path $ProjectFilePath) {
-            Write-Host "File encoding matches encoding specified in XML declaration." -ForegroundColor Green
+            Write-Verbose "File encoding matches encoding specified in XML declaration."
         }
     }
 }
@@ -65,10 +64,11 @@ Function Assert-WebProjectConsistency {
 Function Test-SlowCheetah {
     Param(
         [Parameter(Mandatory = $True)]
-        [xml]$ProjectFileContents
+        [string]$ProjectFilePath
     )
-    If ($ProjectFileContents.OuterXml -match "SlowCheetah") {
-        Write-Warning "Found SlowCheetah references in the project."
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+    If ($projectFileContents.OuterXml -match "SlowCheetah") {
+        Write-Warning "Found SlowCheetah references in '$ProjectFilePath'."
         return $True
     }
     return $False
@@ -77,11 +77,12 @@ Function Test-SlowCheetah {
 Function Test-XdtBuildActionContent {
     Param(
         [Parameter(Mandatory = $True)]
-        [xml]$ProjectFileContents,
+        [string]$ProjectFilePath,
 
         [Parameter(Mandatory = $True)]
         [string]$BuildConfiguration
     )
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
     $valid = $True
     $elements = Get-ElementsWithIncludeAttribute -Xml $ProjectFileContents
     foreach ($element in $elements) {
@@ -94,7 +95,7 @@ Function Test-XdtBuildActionContent {
         if ($buildAction.Equals("Content")) {
             continue
         }
-        Write-Warning "Found potential XDT '$filePath' with build action '$buildAction'."
+        Write-Warning "Found potential XDT '$filePath' with build action '$buildAction' in '$ProjectFilePath'."
         $valid = $False
     }
     $valid
@@ -111,16 +112,17 @@ Function Get-ElementsWithIncludeAttribute {
 Function Test-ReservedFilePath {
     Param(
         [Parameter(Mandatory = $True)]
-        [xml]$ProjectFileContents
+        [string]$ProjectFilePath
     )
     $reservedFilePaths = @("Web.config")
-    $elements = Get-ElementsWithIncludeAttribute -Xml $ProjectFileContents
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+    $elements = Get-ElementsWithIncludeAttribute -Xml $projectFileContents
     $containsReservedFileName = $False
     foreach ($element in $elements) {
         $filePath = $element.GetAttribute("Include")
         $buildAction = $element.LocalName
         If ($reservedFilePaths -contains $filePath -and $buildAction -eq "Content") {
-            Write-Warning "Found file reference '$filePath' using reserved path '$filePath' with build action '$buildAction'."
+            Write-Warning "Found file reference '$filePath' using reserved path '$filePath' with build action '$buildAction' in '$ProjectFilePath'."
             $containsReservedFileName = $True
         }
     }
