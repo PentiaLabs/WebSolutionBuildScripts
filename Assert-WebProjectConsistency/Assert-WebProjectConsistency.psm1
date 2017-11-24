@@ -33,6 +33,11 @@ Function Assert-WebProjectConsistency {
         }
         
         Write-Verbose "Processing '$ProjectFilePath'..."
+
+        Write-Verbose "Checking for missing content files..."
+        If (Test-ContentFileExists -ProjectFilePath $ProjectFilePath) {
+            Write-Verbose "All content files exist on disk."            
+        }
         
         Write-Verbose "Checking for SlowCheetah..."
         If (-not (Test-SlowCheetah -ProjectFilePath $ProjectFilePath)) {
@@ -84,7 +89,7 @@ Function Test-XdtBuildActionContent {
     )
     [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
     $valid = $True
-    $elements = Get-ElementsWithIncludeAttribute -Xml $ProjectFileContents
+    $elements = Get-ElementsWithIncludeAttribute -Xml $projectFileContents
     foreach ($element in $elements) {
         $filePath = $element.GetAttribute("Include")
         $appliesToCurrentBuildConfiguration = $filePath.EndsWith(".$BuildConfiguration.config", [System.StringComparison]::InvariantCultureIgnoreCase)
@@ -184,6 +189,48 @@ Function Get-FileEncoding {
         '^0000feff' { return 'utf32' }
         default { return 'ascii' }
     }
+}
+
+Function Test-ContentFileExists {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$ProjectFilePath
+    )
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+    $valid = $True
+    $elements = Get-ElementsWithIncludeAttribute -Xml $projectFileContents
+    foreach ($element in $elements) {
+        $buildAction = $element.LocalName
+        if (-not $buildAction.Equals("Content")) {
+            continue
+        }
+        $contentFilePath = $element.GetAttribute("Include")
+        $absolutePath = Get-AbsoluteContentFilePath -ProjectFilePath $ProjectFilePath -ContentFilePath $contentFilePath
+        if (Test-Path $absolutePath) {
+            continue
+        }
+        Write-Warning "Content file '$absolutePath' referenced in '$ProjectFilePath' doesn't exist on disk."
+        $valid = $False
+    }
+    $valid
+}
+
+Function Get-AbsoluteContentFilePath {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$ProjectFilePath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$ContentFilePath
+    )
+    if ([System.IO.Path]::IsPathRooted($ContentFilePath)) {
+        $absolutePath = $ContentFilePath
+    }
+    else {
+        $projectDirectory = [System.IO.Path]::GetDirectoryName($ProjectFilePath)
+        $absolutePath = [System.IO.Path]::Combine($projectDirectory, $ContentFilePath)
+    }
+    $absolutePath
 }
 
 Export-ModuleMember -Function Assert-WebProjectConsistency

@@ -194,5 +194,34 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectEncoding | Should Be $False
             }
         }
+
+        Describe "Test-ContentFileExists" {
+            $projectFilePath = "$TestDrive\temp.csproj"
+            $projectFileContent = "<Test><Content Include=""MyFile.txt""></Content></Test>"
+            $absoluteContentFilePath = "$TestDrive\MyFile.txt"
+            Set-Content -Path $projectFilePath -Value $projectFileContent -Encoding UTF8
+
+            It "should detect existing file" {
+                # Arrange
+                Set-Content -Path $absoluteContentFilePath -Value "Hello World!"
+
+                # Act
+                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $projectFilePath
+
+                # Assert
+                $referencedFileExists | Should Be $True
+            }
+
+            It "should detect missing file" {
+                # Arrange
+                Remove-Item -Path $absoluteContentFilePath -ErrorAction SilentlyContinue
+                
+                # Act
+                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $projectFilePath
+                
+                # Assert
+                $referencedFileExists | Should Be $False
+            }
+        }
     }
 }
