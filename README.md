@@ -16,6 +16,9 @@ To release a new version of the build scripts, read the [release management guid
 1. Open an elevated instance of PowerShell ISE.
 2. Copy, paste and run the following commands: 
 ```powershell
+# Install NuGet package provider
+Install-PackageProvider -Name "NuGet"
+
 # Register Pentia's NuGet package feed
 Register-PackageSource -Name "Pentia NuGet" -Location "http://tund/nuget/NuGet" -ProviderName "NuGet" -Trusted -Verbose
   
