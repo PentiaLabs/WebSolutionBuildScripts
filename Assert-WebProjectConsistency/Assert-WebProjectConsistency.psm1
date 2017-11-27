@@ -34,6 +34,11 @@ Function Assert-WebProjectConsistency {
         
         Write-Verbose "Processing '$ProjectFilePath'..."
 
+        Write-Verbose "Checking for missing build configuration..."
+        If (Test-BuildConfigurationExists -ProjectFilePath $ProjectFilePath -BuildConfiguration $BuildConfiguration) {
+            Write-Verbose "Build configuration is mentioned in project file."
+        }
+
         Write-Verbose "Checking for missing content files..."
         If (Test-ContentFileExists -ProjectFilePath $ProjectFilePath) {
             Write-Verbose "All content files exist on disk."            
@@ -231,6 +236,32 @@ Function Get-AbsoluteContentFilePath {
         $absolutePath = [System.IO.Path]::Combine($projectDirectory, $ContentFilePath)
     }
     $absolutePath
+}
+
+<#
+Currently we only check whether or not the build configuration is mentionend in any "Condition" attribute in the project file.
+Time will tell Whether this is a good enough indicator/sanity check or not.
+Alternatively we could parse the .sln-file, but this conflicts with the idea of checking a single project file at a time.
+#>
+Function Test-BuildConfigurationExists {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$ProjectFilePath,
+        
+        [Parameter(Mandatory = $True)]
+        [string]$BuildConfiguration
+    )
+    [xml]$projectFileContents = Get-Content -Path $ProjectFilePath
+    $conditionAttributes = Select-Xml -Xml $projectFileContents -XPath "//*[@Condition != '']/@Condition" | Select-Object -ExpandProperty "Node"
+    foreach ($conditionAttribute in $conditionAttributes) {
+        # <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
+        $isBuildConfigurationMentioned = $conditionAttribute.Value.ToLowerInvariant().Contains("== '$BuildConfiguration|".ToLowerInvariant())
+        if ($isBuildConfigurationMentioned) {
+            return $True
+        }
+    }
+    Write-Warning "Project file '$ProjectFilePath' doesn't mention the build configuration '$BuildConfiguration', indicating that the build configuration is missing for this project."
+    $False
 }
 
 Export-ModuleMember -Function Assert-WebProjectConsistency

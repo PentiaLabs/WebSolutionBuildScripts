@@ -196,17 +196,17 @@ Describe "Assert-WebProjectConsistency" {
         }
 
         Describe "Test-ContentFileExists" {
-            $projectFilePath = "$TestDrive\temp.csproj"
-            $projectFileContent = "<Test><Content Include=""MyFile.txt""></Content></Test>"
-            $absoluteContentFilePath = "$TestDrive\MyFile.txt"
-            Set-Content -Path $projectFilePath -Value $projectFileContent -Encoding UTF8
+            $ProjectFilePath = "$TestDrive\temp.csproj"
+            $ProjectFileContent = "<Test><Content Include=""MyFile.txt""></Content></Test>"
+            $AbsoluteContentFilePath = "$TestDrive\MyFile.txt"
+            Set-Content -Path $ProjectFilePath -Value $ProjectFileContent -Encoding UTF8
 
             It "should detect existing file" {
                 # Arrange
-                Set-Content -Path $absoluteContentFilePath -Value "Hello World!"
+                Set-Content -Path $AbsoluteContentFilePath -Value "Hello World!"
 
                 # Act
-                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $projectFilePath
+                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
 
                 # Assert
                 $referencedFileExists | Should Be $True
@@ -214,13 +214,94 @@ Describe "Assert-WebProjectConsistency" {
 
             It "should detect missing file" {
                 # Arrange
-                Remove-Item -Path $absoluteContentFilePath -ErrorAction SilentlyContinue
+                Remove-Item -Path $AbsoluteContentFilePath -ErrorAction SilentlyContinue
                 
                 # Act
-                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $projectFilePath
+                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
                 
                 # Assert
                 $referencedFileExists | Should Be $False
+            }
+        }
+
+        Describe "Test-BuildConfigurationExists" {
+
+            $ProjectFileContent = "<?xml version=""1.0"" encoding=""utf-8""?>
+            <Project ToolsVersion=""14.0"" DefaultTargets=""Build"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+              <Import Project=""`$(MSBuildExtensionsPath)\`$(MSBuildToolsVersion)\Microsoft.Common.props"" Condition=""Exists('`$(MSBuildExtensionsPath)\`$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
+              <PropertyGroup>
+                <Configuration Condition="" '`$(Configuration)' == '' "">Debug</Configuration>
+                <Platform Condition="" '`$(Platform)' == '' "">AnyCPU</Platform>
+                <ProjectGuid>{EA2CCCED-A0F6-48AB-BC14-96D290BF2B47}</ProjectGuid>
+                <OutputType>Library</OutputType>
+                <AppDesignerFolder>Properties</AppDesignerFolder>
+                <RootNamespace>Cabana.Arwen.Navigation</RootNamespace>
+                <AssemblyName>Cabana.Arwen.Navigation</AssemblyName>
+                <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+                <FileAlignment>512</FileAlignment>
+                <TargetFrameworkProfile />
+              </PropertyGroup>
+              <PropertyGroup Condition="" '`$(Configuration)|`$(Platform)' == 'Debug|AnyCPU' "">
+                <DebugSymbols>true</DebugSymbols>
+                <DebugType>full</DebugType>
+                <Optimize>false</Optimize>
+                <OutputPath>bin\Debug\</OutputPath>
+                <DefineConstants>DEBUG;TRACE</DefineConstants>
+                <ErrorReport>prompt</ErrorReport>
+                <WarningLevel>4</WarningLevel>
+              </PropertyGroup>
+              <PropertyGroup Condition="" '`$(Configuration)|`$(Platform)' == 'Release|AnyCPU' "">
+                <DebugType>pdbonly</DebugType>
+                <Optimize>true</Optimize>
+                <OutputPath>bin\Release\</OutputPath>
+                <DefineConstants>TRACE</DefineConstants>
+                <ErrorReport>prompt</ErrorReport>
+                <WarningLevel>4</WarningLevel>
+              </PropertyGroup>
+              <PropertyGroup Condition=""'`$(Configuration)|`$(Platform)' == 'Dev|AnyCPU'"">
+                <DebugSymbols>true</DebugSymbols>
+                <OutputPath>bin\Dev\</OutputPath>
+                <DefineConstants>DEBUG;TRACE</DefineConstants>
+                <DebugType>full</DebugType>
+                <PlatformTarget>AnyCPU</PlatformTarget>
+                <ErrorReport>prompt</ErrorReport>
+                <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+              </PropertyGroup>
+              <PropertyGroup Condition=""'`$(Configuration)|`$(Platform)' == 'Test|AnyCPU'"">
+                <DebugSymbols>true</DebugSymbols>
+                <OutputPath>bin\Test\</OutputPath>
+                <DefineConstants>DEBUG;TRACE</DefineConstants>
+                <DebugType>full</DebugType>
+                <PlatformTarget>AnyCPU</PlatformTarget>
+                <ErrorReport>prompt</ErrorReport>
+                <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+              </PropertyGroup>
+              <PropertyGroup Condition=""'`$(Configuration)|`$(Platform)' == 'Staging|AnyCPU'"">
+                <OutputPath>bin\Staging\</OutputPath>
+              </PropertyGroup>
+            </Project>"
+            $ProjectFilePath = "$TestDrive\temp.csproj"
+            
+            It "should detect existing build configuration" {
+                # Arrange
+                Set-Content -Path  $ProjectFilePath -Value $ProjectFileContent -Encoding UTF8
+            
+                # Act
+                $buildConfigurationExists = Test-BuildConfigurationExists -ProjectFilePath $ProjectFilePath -BuildConfiguration "Staging"
+            
+                # Assert
+                $buildConfigurationExists | Should Be $True
+            }
+            
+            It "should detect missing build configuration" {
+                # Arrange
+                Set-Content -Path  $ProjectFilePath -Value $ProjectFileContent -Encoding UTF8
+                            
+                # Act
+                $buildConfigurationExists = Test-BuildConfigurationExists -ProjectFilePath $ProjectFilePath -BuildConfiguration "something that does not exist"
+
+                # Assert
+                $buildConfigurationExists | Should Be $False
             }
         }
     }
