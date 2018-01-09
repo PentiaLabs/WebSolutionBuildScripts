@@ -130,8 +130,18 @@ Function Invoke-ConfigurationTransform {
     $xmlDocument.Load($XmlFilePath)
 
     $transformation = New-Object Microsoft.Web.XmlTransform.XmlTransformation($XdtFilePath)
-    If ($transformation.Apply($xmlDocument) -eq $False) {
-        Throw "Transformation of document '$XmlFilePath' failed using transform file '$XdtFilePath'."
+    $errorMessage = "Transformation of '$XmlFilePath' failed using transform '$XdtFilePath'."
+    Try {
+        If ($transformation.Apply($xmlDocument) -eq $False) {
+            $exception = New-Object "System.InvalidOperationException" -ArgumentList $errorMessage
+            Throw $exception
+        }
+    }
+    Catch [Microsoft.Web.XmlTransform.XmlNodeException] {
+        $innerException = $_.Exception
+        $errorMessage = $errorMessage + " See the inner exception for details."
+        $exception = New-Object "System.InvalidOperationException" -ArgumentList $errorMessage, $innerException
+        Throw $exception
     }
     $stringWriter = New-Object -TypeName "System.IO.StringWriter"
     $xmlTextWriter = [System.Xml.XmlWriter]::Create($stringWriter)

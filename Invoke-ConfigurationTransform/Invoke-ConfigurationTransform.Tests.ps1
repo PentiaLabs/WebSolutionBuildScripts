@@ -44,6 +44,26 @@ Describe "Invoke-ConfigurationTransform" {
         $transformedXML | Should Be $expectedTransformedContent
     }
 
+    It "throws a helpful exception when a XML node isn't found" {
+        # Arrange
+        Set-Content -Path "TestDrive:\test.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
+        Set-Content -Path "TestDrive:\test.Transform.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><does-not-exist><setting xdt:Transform=""Insert"" /></does-not-exist></configuration>"
+        $xmlFilePath = "$TestDrive\test.config"
+        $xdtFilePath = "$TestDrive\test.Transform.config"
+
+        # Act
+        $exception = $Null
+        Try { 
+            Invoke-ConfigurationTransform -XmlFilePath $xmlFilePath -XdtFilePath $xdtFilePath
+        }
+        Catch {
+            $exception = $_.Exception
+        }
+        
+        # Assert
+        $exception.Message | Should Be "Transformation of '$xmlFilePath' failed using transform '$xdtFilePath'. See the inner exception for details."
+    }
+
     It "applies multiple XDTs as expected" {
         # Arrange
         $configurationFilePath = "TestDrive:\test.config"
