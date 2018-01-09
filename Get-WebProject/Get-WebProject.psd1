@@ -4,7 +4,7 @@
     RootModule = 'Get-WebProject.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '1.0.1'
 
     # ID used to uniquely identify this module
     GUID              = 'a1c045f3-e740-4979-81f4-ac81ee39e5f0'

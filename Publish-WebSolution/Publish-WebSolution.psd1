@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebSolution.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.3.0'
+    ModuleVersion     = '1.3.1'
 
     # ID used to uniquely identify this module
     GUID              = '8eef74e7-2440-4a00-b2ec-bfc56a7c6297'
@@ -26,7 +26,7 @@
         @{ModuleName = 'Get-MSBuild'; ModuleVersion = '1.0.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'},
         @{ModuleName = 'Get-RuntimeDependencyPackage'; ModuleVersion = '1.0.0'; Guid = '7e75a068-6847-4142-adb0-cf51e2ff8c21'},
         @{ModuleName = 'Publish-RuntimeDependencyPackage'; ModuleVersion = '1.0.1'; Guid = '04c76ad8-7c85-43cc-a1c4-765fc61b6100'},
-        @{ModuleName = 'Get-WebProject'; ModuleVersion = '1.0.0'; Guid = 'a1c045f3-e740-4979-81f4-ac81ee39e5f0'}, 
+        @{ModuleName = 'Get-WebProject'; ModuleVersion = '1.0.1'; Guid = 'a1c045f3-e740-4979-81f4-ac81ee39e5f0'}, 
         @{ModuleName = 'Publish-WebProject'; ModuleVersion = '1.0.0'; Guid = '0180313a-e7a1-401f-a9a6-5150c41eccc9'},
         @{ModuleName = 'Get-ConfigurationTransformFile'; ModuleVersion = '1.0.0'; Guid = '87e9e091-cb36-40fa-8e3f-b7a54cc8c892'}, 
         @{ModuleName = 'Invoke-ConfigurationTransform'; ModuleVersion = '1.0.0'; Guid = '6277b189-3478-4e86-9e3b-782d74a70758' }, 

@@ -10,7 +10,7 @@ Describe "Get-WebProject" {
         $actualProjects = Get-WebProject "$TestDrive"
             
         # Assert
-        $actualProjects.Count | Should Be 0
+        $actualProjects.GetType() | Should Be "System.Object[]"
     }
 
     It "should return all web projects in the solution" {
@@ -25,6 +25,7 @@ Describe "Get-WebProject" {
         $actualProjects = Get-WebProject $solutionDirectory 
         
         # Assert
+        $actualProjects.GetType() | Should Be "System.Object[]"
         $actualProjects | Should Be $expectedProjects
     }
 
@@ -39,6 +40,7 @@ Describe "Get-WebProject" {
         $actualProjects = Get-WebProject $TestDrive
         
         # Assert
+        $actualProjects.GetType() | Should Be "System.Object[]"
         $actualProjects.Count | Should Be 0
     }
 }
