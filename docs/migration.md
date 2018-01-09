@@ -1,6 +1,33 @@
 ## Migration guide
 
-The following section is a short guide on how to migrate from Gulp-based build scripts.
+The following section is a short guide on how to migrate various projects types.
+
+**Note:** The migration guides are 1) backend-centric 2) don't explain how to e.g. create "complimentary setup scripts" for databases, IIS instances etc.
+
+## Slow Cheetah-based project
+
+1. Open PowerShell in the solution root and run the following command to get a list of issues:
+```powershell
+Get-WebProject | Assert-WebProjectConsistency -BuildConfiguration "<your build configuration>"
+``` 
+
+2. Solve all the issues. This is usually done by...
+
+    * renaming files
+    * changing build actions for configuration and XDT files
+    * uninstalling the Slow Cheetah NuGet package from all projects in the solution (read [SlowCheetah NuGet package](/docs/usage.md#SlowCheetah-NuGet-package) for details)
+    * manually removing all mentions of Slow Cheetah from the `*.csproj` files in the solution.
+
+3. Add any relevant Sitecore versions, Sitecore modules and Sitecore patches (read [Consuming runtime dependencies](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html#consuming-runtime-dependencies) for details).
+
+4. Open PowerShell in the solution root and run `Publish-WebSolution`.
+
+5. Compare the output to e.g. a test or production webroot, and create supplementary build scripts as needed (e.g. triggering bundling of frontend assets).
+
+## Pentia Builder-based project
+TODO
+
+## Pentia Gulp tasks-based project
 
 ### `solution-config.json`
 
