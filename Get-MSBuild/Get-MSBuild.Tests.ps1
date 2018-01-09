@@ -5,7 +5,7 @@ Import-Module "$PSScriptRoot\Get-MSBuild.psm1" -Force
 InModuleScope "Get-MSBuild" {
 	
 	Describe "Get-MSBuild" {
-		It "Should throw an exception when MSBuild does not exist" {
+		It "should throw an exception when MSBuild does not exist" {
 			# Arrange
 			Mock Invoke-hMSBuildBat { return "C:\notvalid"} -ModuleName Get-MSBuild
 	
@@ -18,7 +18,7 @@ InModuleScope "Get-MSBuild" {
 	}
 	
 	Describe "Get-MSBuild" {
-		It "Should return the path to MSBuild.exe" {
+		It "should return the path to MSBuild.exe" {
 			# Act
 			$msbuildPath = Get-MSBuild
 	

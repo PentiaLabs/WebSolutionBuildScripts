@@ -1,12 +1,9 @@
 <#
 .SYNOPSIS
-Gets the latest MSBuild executable installed with Visual Studio 2017 or later.
+Gets the path to highest version of MSBuild.exe installed on the system.
 
 .EXAMPLE
 Get-MSBuild
-
-.NOTES
-Requires the "VSSetup" module to be installed.
 #>
 Function Get-MSBuild {
     [CmdletBinding()]
