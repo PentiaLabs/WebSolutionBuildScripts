@@ -8,6 +8,12 @@ Historically, build scripts aim to do the following:
 
 I.e., while the implementations change, the intentions remain the same.
 
+### FAQ
+
+**Q:** Couldn't we just use the regular "web publish" functionality from within Visual Studio?
+
+**A:** No, primarily because only the root `Web.config` is transformed by Visual Studio (all our config include files etc. wouldn't be transformed). Slow Cheetah would solve this in theory, but it brings it's own set of issues due to the custom build action it installs in `.csproj`-files.
+
 ### Publishing a solution
 
 Open an elevated PowerShell prompt and run the following command in the solution root directory:
