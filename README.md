@@ -41,6 +41,7 @@ Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Forc
 ## Table of contents
 
 * [Usage](/docs/usage.md)
+  * [FAQ](/docs/usage.md#faq)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
   * [Solution specific user settings](/docs/usage.md#solution-specific-user-settings)
   * [Adding Sitecore and Sitecore modules](/docs/usage.md#adding-sitecore-and-sitecore-modules)
