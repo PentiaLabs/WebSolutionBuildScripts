@@ -24,7 +24,7 @@
             3. Run `MSBuild.exe /target:WebPublish  [...]` for each project.
 
     3. `Set-WebSolutionConfiguration` is called.
-        1. Get all XDTs for the build configuration "Always" and the current build configuration, found under the solution root path.
+        1. Get all XDTs for the build configuration "Always" and the current build configuration, found under the webroot output path.
         2. Apply them to their respective configuration files under the webroot output path.
         3. Delete all XDTs from the webroot output path.
 
