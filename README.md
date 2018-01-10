@@ -40,8 +40,8 @@ Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Forc
 
 ## Table of contents
 
+* [Pseudo-sequence diagram](/docs/pseudo-sequence-diagram.md)
 * [Usage](/docs/usage.md)
-  * [FAQ](/docs/usage.md#faq)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
   * [Solution specific user settings](/docs/usage.md#solution-specific-user-settings)
   * [Adding Sitecore and Sitecore modules](/docs/usage.md#adding-sitecore-and-sitecore-modules)
@@ -67,3 +67,4 @@ Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Forc
   * [Debugging project publishing](/docs/troubleshooting.md#debugging-project-publishing)
   * [Build log](/docs/troubleshooting.md#build-log)
   * [Known issues](/docs/troubleshooting.md#known-issues)
+* [FAQ](/docs/faq.md)
