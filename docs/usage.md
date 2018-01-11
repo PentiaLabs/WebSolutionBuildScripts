@@ -35,9 +35,9 @@ XDTs are applied after the publish. This means that e.g. insert-statements are e
 
 This isn't a problem for config files which are part of the web project, because they'll be overwritten with a fresh, unmodified version as part of the publish. 
 
-But it's an issue when e.g. an XDT targets e.g. `Web.config`, or a similar Sitecore standard config file, which isn't part of the web project being published, because those files won't be overwritten with fresh versions.
+But it's an issue when an XDT targets e.g. `Web.config`, or a similar Sitecore standard config file, which isn't part of the web project being published, because those files won't be overwritten with fresh versions.
 
-To avoid this, don't use "Insert", but rather "InsertIfMissing" and similar XDT constructs.
+To avoid this, don't use "Insert", but rather "InsertIfMissing" and similar idempotent XDT constructs.
 
 ### Solution specific user settings
 
