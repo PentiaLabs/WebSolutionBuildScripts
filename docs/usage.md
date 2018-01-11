@@ -18,6 +18,16 @@ Publish-ConfiguredWebSolution
 
 You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
+### Publishing only code
+
+**Prerequisite:** `Publish-ConfiguredWebSolution` has to be run at least once before publishing individual layers or projects.
+
+To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
+
+```powershell
+Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
+```
+
 ### Publishing one or more projects
 
 **Prerequisite:** `Publish-ConfiguredWebSolution` has to be run at least once before publishing individual layers or projects.
@@ -38,14 +48,6 @@ This isn't a problem for config files which are part of the web project, because
 But it's an issue when an XDT targets e.g. `Web.config`, or a similar Sitecore standard config file, which isn't part of the web project being published, because those files won't be overwritten with fresh versions.
 
 To avoid this, don't use "Insert", but rather "InsertIfMissing" and similar idempotent XDT constructs.
-
-### Publish only code
-
-To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
-
-```powershell
-Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
-```
 
 ### Solution specific user settings
 
