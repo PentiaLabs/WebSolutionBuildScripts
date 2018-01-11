@@ -15,11 +15,37 @@ Describe "Get-PathOfFileToTransform" {
         $actualPath | Should Be $expectedPath
     }
     
-    It "should return the path of the Web.config file to transform" {
+    It "should return the path of the Web.config file for XDTs targeting Web.config directly" {
+        # Arrange
+        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Debug.config"
+        $webrootOutputPath = "C:\webroot"
+        $expectedPath = "C:\webroot\Web.config"
+
+        # Act
+        $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath
+
+        # Assert
+        $actualPath | Should Be $expectedPath
+    }
+    
+    It "should return the path of the Web.config file for XDTs targeting Web.config by convention" {
         # Arrange
         $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Feature.WebProject.Debug.config"
         $webrootOutputPath = "C:\webroot"
         $expectedPath = "C:\webroot\Web.config"
+
+        # Act
+        $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath
+
+        # Assert
+        $actualPath | Should Be $expectedPath
+    }
+    
+    It "should not return the path of the Web.config file due to an incorrect Regex" {
+        # Arrange
+        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\App_Config\WebProject.Debug.config"
+        $webrootOutputPath = "C:\webroot"
+        $expectedPath = "C:\webroot\App_Config\WebProject.config"
 
         # Act
         $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath

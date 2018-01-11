@@ -38,7 +38,7 @@ In order to enable verbose or debug output for the entire command, run the follo
     $DebugPreference = "Continue"
 #> 
 Function Publish-ConfiguredWebSolution {
-    [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
+    [CmdletBinding()]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
@@ -54,7 +54,7 @@ Function Publish-ConfiguredWebSolution {
     )
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
-    $parameters = Get-ActualPublishParameters -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
+    $parameters = Get-MergedParametersAndUserSettings -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
     $WebrootOutputPath = $parameters.webrootOutputPath
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
@@ -79,37 +79,6 @@ Function Get-SolutionRootPath {
         Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
     }
     $SolutionRootPath
-}
-
-Function Get-ActualPublishParameters {
-    [CmdletBinding(DefaultParameterSetName = "UseUserSettings")]
-    Param (
-        [Parameter(Mandatory = $True)]
-        [string]$SolutionRootPath,
-
-        [Parameter(Mandatory = $False)]
-        [string]$WebrootOutputPath,
-
-        [Parameter(Mandatory = $False)]
-        [string]$DataOutputPath,
-
-        [Parameter(Mandatory = $False)]
-        [string]$BuildConfiguration
-    )
-
-    $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
-    $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
-    If([string]::IsNullOrWhiteSpace($mergedSettings.webrootOutputPath)) {
-        $mergedSettings.webrootOutputPath = Read-Host "Enter value for `$WebrootOutputPath"
-    }
-    If([string]::IsNullOrWhiteSpace($mergedSettings.dataOutputPath)) {
-        $mergedSettings.dataOutputPath = Read-Host "Enter value for `$DataOutputPath"
-    }
-    If([string]::IsNullOrWhiteSpace($mergedSettings.buildConfiguration)) {
-        $mergedSettings.buildConfiguration = Read-Host "Enter value for `$BuildConfiguration"
-    }
-    Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings
-    $mergedSettings
 }
 
 <#
@@ -269,7 +238,7 @@ Function Set-WebSolutionConfiguration {
 
     Write-Progress -Activity "Configuring web solution" -Status "Applying XML Document Transforms"
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
-        Invoke-AllTransforms -SolutionRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
+        Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
 
     Write-Progress -Activity "Configuring web solution" -Status "Removing XML Document Transform files"
@@ -278,27 +247,6 @@ Function Set-WebSolutionConfiguration {
     }
 
     Write-Progress -Activity "Configuring web solution" -Status "Done." -Completed
-}
-
-Function Invoke-AllTransforms {
-    [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
-        [string]$SolutionRootPath,
-
-        [Parameter(Mandatory = $True)]
-        [string]$WebrootOutputPath,
-        
-        [Parameter(Mandatory = $True)]
-        [string]$BuildConfiguration
-    )	
-    $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionRootPath -BuildConfigurations "Always", $BuildConfiguration)
-    for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
-        Write-Progress -Activity "Configuring web solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
-        $xdtFile = $xdtFiles[$i]
-        $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
-        Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform -Encoding UTF8
-    }
 }
 
 Export-ModuleMember -Function Publish-ConfiguredWebSolution, Publish-UnconfiguredWebSolution, Set-WebSolutionConfiguration

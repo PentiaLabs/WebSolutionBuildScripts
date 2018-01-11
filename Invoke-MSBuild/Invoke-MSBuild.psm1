@@ -26,17 +26,14 @@ Function Invoke-MSBuild {
         If (-not (Test-Path -Path $ProjectOrSolutionFilePath -PathType Leaf)) {
             Throw "Project or solution file '$ProjectOrSolutionFilePath' not found."
         }
-        $msBuildCommandParts = @()
-        $msBuildCommandParts += "."
         $msBuildExecutablePath = Get-MSBuild
-        $msBuildCommandParts += """$msBuildExecutablePath"""
-        $msBuildCommandParts += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
+        $msBuildArgs = @()
+        $msBuildArgs += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
         If (-not [System.String]::IsNullOrWhiteSpace($BuildConfiguration)) {
-            $msBuildCommandParts += """/property:Configuration=$BuildConfiguration"""
+            $msBuildArgs += """/property:Configuration=$BuildConfiguration"""
         }        
-        $msBuildCommandParts += """$ProjectOrSolutionFilePath"""
-        $msBuildCommand = $msBuildCommandParts -join " "
-        Invoke-Expression -Command $msBuildCommand
+        $msBuildArgs += """$ProjectOrSolutionFilePath"""
+        & $msBuildExecutablePath $msBuildArgs
         If ($LASTEXITCODE -ne 0) {
             Throw "Failed to build '$ProjectOrSolutionFilePath'."
         }

@@ -15,6 +15,7 @@ Get all web projects in "C:\Path\To\MySolution" and it's subfolders.
 #>
 Function Get-WebProject {
     [CmdletBinding()]
+    [OutputType([System.Object[]])]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,

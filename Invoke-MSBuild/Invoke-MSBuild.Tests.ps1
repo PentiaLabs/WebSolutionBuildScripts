@@ -1,7 +1,7 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
 #Requires -Modules Pester
-Import-Module "$PSScriptRoot\Get-MSBuild.psm1" -Force
 Import-Module "$PSScriptRoot\Invoke-MSBuild.psm1" -Force
+Import-Module "$PSScriptRoot\..\Get-MSBuild\Get-MSBuild.psm1" -Force
 Import-Module "$PSScriptRoot\..\TestContent\TestSolution\Copy-TestSolution.psm1" -Force
 Import-Module "$PSScriptRoot\..\TestContent\TestSolution\Restore-NuGetPackages.psm1" -Force
 

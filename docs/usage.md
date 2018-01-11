@@ -18,6 +18,27 @@ Publish-ConfiguredWebSolution
 
 You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
+### Publishing one or more projects
+
+**Prerequisite:** `Publish-ConfiguredWebSolution` has to be run at least once before publishing individual layers or projects.
+
+Open an elevated PowerShell prompt and run the following command in e.g. a Sitecore Helix-layer directory or project directory:
+
+```powershell
+Get-WebProject | Publish-ConfiguredWebProject
+```
+
+You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
+
+#### Caveats 
+XDTs are applied after the publish. This means that e.g. insert-statements are executed more than once. 
+
+This isn't a problem for config files which are part of the web project, because they'll be overwritten with a fresh, unmodified version as part of the publish. 
+
+But it's an issue when e.g. an XDT targets e.g. `Web.config`, or a similar Sitecore standard config file, which isn't part of the web project being published, because those files won't be overwritten with fresh versions.
+
+To avoid this, don't use "Insert", but rather "InsertIfMissing" and similar XDT constructs.
+
 ### Solution specific user settings
 
 To avoid having to enter the function parameters over and over for the `Publish-ConfiguredWebSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.

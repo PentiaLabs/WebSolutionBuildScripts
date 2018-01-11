@@ -42,8 +42,12 @@ Function Get-PathOfFileToTransform {
         [string]$WebrootOutputPath
     )
     $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
-    If ($nameOfFileToTransform -imatch "Web\.?.*\.config") {
+    If ($nameOfFileToTransform -eq "Web.config") {
         Write-Verbose "Using path of the main 'Web.config' file."
+        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
+    }
+    ElseIf ($nameOfFileToTransform -imatch "Web\..*\.config") {
+        Write-Verbose "Using path of the main 'Web.config' file, by convention."
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
     }
     Else {
@@ -154,4 +158,42 @@ Function Invoke-ConfigurationTransform {
     $transformedXml.Trim()
 }
 
-Export-ModuleMember -Function Get-PathOfFileToTransform, Invoke-ConfigurationTransform
+<#
+.SYNOPSIS
+Applies all configuration transforms found under the specified root path, matching a certain build configuration. 
+By convention, XDTs ending with ".Always.config" are always applied.
+
+.PARAMETER SolutionOrProjectRootPath
+The root path from which to fetch XDT files.
+
+.PARAMETER WebrootOutputPath
+The root path in which to search for configuration files.
+
+.PARAMETER BuildConfiguration
+The build configuration for which to apply transforms.
+
+.EXAMPLE
+Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath "C:\MySolution\src\MyProject" -WebrootOutputPath "C:\Websites\MySolution\www" -BuildConfiguration "Debug"
+#>
+Function Invoke-AllConfigurationTransforms {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionOrProjectRootPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+        
+        [Parameter(Mandatory = $True)]
+        [string]$BuildConfiguration
+    )
+    $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionOrProjectRootPath -BuildConfigurations "Always", $BuildConfiguration)
+    for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
+        Write-Progress -Activity "Configuring web solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
+        $xdtFile = $xdtFiles[$i]
+        $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
+        Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform -Encoding UTF8
+    }
+}
+
+Export-ModuleMember -Function Get-PathOfFileToTransform, Invoke-ConfigurationTransform, Invoke-AllConfigurationTransforms
