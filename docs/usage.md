@@ -39,6 +39,14 @@ But it's an issue when an XDT targets e.g. `Web.config`, or a similar Sitecore s
 
 To avoid this, don't use "Insert", but rather "InsertIfMissing" and similar idempotent XDT constructs.
 
+### Publish only code
+
+To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
+
+```powershell
+Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
+```
+
 ### Solution specific user settings
 
 To avoid having to enter the function parameters over and over for the `Publish-ConfiguredWebSolution` cmdlet, they are stored in `<solution root path>/.pentia/user-settings.json`.
@@ -161,12 +169,4 @@ Try
     Write-Error -Exception $_.Exception
     Exit 1
 }
-```
-
-### Publish code only
-
-To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
-
-```powershell
-Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
 ```
