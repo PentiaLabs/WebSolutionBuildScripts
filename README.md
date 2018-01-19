@@ -35,7 +35,7 @@ Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Forc
 2. Copy, paste and run the following commands: 
 ```powershell
 # Install the latest version of the build scripts
-Install-Module -Name "Publish-WebSolution" -Repository "Pentia PowerShell" -Force -Verbose
+Update-Module -Name "Publish-WebSolution" -Force -Verbose
 ```
 
 ## Table of contents
