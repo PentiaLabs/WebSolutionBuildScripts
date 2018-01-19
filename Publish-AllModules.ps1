@@ -36,8 +36,8 @@ $modulesWithoutDependencies | Select-Object -ExpandProperty "ModuleBase" | Publi
 Write-Host "Installing all modules without dependencies."
 $modulesWithoutDependencies | Install-Module -Repository $repositoryName -Force
 
-# Since these modules can have interdependencies, they need to be installed an published one by one.
-$modulesWithDependencies = $modules | Where-Object { $_.RequiredModules.Count -gt 0 } | Sort-Object -Property "RequiredModules"
+# Since these modules can have interdependencies, they need to be installed and published one by one.
+$modulesWithDependencies = $modules | Where-Object { $_.RequiredModules.Count -gt 0 } | Sort-Object -Property { $_.RequiredModules.Count }
 foreach ($moduleWithDependencies in $modulesWithDependencies) {
     Write-Host "Publishing single module with dependencies."
     $moduleWithDependencies | Select-Object -ExpandProperty "ModuleBase" | Publish
