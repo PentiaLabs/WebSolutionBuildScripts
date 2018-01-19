@@ -34,14 +34,14 @@ Function Publish-WebProject {
 		
     Process {
         if (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
-            Throw "Path '$WebProjectFilePath' not found."
+            Throw "File path '$WebProjectFilePath' not found."
         }
         if ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
             Write-Verbose "`$MSBuildExecutablePath not set."
             $MSBuildExecutablePath = Get-MSBuild
         }
         if (!(Test-Path $MSBuildExecutablePath -PathType Leaf)) {
-            Throw "Path '$MSBuildExecutablePath' not found."
+            Throw "File path '$MSBuildExecutablePath' not found."
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
@@ -56,4 +56,98 @@ Function Publish-WebProject {
     }
 }
 
-Export-ModuleMember -Function Publish-WebProject
+<# 
+ .SYNOPSIS
+ Publishes a web project to the specified output directory using MSBuild and applies all relevant XDTs.
+ 
+ .DESCRIPTION
+ Publishes a web project to the specified output directory using MSBuild and applies all relevant XDTs. The XDTs are then deleted.
+ Optional function parameters which are omitted, will be read from the settings found in "<solution root>\.pentia\user-settings.json".
+ If no settings file exists, the user is prompted for input.
+
+ .PARAMETER WebProjectFilePath
+ Absolute or relative path of the web project file.
+
+ .PARAMETER OutputPath
+ Absolute or relative path of the output directory.
+
+ .PARAMETER MSBuildExecutablePath
+ Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
+
+ .EXAMPLE 
+ Publish-ConfiguredWebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -BuildConfiguration "Debug"
+ Publish a project, and apply all XDTs for the "Debug" configuration.
+
+ .EXAMPLE 
+ Publish-ConfiguredWebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -BuildConfiguration "Debug" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
+ Publish a project, apply all XDTs for the "Debug" configuration, and use the specified MSBuild.exe.
+
+ "./MyProject.csproj" | Publish-ConfiguredWebProject
+ Publish the project "MyProject.csproj", using the settings found in "<solution root>\.pentia\user-settings.json".
+
+ Get-WebProject | Publish-ConfiguredWebProject
+ Retrive all web projects in or under the current directory, and publish them using the settings found in "<solution root>\.pentia\user-settings.json".
+#>   
+Function Publish-ConfiguredWebProject {
+    [CmdletBinding()]
+    Param (
+        [Parameter(Mandatory = $True, ValueFromPipeline)]
+        [string]$WebProjectFilePath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$DataOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string]$BuildConfiguration
+    )
+    Process {
+        if (-not (Test-Path $WebProjectFilePath -PathType Leaf)) {
+            Throw "File path '$WebProjectFilePath' not found."
+        }
+        $solutionRootPath = $WebProjectFilePath | Find-SolutionRootPath
+        $settings = Get-MergedParametersAndUserSettings -SolutionRootPath $solutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $settings.webrootOutputPath -MSBuildExecutablePath $MSBuildExecutablePath
+        $projectDirectory = [System.IO.Path]::GetDirectoryName($WebProjectFilePath)
+        Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath $projectDirectory -WebrootOutputPath $settings.webrootOutputPath -BuildConfiguration $settings.buildConfiguration
+        # Delete XDTs
+        Get-ConfigurationTransformFile -SolutionRootPath $settings.webrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
+    }
+}
+
+Function Find-SolutionRootPath {
+    [CmdletBinding()]
+    [OutputType([String])]
+    Param (
+        [Parameter(Mandatory = $True, ValueFromPipeline)]
+        [string]$SearchStartPath
+    )
+    Process {
+        if (-not (Test-Path $SearchStartPath)) {
+            Throw "Path '$SearchStartPath' not found."
+        }
+
+        if (Test-Path $SearchStartPath -PathType Leaf) {
+            $directory = [System.IO.Path]::GetDirectoryName($SearchStartPath)            
+        }
+        else {
+            $directory = $SearchStartPath
+        }
+
+        $userSettingsFilePath = Get-UserSettingsFilePath -SolutionRootPath $directory
+        if (Test-Path $userSettingsFilePath) {
+            return "$directory"
+        }
+
+        $parent = Split-Path $directory -Parent
+        if ([String]::IsNullOrWhiteSpace($parent)) {
+            return $Null
+        }
+
+        Find-SolutionRootPath -SearchStartPath $parent
+    }
+}
+
+Export-ModuleMember -Function Publish-WebProject, Publish-ConfiguredWebProject

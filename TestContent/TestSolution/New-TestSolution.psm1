@@ -1,4 +1,6 @@
 Import-Module "$PSScriptRoot\..\..\Get-MSBuild\Get-MSBuild.psm1" -Force
+Import-Module "$PSScriptRoot\Copy-TestSolution.psm1" -Force
+Import-Module "$PSScriptRoot\Restore-NuGetPackages.psm1" -Force
 
 Function New-TestSolution {
     [CmdletBinding(SupportsShouldProcess = $True)]
@@ -12,24 +14,8 @@ Function New-TestSolution {
     If (-not $pscmdlet.ShouldProcess($tempTestSolutionPath, "Create clean test solution in directory")) {
         return $tempTestSolutionPath
     }
-
-    # Ensure target directory is clean
-    Remove-Item -Path "$tempTestSolutionPath" -Recurse -Force -ErrorAction SilentlyContinue
-
-    # Copy solution
-    Copy-Item "$PSScriptRoot\src" -Destination "$tempTestSolutionPath\src" -Container -Recurse
-    Copy-Item "$PSScriptRoot\TestSolution.sln" -Destination "$tempTestSolutionPath"
-    Write-Verbose "TestSolution copied:"
-    Get-ChildItem $tempTestSolutionPath -Recurse | Select-Object -ExpandProperty FullName | Write-Verbose
-    
-    # Restore NuGet packages
-    $output = & "$PSScriptRoot\NuGet.exe" "restore" "$tempTestSolutionPath" | Out-String
-    If ($LASTEXITCODE -eq 0) {
-        Write-Verbose $output
-    }
-    Else {
-        Throw "Failed to restore NuGet packages for test solution '$tempTestSolutionPath'.`r`n$output"
-    }
+    Copy-TestSolution -SolutionRootPath $tempTestSolutionPath
+    Restore-NuGetPackages -SolutionFilePath "$tempTestSolutionPath\TestSolution.sln"
 
     # Run MSBuild.exe
     $msBuildExecutable = Get-MSBuild

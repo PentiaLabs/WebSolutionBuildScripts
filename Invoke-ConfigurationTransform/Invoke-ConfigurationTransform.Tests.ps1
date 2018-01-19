@@ -15,11 +15,37 @@ Describe "Get-PathOfFileToTransform" {
         $actualPath | Should Be $expectedPath
     }
     
-    It "should return the path of the Web.config file to transform" {
+    It "should return the path of the Web.config file for XDTs targeting Web.config directly" {
+        # Arrange
+        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Debug.config"
+        $webrootOutputPath = "C:\webroot"
+        $expectedPath = "C:\webroot\Web.config"
+
+        # Act
+        $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath
+
+        # Assert
+        $actualPath | Should Be $expectedPath
+    }
+    
+    It "should return the path of the Web.config file for XDTs targeting Web.config by convention" {
         # Arrange
         $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\Web.Feature.WebProject.Debug.config"
         $webrootOutputPath = "C:\webroot"
         $expectedPath = "C:\webroot\Web.config"
+
+        # Act
+        $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath
+
+        # Assert
+        $actualPath | Should Be $expectedPath
+    }
+    
+    It "should not return the path of the Web.config file due to an incorrect Regex" {
+        # Arrange
+        $configurationTransformFilePath = "C:\MySolution\src\Foundation\MyProject\Code\App_Config\WebProject.Debug.config"
+        $webrootOutputPath = "C:\webroot"
+        $expectedPath = "C:\webroot\App_Config\WebProject.config"
 
         # Act
         $actualPath = Get-PathOfFileToTransform -ConfigurationTransformFilePath $configurationTransformFilePath -WebrootOutputPath $webrootOutputPath
@@ -42,6 +68,26 @@ Describe "Invoke-ConfigurationTransform" {
         
         # Assert
         $transformedXML | Should Be $expectedTransformedContent
+    }
+
+    It "throws a helpful exception when a XML node isn't found" {
+        # Arrange
+        Set-Content -Path "TestDrive:\test.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
+        Set-Content -Path "TestDrive:\test.Transform.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><does-not-exist><setting xdt:Transform=""Insert"" /></does-not-exist></configuration>"
+        $xmlFilePath = "$TestDrive\test.config"
+        $xdtFilePath = "$TestDrive\test.Transform.config"
+
+        # Act
+        $exception = $Null
+        Try { 
+            Invoke-ConfigurationTransform -XmlFilePath $xmlFilePath -XdtFilePath $xdtFilePath
+        }
+        Catch {
+            $exception = $_.Exception
+        }
+        
+        # Assert
+        $exception.Message | Should Be "Transformation of '$xmlFilePath' failed using transform '$xdtFilePath'. See the inner exception for details."
     }
 
     It "applies multiple XDTs as expected" {

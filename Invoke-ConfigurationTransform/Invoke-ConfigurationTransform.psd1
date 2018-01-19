@@ -4,7 +4,7 @@
     RootModule        = 'Invoke-ConfigurationTransform.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '1.1.2'
 
     # ID used to uniquely identify this module
     GUID              = '6277b189-3478-4e86-9e3b-782d74a70758'
@@ -22,7 +22,7 @@
     Description       = 'Used to apply configuration transforms (XDTs) on configuration files.'
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Get-PathOfFileToTransform', 'Invoke-ConfigurationTransform')
+    FunctionsToExport = @('Get-PathOfFileToTransform', 'Invoke-ConfigurationTransform', 'Invoke-AllConfigurationTransforms')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()

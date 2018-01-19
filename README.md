@@ -40,14 +40,19 @@ Update-Module -Name "Publish-WebSolution" -Force -Verbose
 
 ## Table of contents
 
+* [Pseudo-sequence diagram](/docs/pseudo-sequence-diagram.md)
 * [Usage](/docs/usage.md)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
+  * [Publishing only code](/docs/usage.md#publishing-only-code)
+  * [Publishing one or more projects](/docs/usage.md#publishing-one-or-more-projects)
   * [Solution specific user settings](/docs/usage.md#solution-specific-user-settings)
   * [Adding Sitecore and Sitecore modules](/docs/usage.md#adding-sitecore-and-sitecore-modules)
   * [Configuration management](/docs/usage.md#configuration-management)
   * [Build script integration](/docs/usage.md#build-script-integration)
-  * [Publish code only](/docs/usage.md#publish-code-only)
 * [Migration guide](/docs/migration.md)
+  * [Slow Cheetah-based project](/docs/migration.md#slow-cheetah-based-project)
+  * [Pentia Builder-based project](/docs/migration.md#pentia-builder-based-project)
+  * [Pentia Gulp tasks-based project](/docs/migration.md#pentia-gulp-tasks-based-project)
 * [Development tool integration](/docs/development-tool-integration.md)
   * [Visual Studio Task Runner](/docs/development-tool-integration.md#visual-studio-task-runner)
   * [NPM](/docs/development-tool-integration.md#npm)
@@ -63,3 +68,4 @@ Update-Module -Name "Publish-WebSolution" -Force -Verbose
   * [Debugging project publishing](/docs/troubleshooting.md#debugging-project-publishing)
   * [Build log](/docs/troubleshooting.md#build-log)
   * [Known issues](/docs/troubleshooting.md#known-issues)
+* [FAQ](/docs/faq.md)

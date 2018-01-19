@@ -15,6 +15,7 @@ Get all web projects in "C:\Path\To\MySolution" and it's subfolders.
 #>
 Function Get-WebProject {
     [CmdletBinding()]
+    [OutputType([System.Object[]])]
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,
@@ -29,7 +30,14 @@ Function Get-WebProject {
     }
 	
     Write-Verbose "Searching for web projects in '$SolutionRootPath', excluding '$ExcludeFilter'."
-    Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
+    $projects = Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
+    If ($projects -is [System.Object[]]) {
+        return $projects
+    }
+    If ($projects -is [System.String]) {
+        return @($projects)
+    }
+    return , @()
 }
 
 Function Find-Project {
