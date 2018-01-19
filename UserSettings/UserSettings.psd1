@@ -4,7 +4,7 @@
     RootModule        = 'UserSettings.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.1'
+    ModuleVersion     = '1.0.2'
 
     # ID used to uniquely identify this module
     GUID              = '124f394a-8328-4f0e-9aa0-e6c027a02e2b'
@@ -26,7 +26,7 @@
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 
-    FunctionsToExport = @('Get-UserSettings', 'Set-UserSettings', 'Merge-ParametersAndUserSettings')
+    FunctionsToExport = @('Get-UserSettingsFilePath', 'Get-UserSettings', 'Set-UserSettings', 'Merge-ParametersAndUserSettings', 'Get-MergedParametersAndUserSettings')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
