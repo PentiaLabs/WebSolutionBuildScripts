@@ -4,7 +4,7 @@ The following section is a short guide on how to migrate various projects types.
 
 **Note:** The migration guides are 1) backend-centric 2) don't explain how to e.g. create "complimentary setup scripts" for databases, IIS instances etc.
 
-## Slow Cheetah-based project
+## XDT- and Slow Cheetah-based projects
 
 1. Open PowerShell in the solution root and run the following command to get a list of issues:
 ```powershell
