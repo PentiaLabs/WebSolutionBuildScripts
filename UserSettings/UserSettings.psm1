@@ -55,7 +55,7 @@ Function Get-UserSettingsFilePath {
     If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
         $SolutionRootPath = $PWD
     }
-    "$SolutionRootPath\.pentia\user-settings.json"
+    [System.IO.Path]::Combine($SolutionRootPath, ".pentia", "user-settings.json")
 }
 
 <#

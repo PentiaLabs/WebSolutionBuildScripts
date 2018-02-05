@@ -113,13 +113,29 @@ InModuleScope "Publish-WebProject" {
 
         It "should find the solution root path when starting in a solution subfolder" {
             # Arrange
-            New-Item "$TestDrive/subfolder" -ItemType Directory
+            New-Item "$TestDrive/subfolder" -ItemType Directory -Force
             New-Item "$TestDrive/.pentia" -ItemType Directory -Force
             Set-Content "$TestDrive/.pentia/user-settings.json" -Value "{""buildConfiguration"":""Debug""}" -Force
             $searchStartPath = "$TestDrive/subfolder"
 
             # Act
             $solutionRootPath = Find-SolutionRootPath -SearchStartPath $searchStartPath
+
+            # Assert
+            $solutionRootPath | Should Be "$TestDrive"
+        }
+
+        It "should find the solution root path when the search start path is a relative path" {
+            # Arrange
+            New-Item "$TestDrive/subfolder" -ItemType Directory -Force
+            New-Item "$TestDrive/.pentia" -ItemType Directory -Force
+            Set-Content "$TestDrive/.pentia/user-settings.json" -Value "{""buildConfiguration"":""Debug""}" -Force
+            $searchStartPath = "$TestDrive/subfolder"
+
+            # Act
+            Push-Location $searchStartPath
+            $solutionRootPath = Find-SolutionRootPath -SearchStartPath "."
+            Pop-Location
 
             # Assert
             $solutionRootPath | Should Be "$TestDrive"

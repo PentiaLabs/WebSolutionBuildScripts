@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebProject.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.1.3'
+    ModuleVersion     = '1.1.4'
 
     # ID used to uniquely identify this module
     GUID              = '0180313a-e7a1-401f-a9a6-5150c41eccc9'

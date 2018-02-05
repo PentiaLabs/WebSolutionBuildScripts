@@ -128,12 +128,12 @@ Function Find-SolutionRootPath {
         if (-not (Test-Path $SearchStartPath)) {
             Throw "Path '$SearchStartPath' not found."
         }
-
-        if (Test-Path $SearchStartPath -PathType Leaf) {
-            $directory = [System.IO.Path]::GetDirectoryName($SearchStartPath)            
+        $absoluteSearchStartPath = Resolve-Path $SearchStartPath
+        if (Test-Path $absoluteSearchStartPath -PathType Leaf) {
+            $directory = [System.IO.Path]::GetDirectoryName($absoluteSearchStartPath)            
         }
         else {
-            $directory = $SearchStartPath
+            $directory = $absoluteSearchStartPath
         }
 
         $userSettingsFilePath = Get-UserSettingsFilePath -SolutionRootPath $directory
