@@ -33,7 +33,7 @@ Function Set-UserSettings {
 
 <#
 .SYNOPSIS
-Concatenates the provided path and the relative user settings file path ("\.pentia\user-settings.json").
+Concatenates the provided path and the relative user settings file path (".\.pentia\user-settings.json").
 
 .PARAMETER SolutionRootPath
 OPTIONAL: The path to concatenate. If omitted, the current working directory is used.
@@ -43,7 +43,7 @@ Get-UserSettingsFilePath
 Return "<current working directory>\.pentia\user-settings.json"
 
 Get-UserSettingsFilePath -SolutionRootPath "C:\Some-Path\"
-Return "C:\Some-Path\\.pentia\user-settings.json"
+Return "C:\Some-Path\.pentia\user-settings.json"
 #>
 Function Get-UserSettingsFilePath {
     [CmdletBinding()]
@@ -55,7 +55,11 @@ Function Get-UserSettingsFilePath {
     If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
         $SolutionRootPath = $PWD
     }
-    [System.IO.Path]::Combine($SolutionRootPath, ".pentia", "user-settings.json")
+    If (-not (Test-Path $SolutionRootPath)) {
+        Throw "Path '$SolutionRootPath' not found."
+    }
+    $absoluteSolutionRootPath = Resolve-Path $SolutionRootPath
+    [System.IO.Path]::Combine($absoluteSolutionRootPath, ".pentia", "user-settings.json")
 }
 
 <#

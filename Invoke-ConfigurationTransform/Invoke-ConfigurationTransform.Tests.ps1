@@ -107,6 +107,26 @@ Describe "Invoke-ConfigurationTransform" {
         # Assert
         $transformedXML | Should Be $expectedTransformedContent
     }
+
+    It "resolves relative paths against `$PWD" {
+        # Arrange
+        Set-Content -Path "TestDrive:\test.config" -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
+        Set-Content -Path "TestDrive:\test.Transform.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
+        
+        $expectedTransformedContent = "<?xml version=""1.0"" encoding=""utf-8""?><configuration><setting /></configuration>"
+        
+        # Act
+        Push-Location $TestDrive
+        Try {
+            $transformedXML = Invoke-ConfigurationTransform -XmlFilePath ".\test.config" -XdtFilePath ".\test.Transform.config" 
+        }
+        Finally {
+            Pop-Location            
+        }
+
+        # Assert
+        $transformedXML | Should Be $expectedTransformedContent
+    }
 }
 
 Describe "Configuration transformation integration test" {    

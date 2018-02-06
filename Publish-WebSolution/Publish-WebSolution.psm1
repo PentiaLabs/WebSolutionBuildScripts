@@ -125,6 +125,14 @@ Function Publish-UnconfiguredWebSolution {
         [string]$DataOutputPath
     )
 
+    If (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
+        $WebrootOutputPath = [System.IO.Path]::Combine($PWD, $WebrootOutputPath)
+    }
+    
+    If (-not ([System.IO.Path]::IsPathRooted($DataOutputPath))) {
+        $DataOutputPath = [System.IO.Path]::Combine($PWD, $DataOutputPath)
+    }
+
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Cleaning webroot output path"
@@ -235,6 +243,8 @@ Function Set-WebSolutionConfiguration {
     If (-not (Test-Path $WebrootOutputPath)) {
         Throw "Path '$WebrootOutputPath' not found."
     }
+    
+    $WebrootOutputPath = Resolve-Path $WebrootOutputPath
 
     Write-Progress -Activity "Configuring web solution" -Status "Applying XML Document Transforms"
     If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {

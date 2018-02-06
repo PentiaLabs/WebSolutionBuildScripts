@@ -127,6 +127,13 @@ Function Invoke-ConfigurationTransform {
         Throw "File '$XdtFilePath' not found."
     }
 
+    If (-not ([System.IO.Path]::IsPathRooted($XmlFilePath))) {
+        $XmlFilePath = [System.IO.Path]::Combine($PWD, $XmlFilePath)
+    }    
+    If (-not ([System.IO.Path]::IsPathRooted($XdtFilePath))) {
+        $XdtFilePath = [System.IO.Path]::Combine($PWD, $XdtFilePath)
+    }
+
     Add-Type -LiteralPath "$PSScriptRoot\lib\Microsoft.Web.XmlTransform.dll" -ErrorAction Stop
 
     $xmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument

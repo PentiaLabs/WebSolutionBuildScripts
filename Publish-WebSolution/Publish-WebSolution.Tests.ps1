@@ -182,6 +182,21 @@ Describe "Publish-WebSolution" {
         Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
     }
 
+    It "should publish all web projects to a single relative output directory" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+
+        # Act
+        Push-Location $TestDrive
+        Publish-UnconfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath ".\output\www" -DataOutputPath ".\output\data"
+        Pop-Location
+
+        # Assert
+        Test-Path -Path "$TestDrive\output\www\bin\Project.WebProject.dll" -PathType Leaf | Should Be $True         
+        Test-Path -Path "$TestDrive\output\www\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True         
+        Test-Path -Path "$TestDrive\output\www\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
+    }
+
     It "should delete all configuration transform files in the output directory" {
         # Arrange    
         $solutionRootPath = Initialize-TestSolution

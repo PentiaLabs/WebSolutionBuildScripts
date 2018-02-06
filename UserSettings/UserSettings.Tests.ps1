@@ -40,7 +40,16 @@ Describe "UserSettings" {
     }
     
     Describe "Get-UserSettings" {
-        $SolutionRootPath = $TestDrive
+        It "should return an empty object if no user settings are found" {
+            # Arrange
+            $solutionRootPath = "$TestDrive"
+            
+            # Act
+            $savedSettings = Get-UserSettings -SolutionRootPath $solutionRootPath
+
+            # Assert
+            $savedSettings | Should Not Be $Null
+        }
     
         It "should read user settings from the default settings path" {
             # Arrange
@@ -49,26 +58,16 @@ Describe "UserSettings" {
                 dataOutputPath     = "$TestDrive\data"
                 buildConfiguration = "Debug"
             }
-            Set-UserSettings -Settings $settings -SolutionRootPath $SolutionRootPath
+            $solutionRootPath = $TestDrive
+            Set-UserSettings -Settings $settings -SolutionRootPath $solutionRootPath
 
             # Act
-            $savedSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
+            $savedSettings = Get-UserSettings -SolutionRootPath $solutionRootPath
 
             # Assert
             $savedSettings.webrootOutputPath | Should Be $settings.webrootOutputPath
             $savedSettings.dataOutputPath | Should Be $settings.dataOutputPath
             $savedSettings.buildConfiguration | Should Be $settings.buildConfiguration
-        }
-
-        It "should return an empty object if no user settings are found" {
-            # Arrange
-            $nonExistingPath = "$TestDrive\Does-Not-Exist\"
-            
-            # Act
-            $savedSettings = Get-UserSettings -SolutionRootPath $nonExistingPath
-
-            # Assert
-            $savedSettings | Should Not Be $Null
         }
     }
 

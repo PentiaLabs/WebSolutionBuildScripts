@@ -82,6 +82,20 @@ Describe "Publish-WebProject" {
         $webConfigContent | Should Not Match "Feature\.WebProject\.Pipelines\.Debug"
         $webConfigContent | Should Not Match "Feature\.WebProject\.Pipelines\.Release"
     }
+
+    It "should publish projects relative to current working directory" {
+        # Arrange
+        $solutionRootPath = New-TestSolution -TempPath "$TestDrive"
+        $projectFilePath = $solutionRootPath + $FeatureLayerWebProjectFilePath
+
+        # Act
+        Push-Location $TestDrive
+        Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath ".\output"
+        Pop-Location
+
+        # Assert
+        Get-ChildItem "$TestDrive\output\" -Recurse | Measure-Object | Select-Object -ExpandProperty Count | Should BeGreaterThan 0
+    }
 }
 
 InModuleScope "Publish-WebProject" {

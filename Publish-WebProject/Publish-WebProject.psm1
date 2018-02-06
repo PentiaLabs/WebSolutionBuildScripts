@@ -33,15 +33,18 @@ Function Publish-WebProject {
     )
 		
     Process {
-        if (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
+        If (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
             Throw "File path '$WebProjectFilePath' not found."
         }
-        if ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
+        If ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
             Write-Verbose "`$MSBuildExecutablePath not set."
             $MSBuildExecutablePath = Get-MSBuild
         }
-        if (!(Test-Path $MSBuildExecutablePath -PathType Leaf)) {
+        If (!(Test-Path $MSBuildExecutablePath -PathType Leaf)) {
             Throw "File path '$MSBuildExecutablePath' not found."
+        }
+        If (-not ([System.IO.Path]::IsPathRooted($OutputPath))) {
+            $OutputPath = [System.IO.Path]::Combine($PWD, $OutputPath)
         }
         Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
@@ -70,9 +73,6 @@ Function Publish-WebProject {
 
  .PARAMETER OutputPath
  Absolute or relative path of the output directory.
-
- .PARAMETER MSBuildExecutablePath
- Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
 
  .EXAMPLE 
  Publish-ConfiguredWebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -BuildConfiguration "Debug"
@@ -109,7 +109,7 @@ Function Publish-ConfiguredWebProject {
         }
         $solutionRootPath = $WebProjectFilePath | Find-SolutionRootPath
         $settings = Get-MergedParametersAndUserSettings -SolutionRootPath $solutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
-        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $settings.webrootOutputPath -MSBuildExecutablePath $MSBuildExecutablePath
+        Publish-WebProject -WebProjectFilePath $WebProjectFilePath -OutputPath $settings.webrootOutputPath
         $projectDirectory = [System.IO.Path]::GetDirectoryName($WebProjectFilePath)
         Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath $projectDirectory -WebrootOutputPath $settings.webrootOutputPath -BuildConfiguration $settings.buildConfiguration
         # Delete XDTs
