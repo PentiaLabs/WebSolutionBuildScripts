@@ -79,6 +79,16 @@ Describe "Publish-WebSolution" {
         )
         Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
     }
+
+    Function Publish-TestSolutionWithWebProjects {
+        Param(
+            [Parameter(Mandatory = $True)]
+            [string]$SolutionRootPath,
+            [Parameter(Mandatory = $True)]
+            [string[]]$WebProjects
+        )
+        Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects
+    }
     
     It "should save configuration files in the correct encoding" {
         # Arrange    
@@ -234,5 +244,20 @@ Describe "Publish-WebSolution" {
         $transformedWebConfig -match "value=""Project.WebProject""" | Should Be $True
         $transformedWebConfig -match "value=""Feature.WebProject""" | Should Be $True
         $transformedWebConfig -match "value=""Foundation.WebProject""" | Should Be $True        
+    }
+    
+    It "should only publish web projects in the webproject parameter" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+        $WebProjects = Get-WebProject -SolutionRootPath $solutionRootPath | Where-Object  -FilterScript {$_ -Like "*Feature.WebProject*"}
+
+        # Act
+        Publish-TestSolutionWithWebProjects -SolutionRootPath $solutionRootPath -WebProjects $WebProjects
+
+        # Assert
+        Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $False
+        Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True    
+        Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $False
+        
     }
 }

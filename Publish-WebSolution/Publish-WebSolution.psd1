@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebSolution.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.4.5'
+    ModuleVersion     = '1.4.6'
 
     # ID used to uniquely identify this module
     GUID              = '8eef74e7-2440-4a00-b2ec-bfc56a7c6297'

@@ -25,6 +25,9 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 .PARAMETER BuildConfiguration
 The build configuration that will be passed to "MSBuild.exe".
 
+.PARAMETER WebProjects
+The list of webprojects to publish - will call Get-WebProject if empty
+
 .EXAMPLE
 Publish-ConfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the "Debug" build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
@@ -50,7 +53,10 @@ Function Publish-ConfiguredWebSolution {
         [string]$DataOutputPath,
 
         [Parameter(Mandatory = $False)]
-        [string]$BuildConfiguration
+        [string]$BuildConfiguration,
+
+        [Parameter(Mandatory = $False)]
+        [string[]]$WebProjects
     )
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
@@ -59,7 +65,7 @@ Function Publish-ConfiguredWebSolution {
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects
     If (Test-Path $WebrootOutputPath) {
         Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
@@ -103,6 +109,9 @@ The path to where you want your webroot to be published. E.g. "D:\Websites\Solut
 .PARAMETER DataOutputPath
 This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
 
+.PARAMETER WebProjects
+The list of webprojects to publish - will call Get-WebProject if empty
+
 .EXAMPLE
 Publish-UnconfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
@@ -122,7 +131,10 @@ Function Publish-UnconfiguredWebSolution {
         [string]$WebrootOutputPath,
 		
         [Parameter(Mandatory = $True)]
-        [string]$DataOutputPath
+        [string]$DataOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string[]]$WebProjects
     )
 
     If (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
@@ -142,7 +154,7 @@ Function Publish-UnconfiguredWebSolution {
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
-    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath    
+    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects    
 	
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
@@ -194,10 +206,18 @@ Function Publish-AllWebProjects {
         [string]$SolutionRootPath,
     
         [Parameter(Mandatory = $True)]
-        [string]$WebrootOutputPath
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $False)]
+        [string[]]$WebProjects
     )
     $msBuildExecutablePath = Get-MSBuild
-    $webProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
+
+    if($WebProjects.Count -lt 1)
+    {
+        $WebProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
+    }
+
     for ($i = 0; $i -lt $webProjects.Count; $i++) {
         Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $webProjects.Count * 100) -Status "Publishing web projects" -CurrentOperation "$webProject"
         $webProject = $webProjects[$i]
