@@ -154,7 +154,7 @@ Function Publish-UnconfiguredWebSolution {
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
-    Publish-AllWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects    
+    Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects    
 	
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
@@ -200,7 +200,7 @@ Function Publish-AllRuntimeDependencies {
     }
 }
 
-Function Publish-AllWebProjects {
+Function Publish-MultipleWebProjects {
     Param (
         [Parameter(Mandatory = $False)]
         [string]$SolutionRootPath,

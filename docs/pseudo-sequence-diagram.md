@@ -18,7 +18,7 @@
             3. Unpack all packages to the "webroot" and "data folder" output paths, in the order read from the config file.
         
         
-        3. `Publish-AllWebProjects` is called.
+        3. `Publish-MultipleWebProjects` is called.
             1. Get all web projects found under the solution root path.
             2. Get the `MSBuild.exe` path. *The path is found using [hMSBuild.bat](https://github.com/3F/hMSBuild).*
             3. Run `MSBuild.exe /target:WebPublish  [...]` for each project.
