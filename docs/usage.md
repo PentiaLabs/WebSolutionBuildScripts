@@ -25,7 +25,7 @@ You'll be prompted for various required parameters. Once provided, these paramet
 To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
 
 ```powershell
-Get-WebProject | Publish-WebProject -OutputPath (Get-UserSettings).webrootOutputPath
+Get-WebProject | Publish-UnconfiguredWebProject -OutputPath (Get-UserSettings).webrootOutputPath
 ```
 
 ### Publishing one or more projects
