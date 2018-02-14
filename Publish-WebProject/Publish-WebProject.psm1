@@ -150,4 +150,5 @@ Function Find-SolutionRootPath {
     }
 }
 
-Export-ModuleMember -Function Publish-WebProject, Publish-ConfiguredWebProject
+New-Alias -Name Publish-UnconfiguredWebProject -Value Publish-WebProject
+Export-ModuleMember -Function Publish-WebProject, Publish-ConfiguredWebProject -Alias Publish-UnconfiguredWebProject

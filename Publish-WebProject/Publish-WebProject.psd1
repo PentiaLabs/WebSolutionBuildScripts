@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebProject.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.1.5'
+    ModuleVersion     = '1.1.6'
 
     # ID used to uniquely identify this module
     GUID              = '0180313a-e7a1-401f-a9a6-5150c41eccc9'
@@ -38,6 +38,6 @@
     VariablesToExport = @()
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = @()
+    AliasesToExport   = @('Publish-UnconfiguredWebProject')
 
 }

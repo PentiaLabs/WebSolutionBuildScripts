@@ -23,7 +23,14 @@ Describe "module member exports" {
                 )
                 $moduleScriptFilePath = "$ModuleDefinitionFile".Replace("psd1", "psm1")      
                 $moduleScriptFileContent = Get-Content $moduleScriptFilePath -Raw 
-                $exportModuleMemberRegex = [Regex]"(?mi)^Export-ModuleMember -Function (.*)$"
+
+                if ($moduleScriptFileContent -like "*-Alias*") {
+                    $exportModuleMemberRegex = [Regex]"(?mi)^Export-ModuleMember -Function (.*) -Alias (.*)$"
+                }
+                else {
+                    $exportModuleMemberRegex = [Regex]"(?mi)^Export-ModuleMember -Function (.*)$"
+                }
+                
                 $exportedCommandsFromScriptMatches = $exportModuleMemberRegex.Matches($moduleScriptFileContent)
                 $exportedCommandsFromScript = $exportedCommandsFromScriptMatches[0].Groups[1].Value.Split(",") | ForEach-Object { $_.Trim() }
                 $exportedCommandsFromScript

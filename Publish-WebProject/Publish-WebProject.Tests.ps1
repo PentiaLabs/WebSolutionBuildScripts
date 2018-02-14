@@ -26,11 +26,26 @@ Describe "Publish-WebProject" {
 
     It "should publish a web project to the target directory" {
         # Arrange
+        $PublishUnConfigeredWebsitePath = "$TestDrive\UnConfigeredWebsite"
         $solutionRootPath = New-TestSolution -TempPath "$TestDrive"
         $projectFilePath = $solutionRootPath + $ProjectLayerWebProjectFilePath
 
         # Act
-        Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath $PublishWebsitePath
+        Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath $PublishUnConfigeredWebsitePath
+
+        # Assert
+        $publishedFiles = Get-ChildItem $PublishUnConfigeredWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
+        $publishedFiles -contains "Project.WebProject.dll" | Should Be $True
+        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
+    }
+
+    It "should publish a web project to the target directory using the alias Publish-UnconfiguredWebProject" {
+        # Arrange
+        $solutionRootPath = New-TestSolution -TempPath "$TestDrive"
+        $projectFilePath = $solutionRootPath + $ProjectLayerWebProjectFilePath
+
+        # Act
+        Publish-UnconfiguredWebProject -WebProjectFilePath $projectFilePath -OutputPath $PublishWebsitePath
 
         # Assert
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
