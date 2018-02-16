@@ -1,4 +1,4 @@
-$scriptsModules = Get-ChildItem "$PSScriptRoot" -Include "*.psm1" -Exclude "*.Tests.ps1" -Recurse
+$scriptsModules = Get-ChildItem "$PSScriptRoot" -Include "*.psm1" -Recurse | Where-Object { $_.FullName -notmatch "TestContent" }
 
 Describe "all scripts and modules conform to PowerShell best pratices" {
     Context "checking analysis prerequisites" {
@@ -17,14 +17,9 @@ Describe "all scripts and modules conform to PowerShell best pratices" {
     }
 
     $scriptAnalyzerRules = Get-ScriptAnalyzerRule | Where-Object -Property RuleName -NE PSUseSingularNouns
-	
     forEach ($scriptModule in $scriptsModules) {
-        switch -wildCard ($scriptModule) { 
-            "*.psm1" { $typeTesting = "module" } 
-            "*.ps1" { $typeTesting = "script" } 
-        }
 
-        Describe "$typeTesting '$($scriptModule.Name)'" {
+        Describe "module '$($scriptModule.Name)' ($($scriptModule.FullName))" {
             forEach ($scriptAnalyzerRule in $scriptAnalyzerRules) {
                 It "conforms to best practice '$scriptAnalyzerRule'" {
                     # Act
@@ -36,5 +31,6 @@ Describe "all scripts and modules conform to PowerShell best pratices" {
                 }
             }
         }
+
     }
 }
