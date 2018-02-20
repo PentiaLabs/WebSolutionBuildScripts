@@ -13,7 +13,7 @@
     2. `Publish-UnconfiguredWebSolution` is called.
         1. `Remove-WebrootOutputPath` is called to delete any existing files.
         2. `Publish-AllRuntimeDependencies` is called.
-            1. Read `<solution root>/runtime-dependencies.config`.
+            1. Read `<solution root>/packages.config`.
             2. If a package can't be found in the local package cache, install it. *Most of our Sitecore packages are found in the feed [http://tund/nuget/NuGet/](http://tund/feeds/NuGet). Packages are loaded and installed using standard [PowerShell PackageManagement](https://docs.microsoft.com/en-us/powershell/module/packagemanagement/?view=powershell-5.1).*
             3. Unpack all packages to the "webroot" and "data folder" output paths, in the order read from the config file.
         

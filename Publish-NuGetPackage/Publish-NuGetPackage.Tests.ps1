@@ -1,9 +1,9 @@
 # Requires https://github.com/pester/Pester: Install-Module Pester -Force -SkipPublisherCheck
-Import-Module "$PSScriptRoot\Restore-NuGetPackage.psm1" -Force
+Import-Module "$PSScriptRoot\Publish-NuGetPackage.psm1" -Force
 
 Describe "Install-NuGetExe" {
     
-    InModuleScope "Restore-NuGetPackage" {
+    InModuleScope "Publish-NuGetPackage" {
 
         Describe "global NuGet.exe usage" {
     

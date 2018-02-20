@@ -61,7 +61,7 @@ The `.pentia` directory should be added to the solution's `.gitignore` file:
 
 ### Adding Sitecore and Sitecore modules
 
-Runtime dependencies like Sitecore and Sitecore modules are installed as NuGet packages, and must be configured in a `runtime-dependencies.config` configuration file.
+Runtime dependencies like Sitecore and Sitecore modules are installed as NuGet packages, and must be configured in a `packages.config` configuration file.
 They serve the same purpose as the corresponding Pentia `\\buildlibrary` modules.
 
 [A full guide on installing runtime dependencies can be found here.](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html)

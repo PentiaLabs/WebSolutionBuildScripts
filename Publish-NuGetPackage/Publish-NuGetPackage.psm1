@@ -211,4 +211,88 @@ Class InstallOptionBuilder : OptionBuilder {
     }
 }
 
-Export-ModuleMember -Function Install-NuGetExe, Restore-NuGetPackage, Install-NuGetPackage
+<#
+.SYNOPSIS
+Publishes the contents of a runtime dependency package to a website, using NuGet.
+
+.DESCRIPTION
+Publishes the contents of a runtime dependency package to a website, using NuGet.
+
+Packages are expected to be NuGet-packages and contain any of the following folders:
+
+- <package>/Webroot
+- <package>/Data
+
+All of the above are optional.
+
+The following steps are performed during package publishing:
+
+1. Check if the required package is cached locally.
+1.1 If the package isn't found locally, it's installed from a registered package source, or from the $PackageSource parameter.
+2. Copy the contents of the "<package>\Webroot"-folder to the "<WebrootOutputPath>".
+3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
+
+.PARAMETER PackageName
+The name of the package to publish.
+
+.PARAMETER PackageVersion
+The exact version of the package to publish.
+
+.PARAMETER PackageOutputPath
+The location of the installed NuGet packages (e.g. "<solution root>/.pentia/runtime-dependencies/").
+
+.PARAMETER WebrootOutputPath
+The path where the contents of "<package>\Webroot" will be copied to.
+
+.PARAMETER DataOutputPath
+The path where the contents of "<package>\Data" will be copied to.
+#>
+Function Publish-NuGetPackage {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory = $True)]
+        [string]$PackageName,
+        
+        [Parameter(Mandatory = $True)]
+        [string]$PackageVersion,
+        
+        [Parameter(Mandatory = $True)]
+        [string]$PackageOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
+    $packagePath = [System.IO.Path]::Combine($PackageOutputPath, "$PackageName.$PackageVersion")
+    $packageWebrootPath = [System.IO.Path]::Combine($PackagePath, "webroot")
+    Copy-PackageFolder -SourceFriendlyName "webroot" -Source $packageWebrootPath -Target $WebrootOutputPath
+    $packageDataPath = [System.IO.Path]::Combine($PackagePath, "data")
+    Copy-PackageFolder -SourceFriendlyName "data" -Source $packageDataPath -Target $DataOutputPath
+}
+
+Function Copy-PackageFolder {
+    [CmdletBinding()]
+    Param (        
+        [Parameter(Mandatory = $True)]
+        [string]$SourceFriendlyName,
+                
+        [Parameter(Mandatory = $True)]
+        [string]$Source,
+    
+        [Parameter(Mandatory = $True)]
+        [string]$Target
+    )
+
+    Write-Verbose "Checking if package has a $SourceFriendlyName folder '$Source'."
+    if (Test-Path -Path $Source -PathType Container) {
+        Write-Verbose "Copying $SourceFriendlyName files from '$Source' to '$Target'."
+        robocopy "$Source" "$Target" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
+    }
+    else {
+        Write-Verbose "No $SourceFriendlyName folder found."
+    }
+}
+
+Export-ModuleMember -Function Install-NuGetExe, Restore-NuGetPackage, Install-NuGetPackage, Publish-NuGetPackage

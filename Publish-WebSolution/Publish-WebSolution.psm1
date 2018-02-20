@@ -186,17 +186,60 @@ Function Publish-AllRuntimeDependencies {
         [Parameter(Mandatory = $True)]
         [string]$DataOutputPath
     )
+    Publish-PackagesUsingPackageManagement -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+    Publish-PackagesUsingNuGet -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
+}
+
+Function Publish-PackagesUsingPackageManagement {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
     $runtimeDependencyConfigurationFileName = "runtime-dependencies.config"
     $runtimeDependencyConfigurationFilePath = [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
     If (-not (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf)) {
-        Write-Verbose "No '$runtimeDependencyConfigurationFileName' file found in '$SolutionRootPath'. Skipping runtime package installation."
-        return      
+        return
     }
+    Write-Warning "Usage of 'runtime-dependencies.config' is deprecated. Use regular 'packages.config' and 'NuGet.config' files instead."
     $runtimeDependencies = Get-RuntimeDependencyPackage -ConfigurationFilePath $RuntimeDependencyConfigurationFilePath
     for ($i = 0; $i -lt $runtimeDependencies.Count; $i++) {
         $runtimeDependency = $runtimeDependencies[$i]
         Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "$($runtimeDependency.id) $($runtimeDependency.version)"
         Publish-RuntimeDependencyPackage -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version -PackageSource $runtimeDependency.source
+    }
+}
+
+Function Publish-PackagesUsingNuGet {
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$WebrootOutputPath,
+
+        [Parameter(Mandatory = $True)]
+        [string]$DataOutputPath
+    )
+    $nugetPackageFileName = "packages.config"
+    $nugetPackageFilePath = [System.IO.Path]::Combine($SolutionRootPath, $nugetPackageFileName)
+    If (-not(Test-Path $nugetPackageFilePath -PathType Leaf)) {
+        return
+    }
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages" -CurrentOperation "Installing packages in parallel"
+    Install-NuGetExe
+    $packageOutputDirectory = [System.IO.Path]::Combine($SolutionRootPath, ".pentia", "runtime-dependencies")
+    Install-NuGetPackage -PackageConfigFile $nugetPackageFilePath -SolutionDirectory $SolutionRootPath -OutputDirectory $packageOutputDirectory
+    $runtimeDependencies = @(Get-Content $nugetPackageFilePath | Select-Xml -XPath "/packages/package" | Select-Object -ExpandProperty "Node")
+    for ($i = 0; $i -lt $runtimeDependencies.Count; $i++) {
+        $runtimeDependency = $runtimeDependencies[$i]
+        Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "Copying package contents sequentially"
+        Publish-NuGetPackage -PackageName $runtimeDependency.id -PackageVersion $runtimeDependency.version -PackageOutputPath $packageOutputDirectory -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
     }
 }
 
@@ -213,8 +256,7 @@ Function Publish-MultipleWebProjects {
     )
     $msBuildExecutablePath = Get-MSBuild
 
-    if($WebProjects.Count -lt 1)
-    {
+    if ($WebProjects.Count -lt 1) {
         $WebProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
     }
 
