@@ -233,7 +233,7 @@ Function Publish-PackagesUsingNuGet {
     }
     Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages" -CurrentOperation "Installing packages in parallel"
     Install-NuGetExe
-    $packageOutputDirectory = [System.IO.Path]::Combine($SolutionRootPath, ".pentia", "runtime-dependencies")
+    $packageOutputDirectory = [System.IO.Path]::Combine($env:APPDATA, ".pentia")
     Install-NuGetPackage -PackageConfigFile $nugetPackageFilePath -SolutionDirectory $SolutionRootPath -OutputDirectory $packageOutputDirectory
     [xml]$nugetPackageFileXml = Get-Content $nugetPackageFilePath
     $runtimeDependencies = @($nugetPackageFileXml | Select-Xml -XPath "/packages/package" | Select-Object -ExpandProperty "Node")
