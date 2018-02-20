@@ -235,7 +235,8 @@ Function Publish-PackagesUsingNuGet {
     Install-NuGetExe
     $packageOutputDirectory = [System.IO.Path]::Combine($SolutionRootPath, ".pentia", "runtime-dependencies")
     Install-NuGetPackage -PackageConfigFile $nugetPackageFilePath -SolutionDirectory $SolutionRootPath -OutputDirectory $packageOutputDirectory
-    $runtimeDependencies = @(Get-Content $nugetPackageFilePath | Select-Xml -XPath "/packages/package" | Select-Object -ExpandProperty "Node")
+    [xml]$nugetPackageFileXml = Get-Content $nugetPackageFilePath
+    $runtimeDependencies = @($nugetPackageFileXml | Select-Xml -XPath "/packages/package" | Select-Object -ExpandProperty "Node")
     for ($i = 0; $i -lt $runtimeDependencies.Count; $i++) {
         $runtimeDependency = $runtimeDependencies[$i]
         Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $runtimeDependencies.Count * 100) -Status "Publishing runtime dependency packages" -CurrentOperation "Copying package contents sequentially"
