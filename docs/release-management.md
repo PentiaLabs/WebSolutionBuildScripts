@@ -3,8 +3,9 @@
 To create a new release of the Build Scripts, do the following:
 
 1. Update all `.psd` files with the new script version as appropriate.
-2. Run `Publish-AllModules.ps1`.
-3. Update all TeamCity build agents using the script shown below.
+2. Generate a Personal Access Token (PAT) with "Package read/write" access via https://pentia.visualstudio.com/_details/security/tokens.
+3. Run `Publish-AllModules.ps1 -Username <VSTS username> -PersonalAccessToken <PAT>`.
+4. Update all TeamCity build agents using the script shown below.
 
 ```powershell
 Function Invoke-CommandOnMachine {

@@ -1,3 +1,11 @@
+Param (
+    [Parameter(Mandatory = $True)]
+    [string]$Username,
+
+    [Parameter(Mandatory = $True)]
+    [string]$PersonalAccessToken
+)
+
 Import-Module -Name "PowerShellGet" -MinimumVersion "1.6" -ErrorAction Stop
 
 Function Register-PentiaPowerShellRepository {
@@ -76,9 +84,8 @@ $vsts.Name = "Pentia VSTS PowerShell"
 $vsts.SourceLocation = "https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2"
 $vsts.PublishLocation = "https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2"
 $vsts.NuGetApiKey = "<irrelevant>"
-$vsts.Username = "uw"
-# Generate a personal access token with "Package read/write" access via https://pentia.visualstudio.com/_details/security/tokens
-$vsts.Password = "covjri6makgl7ysb5xnn7ryua2tveqhmnbv6scepta6a4jvntauq"
+$vsts.Username = $Username
+$vsts.Password = $PersonalAccessToken
 $vsts.Credentials = New-Object System.Management.Automation.PSCredential ($vsts.Username, (ConvertTo-SecureString $vsts.Password -AsPlainText -Force))
 
 #Publish-AllModules -Repository $tund
