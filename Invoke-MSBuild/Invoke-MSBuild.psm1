@@ -8,9 +8,16 @@ Path to the project or solution to build. Can be piped.
 .PARAMETER BuildConfiguration
 The build configuration to use. Leave blank to use each project's default configuration (usually "Debug").
 
+.PARAMETER BuildArgs
+Additional arguments for MSBuild.exe, e.g. "/target:WebPublish", "/property:PublishUrl:<destination>" etc.
+See the official documentation for details: https://msdn.microsoft.com/en-us/library/ms164311.aspx.
+
 .EXAMPLE
 Get-WebProject -SolutionRootPath $PWD | Invoke-MSBuild -BuildConfiguration "Staging"
-Builds all web projects found under the current working directory, using the build configuration "Staging".
+Gets all web projects found under the current working directory, and invokes their default build target using the build configuration "Staging".
+
+Get-WebProject -SolutionRootPath $PWD | Invoke-MSBuild -BuildConfiguration "Staging" -BuildArgs "/t:WebPublish", "/p:PublishUrl:C:\Output", "/p:WebPublishMethod=FileSystem"
+Gets all web projects found under the current working directory, and invokes the "WebPublish" build target with the output path "C:\Output", using the build configuration "Staging".
 #>
 Function Invoke-MSBuild {
     [CmdletBinding()]
@@ -19,7 +26,10 @@ Function Invoke-MSBuild {
         [string]$ProjectOrSolutionFilePath,
 
         [Parameter(Mandatory = $False)]
-        [string]$BuildConfiguration
+        [string]$BuildConfiguration,
+
+        [Parameter(Mandatory = $False)]
+        [string[]]$BuildArgs
     )
 
     Process {
@@ -27,13 +37,15 @@ Function Invoke-MSBuild {
             Throw "Project or solution file '$ProjectOrSolutionFilePath' not found."
         }
         $msBuildExecutablePath = Get-MSBuild
-        $msBuildArgs = @()
-        $msBuildArgs += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
+        If (-not $BuildArgs) {
+            $BuildArgs = @()
+            $BuildArgs += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
+        }
         If (-not [System.String]::IsNullOrWhiteSpace($BuildConfiguration)) {
-            $msBuildArgs += """/property:Configuration=$BuildConfiguration"""
+            $BuildArgs += """/property:Configuration=$BuildConfiguration"""
         }        
-        $msBuildArgs += """$ProjectOrSolutionFilePath"""
-        & $msBuildExecutablePath $msBuildArgs
+        $BuildArgs += """$ProjectOrSolutionFilePath"""
+        & $msBuildExecutablePath $BuildArgs
         If ($LASTEXITCODE -ne 0) {
             Throw "Failed to build '$ProjectOrSolutionFilePath'."
         }

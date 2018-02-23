@@ -4,7 +4,7 @@
     RootModule        = 'Invoke-MSBuild.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '1.1.0'
 
     # ID used to uniquely identify this module
     GUID              = '41268f87-c705-4481-aad8-9e9c6c05ae2c'
@@ -16,7 +16,7 @@
     CompanyName       = 'Pentia A/S'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2017 Pentia A/S. All rights reserved.'
+    Copyright         = '(c) 2018 Pentia A/S. All rights reserved.'
 
     RequiredModules   = @(@{ModuleName = 'Get-MSBuild'; ModuleVersion = '1.0.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'})
 

@@ -33,3 +33,27 @@ Describe "Invoke-MSBuild" {
         $invocation | Should Throw "Failed to build '$solutionFilePath'."
     }
 }
+
+Describe "Invoke-MSBuild" {
+    It "should accept an array of additional build arguments" {
+        # Arrange
+        $solutionRootPath = $TestDrive
+        Copy-TestSolution -SolutionRootPath $solutionRootPath
+        Restore-NuGetPackages -SolutionFilePath $solutionRootPath
+        $webProjectFilePath = "$solutionRootPath\src\Feature\WebProject\Code\Feature.WebProject.csproj"
+        $buildArgs = @(
+            "/t:Build,WebPublish",
+            "/m",
+            "/p:Configuration=Debug",
+            "/p:PublishUrl=$TestDrive\output",
+            "/p:WebPublishMethod=FileSystem"
+        )
+
+        # Act
+        $webProjectFilePath | Invoke-MSBuild -BuildArgs $buildArgs
+
+        # Assert
+        $LASTEXITCODE | Should Be 0
+        Test-Path -Path "$TestDrive\output\bin\Feature.WebProject.dll" | Should Be $True
+    }
+}

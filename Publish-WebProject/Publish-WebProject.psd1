@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebProject.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.2.0'
+    ModuleVersion     = '1.3.0'
 
     # ID used to uniquely identify this module
     GUID              = '0180313a-e7a1-401f-a9a6-5150c41eccc9'
@@ -23,7 +23,7 @@
 
     # Modules that must be imported into the global environment prior to importing this module
     RequiredModules   = @( 
-        @{ModuleName = 'Get-MSBuild'; ModuleVersion = '1.0.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'; }
+        @{ModuleName = 'Invoke-MSBuild'; ModuleVersion = '1.1.0'; Guid = '41268f87-c705-4481-aad8-9e9c6c05ae2c'; }
         @{ModuleName = 'UserSettings'; ModuleVersion = '1.0.2'; Guid = '124f394a-8328-4f0e-9aa0-e6c027a02e2b'; }
         @{ModuleName = 'Invoke-ConfigurationTransform'; ModuleVersion = '1.1.3'; Guid = '6277b189-3478-4e86-9e3b-782d74a70758'; }
     )

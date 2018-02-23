@@ -36,26 +36,18 @@ Function Publish-WebProject {
         If (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
             Throw "File path '$WebProjectFilePath' not found."
         }
-        If ([string]::IsNullOrEmpty($MSBuildExecutablePath)) {
-            Write-Verbose "`$MSBuildExecutablePath not set."
-            $MSBuildExecutablePath = Get-MSBuild
-        }
-        If (!(Test-Path $MSBuildExecutablePath -PathType Leaf)) {
-            Throw "File path '$MSBuildExecutablePath' not found."
-        }
         If (-not ([System.IO.Path]::IsPathRooted($OutputPath))) {
             $OutputPath = [System.IO.Path]::Combine($PWD, $OutputPath)
         }
-        Write-Verbose "Using '$MSBuildExecutablePath'."
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
-        $output = (& "$MSBuildExecutablePath" "$WebProjectFilePath" /t:WebPublish /p:PublishUrl="$OutputPath" /p:WebPublishMethod="FileSystem" /p:DeleteExistingFiles="false" /p:MSDeployUseChecksum="true") | Out-String
-        If ($LASTEXITCODE -eq 0) {
-            Write-Verbose $output
-        }
-        Else {
-            Write-Error $output
-            Throw "Error publishing project '$WebProjectFilePath'."
-        }
+        $buildArgs = @(
+            "/t:WebPublish", 
+            "/p:WebPublishMethod=FileSystem",
+            "/p:PublishUrl=""$OutputPath""",
+            "/p:DeleteExistingFiles=false",
+            "/p:MSDeployUseChecksum=true"
+        )
+        Invoke-MSBuild -ProjectOrSolutionFilePath $WebProjectFilePath -BuildArgs $buildArgs
     }
 }
 
