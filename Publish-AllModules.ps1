@@ -42,7 +42,7 @@ Function Publish-AllModules {
     Write-Host "Publishing all modules without dependencies."
     $modulesWithoutDependencies | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { Publish-Module -Path $_ -Repository "Local Folder" }
     Write-Host "Installing all modules without dependencies."
-    $modulesWithoutDependencies | Install-Module -Repository $Repository.Name -Credential $Repository.Credentials -Force
+    $modulesWithoutDependencies | Install-Module -Repository "Local Folder" -Force
 
     # Since these modules can have interdependencies, they need to be installed and published one by one.
     $modulesWithDependencies = $modules | Where-Object { $_.RequiredModules.Count -gt 0 } | Sort-Object -Property { $_.RequiredModules.Count }
@@ -50,7 +50,7 @@ Function Publish-AllModules {
         Write-Host "Publishing single module with dependencies."
         $moduleWithDependencies | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { Publish-Module -Path $_ -Repository "Local Folder" }
         Write-Host "Installing single module with dependencies."
-        $moduleWithDependencies | Install-Module -Repository $Repository.Name -Credential $Repository.Credentials -Force
+        $moduleWithDependencies | Install-Module -Repository "Local Folder" -Force
     }
 
     # We're falling back to raw NuGet commands because interaction with feeds which require credentials is currently f*cked in PowerShellGet
