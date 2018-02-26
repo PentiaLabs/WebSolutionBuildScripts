@@ -4,7 +4,7 @@
     RootModule        = 'Publish-WebSolution.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.7.0'
+    ModuleVersion     = '1.8.0'
 
     # ID used to uniquely identify this module
     GUID              = '8eef74e7-2440-4a00-b2ec-bfc56a7c6297'
@@ -35,7 +35,7 @@
         @{ModuleName = 'Publish-NuGetPackage'; ModuleVersion = '1.0.0'; Guid = 'df34c7b7-7748-40b7-8c8a-bd90c60cd8af' })
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Publish-ConfiguredWebSolution', 'Publish-UnconfiguredWebSolution', 'Set-WebSolutionConfiguration')
+    FunctionsToExport = @('Publish-ConfiguredWebSolution', 'Publish-UnconfiguredWebSolution', 'Set-WebSolutionConfiguration', 'Publish-AllRuntimeDependencies')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()

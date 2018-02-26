@@ -174,6 +174,29 @@ Function Remove-WebrootOutputPath {
     }
 }
 
+<#
+.SYNOPSIS
+Publishes the contents of all runtime dependency packages to the specified directores.
+
+.DESCRIPTION
+Publishes the contents of all runtime dependency packages to the specified directores, by looking for a "packages.config" to install packages using NuGet, 
+or a "runtime-dependencies.config" to install packages using the PowerShell Package Management framework (deprecated).
+
+
+.PARAMETER SolutionRootPath
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+Uses the current working directory ($PWD) as a fallback.
+
+.PARAMETER WebrootOutputPath
+The path to where you want your webroot to be published. E.g. "D:\Websites\SolutionSite\www".
+
+.PARAMETER DataOutputPath
+This is where the Sitecore data folder will be placed. E.g. "D:\Websites\SolutionSite\Data".
+
+.EXAMPLE
+Publish-AllRuntimeDependencies -SolutionRootPath "D:\Projects\Abbr\Solution\" -WebrootOutputPath "D:\Websites\SolutionSite\www". -DataOutputPath "D:\Websites\SolutionSite\Data"
+Publishes all runtime packages defined in "D:\Projects\Abbr\Solution\packages.config" and "D:\Projects\Abbr\Solution\runtime-dependencies.config" to the specified output paths.
+#>
 Function Publish-AllRuntimeDependencies {
     [CmdletBinding()]
     Param (
@@ -186,6 +209,9 @@ Function Publish-AllRuntimeDependencies {
         [Parameter(Mandatory = $True)]
         [string]$DataOutputPath
     )
+    If (-not [System.IO.Path]::IsPathRooted($SolutionRootPath)) {
+        $SolutionRootPath = [System.IO.Path]::Combine($PWD, $SolutionRootPath)
+    }
     Publish-PackagesUsingPackageManagement -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
     Publish-PackagesUsingNuGet -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
@@ -204,6 +230,7 @@ Function Publish-PackagesUsingPackageManagement {
     $runtimeDependencyConfigurationFileName = "runtime-dependencies.config"
     $runtimeDependencyConfigurationFilePath = [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
     If (-not (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf)) {
+        Write-Verbose "'$runtimeDependencyConfigurationFilePath' not found - skipping runtime package installation using Package Management."
         return
     }
     Write-Warning "Usage of 'runtime-dependencies.config' is deprecated. Use regular 'packages.config' and 'NuGet.config' files instead."
@@ -229,6 +256,7 @@ Function Publish-PackagesUsingNuGet {
     $nugetPackageFileName = "packages.config"
     $nugetPackageFilePath = [System.IO.Path]::Combine($SolutionRootPath, $nugetPackageFileName)
     If (-not(Test-Path $nugetPackageFilePath -PathType Leaf)) {
+        Write-Verbose "'$nugetPackageFileName' not found - skipping runtime package installation using NuGet."
         return
     }
     Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages" -CurrentOperation "Installing packages in parallel"
@@ -322,4 +350,4 @@ Function Set-WebSolutionConfiguration {
     Write-Progress -Activity "Configuring web solution" -Status "Done." -Completed
 }
 
-Export-ModuleMember -Function Publish-ConfiguredWebSolution, Publish-UnconfiguredWebSolution, Set-WebSolutionConfiguration
+Export-ModuleMember -Function Publish-ConfiguredWebSolution, Publish-UnconfiguredWebSolution, Set-WebSolutionConfiguration, Publish-AllRuntimeDependencies

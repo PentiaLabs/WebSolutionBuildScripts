@@ -82,12 +82,20 @@ Describe "Install-NuGetExe" {
     }
 }
 
+Function New-NuGetConfig {
+    If (Test-Path "NuGet.config") {
+        return
+    }
+    Set-Content -Path "NuGet.config" -Value '<configuration><packageSources><clear /><add key="NuGet official package source" value="https://api.nuget.org/v3/index.json" /></packageSources></configuration>'
+}
+
 Describe "Restore-NuGetPackage" {
     It "should invoke NuGet.exe and restore packages" {
         Push-Location $TestDrive
         try {
             # Arrange
             Install-NuGetExe
+            New-NuGetConfig
             Set-Content -Path "packages.config" -Value "<packages><package id=""jQuery"" version=""3.2.1"" /></packages>"
         
             # Act
@@ -109,6 +117,7 @@ Describe "Install-NuGetPackage" {
         try {
             # Arrange
             Install-NuGetExe
+            New-NuGetConfig
             Install-NuGetPackage -SolutionDirectory "." -PackageId "jQuery" -PackageVersion "3.2.1"
         
             # Act
@@ -128,6 +137,7 @@ Describe "Install-NuGetPackage" {
         try {
             # Arrange
             Install-NuGetExe
+            New-NuGetConfig
             Set-Content -Path "packages.config" -Value "<packages><package id=""Newtonsoft.Json"" version=""10.0.2"" /><package id=""Newtonsoft.Json"" version=""10.0.3"" /></packages>"
         
             # Act
