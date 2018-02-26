@@ -13,7 +13,7 @@ To release a new version of the build scripts, read the [release management guid
 
 ## Installation
 
-1. [Create a Personal Access Token](https://pentia.visualstudio.com/_details/security/tokens) (PAT) for VSTS. The token must grant read-access to packages.
+1. [Create a Personal Access Token](https://pentia.visualstudio.com/_details/security/tokens) (PAT) for VSTS. The token must grant read-access to packages. 
 ![Generate a PAT](/docs/images/generate-pat.png)
 2. Open an elevated PowerShell prompt.
 3. Run the following commands, using your VSTS username and PAT as credentials: 
@@ -21,14 +21,11 @@ To release a new version of the build scripts, read the [release management guid
 # Install and import package management dependencies
 Install-PackageProvider -Name "NuGet"
 Install-Module -Name "PowerShellGet" -MinimumVersion 1.6 -Repository "PSGallery"
-Remove-Module PowerShellGet
-Import-Module -Name "PowerShellGet" -MinimumVersion 1.6
+Remove-Module PowerShellGet # Unload previous versions from your current PS session
+Import-Module -Name "PowerShellGet" -MinimumVersion 1.6 # Load latest versions into your current PS session
 
 $credentials = Get-Credential
 
-# Register Pentia's NuGet package feed
-Register-PackageSource -Name "Pentia VSTS NuGet" -Location "https://pentia.pkgs.visualstudio.com/_packaging/nuget-pentia/nuget/v2" -ProviderName "NuGet" -Credential $credentials -Trusted
-  
 # Register Pentia's PowerShell module feed
 $powershellFeed = "https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2"
 Register-PSRepository -Name "Pentia VSTS PowerShell" -PublishLocation $powershellFeed -SourceLocation $powershellFeed -InstallationPolicy "Trusted" -Credential $credentials -PackageManagementProvider NuGet

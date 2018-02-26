@@ -297,3 +297,4 @@ __pycache__/
 *.xsd.cs
 
 .vscode
+output/
