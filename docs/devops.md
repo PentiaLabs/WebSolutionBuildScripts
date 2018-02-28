@@ -57,9 +57,9 @@ Try {
 
 ### Octopus Deploy
 
-The [guidelines reg. configuration management](#configuration-management) dictate the way Octopus Deploy should apply additional XML Document Tranforms:
+The [guidelines reg. configuration management](/docs/usage.md#configuration-management) dictate the way Octopus Deploy should apply additional XML Document Tranforms:
 
-1. Ensure the solution complies to the [configuration management guidelines](#configuration-management).
+1. Ensure the solution complies to the [configuration management guidelines](/docs/usage.md#configuration-management).
 2. Enable the "Configuration Transforms" feature in Octopus.
 3. Enable the "Automatically run configuration transform files" option.
 4. Add the following as additional transforms (this ensures that e.g. `web.Pentia.Foundation.Search.Always.config` and `web.Pentia.Foundation.Search.Debug.config` is applied to `web.config`): 
