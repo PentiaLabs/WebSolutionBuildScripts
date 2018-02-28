@@ -33,7 +33,7 @@ TODO
 
 * `configurationTransform.AlwaysApplyName` now defaults to "Always" by convention (case insensitive).
 * The latest version of `MSBuild.exe` installed on the system is now automatically used for compilation.
-* The `configs` section has been replaced with `./pentia/user-settings.json`. See [Solution specific user settings](#solution-specific-user-settings).
+* The `configs` section has been replaced with `./pentia/user-settings.json`. See [Solution specific user settings](/docs/usage.md#solution-specific-user-settings).
 
 #### Before - `solution-config.json`
 ```json
