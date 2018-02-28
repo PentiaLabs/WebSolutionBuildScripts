@@ -15,7 +15,7 @@ Get-WebProject | Assert-WebProjectConsistency -BuildConfiguration "<your build c
 
     * renaming files
     * changing build actions for configuration and XDT files
-    * uninstalling the Slow Cheetah NuGet package from all projects in the solution (read [SlowCheetah NuGet package](/docs/usage.md#SlowCheetah-NuGet-package) for details)
+    * uninstalling the Slow Cheetah NuGet package from all projects in the solution (read [SlowCheetah NuGet package](/docs/usage.md#slowcheetah-nuget-package) for details)
     * manually removing all mentions of Slow Cheetah from the `*.csproj` files in the solution.
 
 3. Add any relevant Sitecore versions, Sitecore modules and Sitecore patches (read [Consuming runtime dependencies](https://sop.pentia.dk/Backend/Package-Management/NuGet/Installing-NuGet-Packages.html#consuming-runtime-dependencies) for details).
