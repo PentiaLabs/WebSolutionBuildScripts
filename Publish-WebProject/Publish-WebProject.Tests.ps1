@@ -105,8 +105,12 @@ Describe "Publish-WebProject" {
 
         # Act
         Push-Location $TestDrive
-        Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath ".\output"
-        Pop-Location
+        try {
+            Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath ".\output"
+        }
+        finally {
+            Pop-Location
+        }
 
         # Assert
         Get-ChildItem "$TestDrive\output\" -Recurse | Measure-Object | Select-Object -ExpandProperty Count | Should BeGreaterThan 0
@@ -163,8 +167,12 @@ InModuleScope "Publish-WebProject" {
 
             # Act
             Push-Location $searchStartPath
-            $solutionRootPath = Find-SolutionRootPath -SearchStartPath "."
-            Pop-Location
+            try {
+                $solutionRootPath = Find-SolutionRootPath -SearchStartPath "."
+            }
+            finally {
+                Pop-Location                
+            }
 
             # Assert
             $solutionRootPath | Should Be "$TestDrive"

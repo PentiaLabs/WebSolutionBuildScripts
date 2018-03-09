@@ -45,7 +45,8 @@ Function Publish-WebProject {
             "/p:WebPublishMethod=FileSystem",
             "/p:PublishUrl=""$OutputPath""",
             "/p:DeleteExistingFiles=false",
-            "/p:MSDeployUseChecksum=true"
+            "/p:MSDeployUseChecksum=true",
+            "/m"
         )
         Invoke-MSBuild -ProjectOrSolutionFilePath $WebProjectFilePath -BuildArgs $buildArgs
     }

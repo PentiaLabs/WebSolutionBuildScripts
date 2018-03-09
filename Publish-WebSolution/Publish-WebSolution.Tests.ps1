@@ -52,7 +52,7 @@ Describe "Publish-WebSolution - solution root path" {
         It "should determine the solution root path correctly" {
             # Arrange 
             $solutionRootPath = "Some Path"
-            $expectedSolutionRootPath = $solutionRootPath
+            $expectedSolutionRootPath = [System.IO.Path]::Combine($PWD, $solutionRootPath)
 
             # Act
             $solutionRootPath = Get-SolutionRootPath -SolutionRootPath $solutionRootPath
@@ -233,8 +233,12 @@ Describe "Publish-WebSolution - web project publishing" {
 
         # Act
         Push-Location $TestDrive
-        Publish-UnconfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath ".\output\www" -DataOutputPath ".\output\data"
-        Pop-Location
+        Try {
+            Publish-UnconfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath ".\output\www" -DataOutputPath ".\output\data"
+        }
+        Finally {
+            Pop-Location
+        }
 
         # Assert
         Test-Path -Path "$TestDrive\output\www\bin\Project.WebProject.dll" -PathType Leaf | Should Be $True         
@@ -267,9 +271,67 @@ Describe "Publish-WebSolution - web project publishing" {
         Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True    
         Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $False   
     }
-
 }
-    
+
+Describe "Publish-WebSolution - web project publish concurrency" {
+
+    Function Test-ConcurrencyPrerequisite {
+        $processorInfo = Get-WmiObject "Win32_processor" | Select-Object -Property "NumberOfEnabledCore"
+        $processorInfo.NumberOfEnabledCore -gt 1
+    }
+
+    if (-not (Test-ConcurrencyPrerequisite)) {
+        Write-Warning "Skipping concurrency tests - requires at least two enabled cores."
+        return
+    }
+
+    It "should publish using a single MSBuild node by default" {
+        # Arrange        
+        $solutionRootPath = Initialize-TestSolution
+        $preference = $VerbosePreference
+        $VerbosePreference = "Continue"
+        $buildLogPath = "$TestDrive\publish-sequential.log"
+        
+        # Act
+        try {
+            Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website"`
+                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects -Verbose *> $buildLogPath
+        }
+        finally {
+            $VerbosePreference = $preference
+        }
+  
+        # Assert
+        $buildLog = Get-Content $buildLogPath -Raw
+        $buildLog | Should Match " on node 1 \(WebPublish target"
+        $buildLog | Should Not Match " on node 2 \(WebPublish target"
+        $buildLog | Should Not Match " on node 3 \(WebPublish target"
+    }
+
+    It "should publish using multiple MSBuild nodes when using the 'PublishParallelly' switch" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+        $preference = $VerbosePreference
+        $VerbosePreference = "Continue"
+        $buildLogPath = "$TestDrive\publish-parallel.log"
+        
+        # Act
+        try {
+            Publish-ConfiguredWebSolution -PublishParallelly -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website"`
+                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects -Verbose *> $buildLogPath
+        }
+        finally {
+            $VerbosePreference = $preference           
+        }     
+   
+        # Assert
+        $buildLog = Get-Content $buildLogPath -Raw    
+        $buildLog | Should Match " on node 1 \(WebPublish target"
+        $buildLog | Should Match " on node 2 \(WebPublish target"
+        $buildLog | Should Match " on node 3 \(WebPublish target"
+    }
+}
+
 Describe "Publish-WebSolution - configuration transformation" {
 
     It "should invoke all 'Always' configuration transforms" {

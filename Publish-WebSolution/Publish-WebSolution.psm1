@@ -28,6 +28,9 @@ The build configuration that will be passed to "MSBuild.exe".
 .PARAMETER WebProjects
 The list of webprojects to publish - will call Get-WebProject if empty
 
+.PARAMETER PublishParallelly
+If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
+
 .EXAMPLE
 Publish-ConfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the "Debug" build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
@@ -36,6 +39,8 @@ Publish-ConfiguredWebSolution
 Publishes the solution using the saved user settings found in "<current directory>\.pentia\user-settings.json", and prompts the user for any missing settings.
 
 .NOTES
+Most large scale solutions will end up with file lock issues when using the "-PublishParallelly" switch, which is why it's off by default.
+
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
@@ -56,7 +61,9 @@ Function Publish-ConfiguredWebSolution {
         [string]$BuildConfiguration,
 
         [Parameter(Mandatory = $False)]
-        [string[]]$WebProjects
+        [string[]]$WebProjects,
+
+        [switch]$PublishParallelly
     )
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
@@ -65,7 +72,7 @@ Function Publish-ConfiguredWebSolution {
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects
+    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
     If (Test-Path $WebrootOutputPath) {
         Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
@@ -81,8 +88,12 @@ Function Get-SolutionRootPath {
     )
 
     If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
-        $SolutionRootPath = "$PWD"
         Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
+        $SolutionRootPath = "$PWD"
+    }
+    If (-not ([System.IO.Path]::IsPathRooted($SolutionRootPath))) {
+        $SolutionRootPath = [System.IO.Path]::Combine($PWD, $SolutionRootPath)
+        Write-Verbose "`$SolutionRootPath not rooted. Using '$SolutionRootPath'."
     }
     $SolutionRootPath
 }
@@ -112,11 +123,16 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 .PARAMETER WebProjects
 The list of webprojects to publish - will call Get-WebProject if empty
 
+.PARAMETER PublishParallelly
+If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
+
 .EXAMPLE
 Publish-UnconfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
 
 .NOTES
+Most large scale solutions will end up with file lock issues when using the "-PublishParallelly" switch, which is why it's off by default.
+
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
@@ -134,7 +150,9 @@ Function Publish-UnconfiguredWebSolution {
         [string]$DataOutputPath,
 
         [Parameter(Mandatory = $False)]
-        [string[]]$WebProjects
+        [string[]]$WebProjects,
+
+        [switch]$PublishParallelly
     )
 
     If (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
@@ -154,7 +172,7 @@ Function Publish-UnconfiguredWebSolution {
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
-    Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects    
+    Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
 	
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
@@ -274,26 +292,82 @@ Function Publish-PackagesUsingNuGet {
 
 Function Publish-MultipleWebProjects {
     Param (
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $True)]
         [string]$SolutionRootPath,
     
         [Parameter(Mandatory = $True)]
         [string]$WebrootOutputPath,
 
         [Parameter(Mandatory = $False)]
-        [string[]]$WebProjects
+        [string[]]$WebProjects,
+
+        [switch]$PublishParallelly
     )
     $msBuildExecutablePath = Get-MSBuild
 
-    if ($WebProjects.Count -lt 1) {
+    If ($WebProjects.Count -lt 1) {
         $WebProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
     }
-
-    for ($i = 0; $i -lt $webProjects.Count; $i++) {
-        Write-Progress -Activity "Publishing web solution" -PercentComplete ($i / $webProjects.Count * 100) -Status "Publishing web projects" -CurrentOperation "$webProject"
-        $webProject = $webProjects[$i]
-        $webProject | Publish-WebProject -OutputPath $WebrootOutputPath -MSBuildExecutablePath $msBuildExecutablePath
+    If ($WebProjects.Count -lt 1) {
+        Write-Verbose "No web projects found - skipping web project publishing."
+        return
     }
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects" -CurrentOperation "Creating web publish project"
+    $projectFilePath = New-WebPublishProject -SolutionRootPath $SolutionRootPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects" -CurrentOperation "Publishing all web projects referenced by '$projectFilePath'"
+    Publish-WebProject -WebProjectFilePath $projectFilePath  -OutputPath $WebrootOutputPath -MSBuildExecutablePath $msBuildExecutablePath
+}
+
+<#
+.SYNOPSIS
+Creates a .csproj-file which references all projects in "WebProjects".
+
+.DESCRIPTION
+Creates a .csproj-file which references all projects in "WebProjects".
+Publishing this project will trigger the WebPublish target for all referenced projects. 
+This gives a significant performance boost compared to publishing individual projects sequentially.
+
+.PARAMETER SolutionRootPath
+The solution root path.
+
+.PARAMETER WebProjects
+A list of web projects to publish.
+
+.PARAMETER PublishParallelly
+If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
+#>
+Function New-WebPublishProject {
+    [CmdletBinding(SupportsShouldProcess = $True)]
+    [OutputType([System.String])]
+    Param (
+        [Parameter(Mandatory = $True)]
+        [string]$SolutionRootPath,
+        
+        [Parameter(Mandatory = $True)]
+        [string[]]$WebProjects,
+
+        [switch]$PublishParallelly
+    )
+    $webProjectFilePaths = @()
+    foreach ($webProject in $WebProjects) {
+        if ([System.IO.Path]::IsPathRooted($webProject)) {
+            $webProjectFilePaths += $webProject
+        }
+        else {
+            $webProjectFilePaths += [System.IO.Path]::Combine($SolutionRootPath, $webProject)
+        }
+    }
+    $formattedWebProjectPaths = $webProjectFilePaths -join ";"
+    [xml]$webPublishProject = "<!-- This file is (re-)generated automatically --><Project><ItemGroup><WebProjects Include=""$formattedWebProjectPaths"" /></ItemGroup><Target Name=""WebPublish""><MSBuild Projects=""@(WebProjects)"" Targets=""WebPublish"" BuildInParallel=""$PublishParallelly"" /></Target></Project>"
+    $webPublishProjectDirectory = [System.IO.Path]::Combine($SolutionRootPath, ".pentia")
+    if (-not (Test-Path $webPublishProjectDirectory) -and $pscmdlet.ShouldProcess($webPublishProjectDirectory, "Create misc. directory")) {
+        $webPublishProjectDirectory = New-Item $webPublishProjectDirectory -ItemType Directory
+    }
+    $projectFilePath = [System.IO.Path]::Combine($webPublishProjectDirectory, "WebPublish.csproj")
+    if ($pscmdlet.ShouldProcess($projectFilePath, "Create .csproj-file")) {
+        $webPublishProject.Save($projectFilePath)
+    }
+    $projectFilePath
 }
 
 <#
