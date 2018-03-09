@@ -18,16 +18,12 @@ Class Repository {
     [PSCredential]$Credentials
 }
 
-Function Publish-AllModules {
-    Param(
-        [Parameter(Mandatory = $True)]
-        [Repository]$Repository
-    )
-    
-    Write-Host "Publishing all modules to '$($Repository.Name)'..."
+Function Publish-AllModulesToLocalFolder {    
+    $localFolder = "$PSScriptRoot\output"
+    Write-Host "Publishing all modules to '$localFolder'..."    
+    New-Item -Path $localFolder -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
     If (-not (Get-PSRepository -Name "Local Folder" -ErrorAction SilentlyContinue)) {
-        New-Item -Path "$PSScriptRoot\output\" -Force -ErrorAction SilentlyContinue
-        Register-PSRepository -Name "Local Folder" -SourceLocation "$PSScriptRoot\output\" -PublishLocation "$PSScriptRoot\output\"
+        Register-PSRepository -Name "Local Folder" -SourceLocation "$localFolder" -PublishLocation "$localFolder"
     }
 
     $modules = Get-Module -Name ".\**\*.psd1" -ListAvailable
@@ -37,7 +33,7 @@ Function Publish-AllModules {
     # and all required modules *must* be installed on the local system
     # for it to validate the module manifest.
     # See https://github.com/PowerShell/PowerShellGet/blob/90c5a3d4c8a2e698d38cfb5ef4b1c44d79180d66/Tests/PSGetPublishModule.Tests.ps1#L1470).
-    Remove-Item -Path "$PSScriptRoot\output\*"
+    Remove-Item -Path "$localFolder\*"
     $modulesWithoutDependencies = $modules | Where-Object { $_.RequiredModules.Count -eq 0 }
     Write-Host "Publishing all modules without dependencies."
     $modulesWithoutDependencies | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { Publish-Module -Path $_ -Repository "Local Folder" }
@@ -52,7 +48,18 @@ Function Publish-AllModules {
         Write-Host "Installing single module with dependencies."
         $moduleWithDependencies | Install-Module -Repository "Local Folder" -Force
     }
+    $localFolder
+}
 
+Function Publish-AllModulesToRepository {
+    Param(
+        [Parameter(Mandatory = $True)]
+        [Repository]$Repository,
+
+        [Parameter(Mandatory = $True)]
+        [string]$LocalFolder
+    )
+    Write-Host "Publishing all modules to '$($Repository.Name)'..."
     # We're falling back to raw NuGet commands because interaction with feeds which require credentials is currently f*cked in PowerShellGet
     $nugetExePath = Get-Command -Name "NuGet.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "Path"
     If (-not $nugetExePath) {
@@ -62,10 +69,10 @@ Function Publish-AllModules {
     If ($Repository.Username -and $Repository.Password) {
         & "$nugetExePath" "sources" "add" "-Name" "$($Repository.Name)" "-Source" "$($Repository.PublishLocation)" "-Username" "$($Repository.Username)" "-Password" "$($Repository.Password)"
     }
-    $packages = Get-ChildItem "$PSScriptRoot\output\*.nupkg"
+    $packages = Get-ChildItem "$LocalFolder\*.nupkg"
     foreach ($package in $packages) {
         & "$nugetExePath" "push" "$($package.FullName)" "-Source" "$($Repository.PublishLocation)" "-ApiKey" "$($Repository.NuGetApiKey)"   
-    }    
+    }
 }
 
 $tund = New-Object Repository
@@ -83,7 +90,8 @@ $vsts.Username = $Username
 $vsts.Password = $PersonalAccessToken
 $vsts.Credentials = New-Object System.Management.Automation.PSCredential ($vsts.Username, (ConvertTo-SecureString $vsts.Password -AsPlainText -Force))
 
-Publish-AllModules -Repository $tund
-Publish-AllModules -Repository $vsts
+$localFolder = Publish-AllModulesToLocalFolder
+Publish-AllModulesToRepository -Repository $tund -LocalFolder $localFolder
+Publish-AllModulesToRepository -Repository $vsts -LocalFolder $localFolder
 
 Write-Host "Done."
