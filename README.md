@@ -4,7 +4,7 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 
 To release a new version of the build scripts, read the [release management guide](/docs/release-management.md).
 
-![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/11/badge)
+![**CI Build**](https://pentia.visualstudio.com/_apis/public/build/definitions/6af2be26-000f-4864-ad4c-0af024086c4e/39/badge)
 
 ## Terminology
 * Solution root: Where your `.sln`-file and source code is located.
