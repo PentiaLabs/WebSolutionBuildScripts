@@ -45,7 +45,6 @@ Update-Module -Name "Publish-WebSolution" -Credential (Get-Credential) -Force -V
 
 ## Table of contents
 
-* [Pseudo-sequence diagram](/docs/pseudo-sequence-diagram.md)
 * [Usage](/docs/usage.md)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
   * [Publishing only code](/docs/usage.md#publishing-only-code)
