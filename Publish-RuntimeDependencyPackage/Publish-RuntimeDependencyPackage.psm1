@@ -144,7 +144,7 @@ Function Install-RuntimeDependencyPackage {
             $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop
         }
         Write-Verbose "Installing package '$PackageName'."
-        $package | Install-Package -Credential $credentials -Force
+        $package | Install-Package -Scope "CurrentUser" -Credential $credentials -Force
     }
     Catch {
         If ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {

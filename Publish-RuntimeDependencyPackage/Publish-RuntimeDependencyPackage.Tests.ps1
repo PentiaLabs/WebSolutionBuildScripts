@@ -34,7 +34,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $packageName = "jQuery"
             $packageVersion = "3.1.1"
             $packageSource = "https://www.nuget.org/api/v2"
-            $package = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Force
+            $package = Install-Package -Scope "CurrentUser" -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Force
 
             # Act
             $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $package.Name -PackageVersion $package.Version
@@ -126,7 +126,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
         $packageVersion = "1.0.0"
         $packageSource = "$PSScriptRoot\..\TestContent\TestPackages\"
         $destination = "$TestDrive"
-        $installedPackage = Install-Package -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Destination $destination
+        $installedPackage = Install-Package -Scope "CurrentUser" -Name $packageName -RequiredVersion $packageVersion -Source $packageSource -Destination $destination
     
         It "should copy 'Webroot' folder contents to the target webroot path" {
             # Arrange
@@ -168,7 +168,7 @@ Describe "Publish-RuntimeDependencyPackage" {
         $webrootOutputPath = "$TestDrive\my-webroot-folder"
         $dataOutputPath = "$TestDrive\my-data-folder"
         $expectedFileNames = @("DataSampleFile.txt", "Web.config", "WebrootSampleFile.txt")
-        Uninstall-Package -Name $packageName -ErrorAction SilentlyContinue
+        Uninstall-Package -Scope "CurrentUser" -Name $packageName -ErrorAction SilentlyContinue
 
         # Act
         Publish-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion -PackageSource $packageSource -WebrootOutputPath $webrootOutputPath -DataOutputPath $dataOutputPath
