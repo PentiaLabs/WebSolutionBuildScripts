@@ -4,6 +4,40 @@
 
 Use this [extension](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CommandTaskRunner) to enable support for PowerShell scripts via the Task Runner.
 
+### Visual Studio Context Menu entry
+The following steps make the ``Publish-ConfiguredWebProject`` command available via the Visual Studio context menu.
+
+#### Step 1: Add PowerShell as an External Tool
+   1. Open Visual Studio.
+   2. Open **Tools -> Externl Tools...** 
+
+   ![Add PowerShell as External Tool step 1](/docs/images/vs-add-external-tool-step-1.png)
+
+   3. Click the **Add** button.
+   4. Set the **Title** to e.g. "Publish Configured Project".
+   5. Set the **Command** to the default path for powershell.exe: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
+   6. Set the **Arguments** to: `-Command "& {Import-Module Publish-WebProject; Publish-ConfiguredWebProject -WebProjectFilePath '$(ProjectFileName)' -Verbose;}"`
+   7. Set the **Initial directory** to: `$(ProjectDir)`
+   8. Count the position (starting from 1) of your command and remember this index number. *Visual Studio usually ships with **Creat &GUID** tool which is typically located at the top in first position.*
+
+   ![Add PowerShell as External Tool step 2](/docs/images/vs-add-external-tool-step-2.png)
+
+#### Step 2: Create the Context Menu entry
+   1. Open **Tools -> Customize...**.
+   2. Select the **Comamnds** tab.
+   3. Click **Context menu** and select **Project and Solution Context Menus | Project**
+
+   ![Add Context Menu entry step 1](/docs/images/vs-context-menu-step-1.png)
+
+   4. Click **Add Comamnd...** and from **Categories** select **Tools**
+   5. From **Commands** scroll down and select **External Command X** where "X" is the previously determined index.
+
+   ![Add Context Menu entry step 2](/docs/images/vs-context-menu-step-2.png)
+
+   6. Right click any project in your solution and run the publishing command. *NB: The `Publish-ConfiguredWebSolution` command must have been run at least once for the solution, as `Publish-ConfiguredWebProject` depends on user settings in `<solution root>\.pentia\user-settings.json`.*
+
+   ![Publish project via Visual Studio Context Menu](/docs/images/vs-context-menu-step-3.png)
+
 ### NPM
 
 Add a [script](https://docs.npmjs.com/misc/scripts) object to your package.json, if you're using [NPM as a build tool](https://www.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/):

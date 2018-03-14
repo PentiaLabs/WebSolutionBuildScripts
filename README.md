@@ -50,7 +50,6 @@ You must be part of Pentia Denmark's Active Directory to access the feed. If you
 
 * [Usage](/docs/usage.md)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
-  * [Publishing only code](/docs/usage.md#publishing-only-code)
   * [Publishing one or more projects](/docs/usage.md#publishing-one-or-more-projects)
   * [Solution specific user settings](/docs/usage.md#solution-specific-user-settings)
   * [Adding Sitecore and Sitecore modules](/docs/usage.md#adding-sitecore-and-sitecore-modules)
@@ -62,6 +61,7 @@ You must be part of Pentia Denmark's Active Directory to access the feed. If you
   * [Pentia Gulp tasks-based project](/docs/migration.md#pentia-gulp-tasks-based-project)
 * [Development tool integration](/docs/development-tool-integration.md)
   * [Visual Studio Task Runner](/docs/development-tool-integration.md#visual-studio-task-runner)
+  * [Visual Studio Context Menu entry](/docs/development-tool-integration.md#visual-studio-context-menu-entry)
   * [NPM](/docs/development-tool-integration.md#npm)
   * [Gulp](/docs/development-tool-integration.md#gulp)
 * [Setting up Continuous Integration](/docs/devops.md#setting-up-continuous-integration)

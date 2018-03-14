@@ -18,16 +18,6 @@ Publish-ConfiguredWebSolution
 
 You'll be prompted for various required parameters. Once provided, these parameters will be saved in a local file for future use (see [Solution specific user settings](#solution-specific-user-settings) below).
 
-### Publishing only code
-
-**Prerequisite:** `Publish-ConfiguredWebSolution` has to be run at least once before publishing individual layers or projects.
-
-To publish only code, open an elevated PowerShell prompt and run the following command in the solution root directory:
-
-```powershell
-Get-WebProject | Publish-UnconfiguredWebProject -OutputPath (Get-UserSettings).webrootOutputPath
-```
-
 ### Publishing one or more projects
 
 **Prerequisite:** `Publish-ConfiguredWebSolution` has to be run at least once before publishing individual layers or projects.
@@ -127,43 +117,21 @@ Shown below is a build script example which does the following:
 The script should be placed in the same directory as the solution's `.sln` file.
 
 ```powershell
-Function RestoreNuGetPackages {
-    & "nuget.exe" "restore" "$PSScriptRoot" *>> $script:buildLogFilePath
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "NuGet packages restored successfully. Build log written to '$script:buildLogFilePath'"
-    }
-    else {
-        Throw "NuGet package restore failed. Build log written to '$script:buildLogFilePath'"
-    }
-}
-
-Function BuildSolution {    
-    $msBuild = Get-MSBuild
-    & "$msBuild" "$PSScriptRoot" *>> $script:buildLogFilePath
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "Solution compilation succeeded. Build log written to '$script:buildLogFilePath'"
-    }
-    else {
-        Throw "Solution compilation failed. Build log written to '$script:buildLogFilePath'"
-    }
-}
-
 Try
 {
-    Import-Module Publish-WebSolution -MinimumVersion "0.5.1" -Force -ErrorAction Stop
-
-    $buildLogFilePath = "$PSScriptRoot\.pentia\build-$(Get-Date -Format "yyyy-MM-dd.HH.mm.ss").log"
+    $ErrorActionPreference = "Stop"
+    Import-Module "Publish-WebSolution" -MinimumVersion "1.9.0" -Force
 
     # Build and publish solution
-    RestoreNuGetPackages
-    BuildSolution
-    Publish-ConfiguredWebSolution -SolutionRootPath $PSScriptRoot | Out-Null
+    Restore-NuGetPackage -SolutionDirectory $PSScriptRoot
+    Invoke-MSBuild -ProjectOrSolutionFilePath $PSScriptRoot
+    Publish-ConfiguredWebSolution -SolutionRootPath $PSScriptRoot
 
     # Load user settings
     $settings = Get-UserSettings -SolutionRootPath $PSScriptRoot
 
     # Copy Pentia Sitecore license
-    Copy-Item "\\buildlibrary.hq.pentia.dk\library\Sitecore License\Pentia 8.x\www\Data\pentia.license.xml" "$($settings.dataOutputPath)\license.xml" -ErrorAction Stop
+    Copy-Item "\\buildlibrary.hq.pentia.dk\library\Sitecore License\Pentia 8.x\www\Data\pentia.license.xml" "$($settings.dataOutputPath)\license.xml"
 
     Write-Host "Done."
 
