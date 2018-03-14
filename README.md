@@ -13,35 +13,38 @@ To release a new version of the build scripts, read the [release management guid
 
 ## Installation
 
-1. [Create a Personal Access Token](https://pentia.visualstudio.com/_details/security/tokens) (PAT) for VSTS. The token must grant read-access to packages. 
+1. Open an elevated PowerShell prompt and run the following commands:
+    ```powershell
+    PowerShellGet\Install-Module -Name "PowerShellGet" -Repository "PSGallery" -Force
+    PowerShellGet\Install-Module -Name "PackageManagement" -Repository "PSGallery" -Force
+    PackageManagement\Install-PackageProvider -Name "NuGet" -Force
+    ```
+
+2. Close the PowerShell prompt.
+
+3. Download the install script "[Install-WebSolutionBuildScripts.ps1](/Install-WebSolutionBuildScripts.ps1)" and save it to a file. E.g. "`%TEMP%\Install-WebSolutionBuildScripts.ps1`".
+    
+4. Open an elevated PowerShell prompt and run the install script. E.g. "`.\%TEMP%\Install-WebSolutionBuildScripts.ps1`". 
+You'll be prompted for a Personal Access Token (PAT).
+![Run installation script](/docs/images/install-websolutionbuildscripts.png)
+
+5. [Generate a PAT](https://pentia.visualstudio.com/_details/security/tokens). The token must grant read-access to packages in the [Pentia VSTS PowerShell package feed](https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2). 
+You must be part of Pentia Denmark's Active Directory to access the feed. If you're not, contact <it@pentia.dk> for help. 
 ![Generate a PAT](/docs/images/generate-pat.png)
-2. Open an elevated PowerShell prompt.
-3. Run the following commands, using your VSTS username and PAT as credentials: 
-```powershell
-# Install and import package management dependencies
-Install-PackageProvider -Name "NuGet"
-Install-Module -Name "PowerShellGet" -MinimumVersion 1.6 -Repository "PSGallery"
-Remove-Module PowerShellGet # Unload previous versions from your current PS session
-Import-Module -Name "PowerShellGet" -MinimumVersion 1.6 # Load latest versions into your current PS session
 
-$credentials = Get-Credential
+6. Copy & paste the PAT into the prompt from step 4.
+![Enter PAT into install script](/docs/images/install-websolutionbuildscripts-with-pat.png)
 
-# Register Pentia's PowerShell module feed
-$powershellFeed = "https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2"
-Register-PSRepository -Name "Pentia VSTS PowerShell" -PublishLocation $powershellFeed -SourceLocation $powershellFeed -InstallationPolicy "Trusted" -Credential $credentials -PackageManagementProvider NuGet
-
-# Install the latest version of the build scripts
-Install-Module -Name "Publish-WebSolution" -Repository "Pentia VSTS PowerShell" -Credential $credentials -Force -Verbose
-```
+7. The installation should now commence. You can delete the installation file and revoke the PAT once the installation is done.
 
 ## Updating
 
 1. [Create a Personal Access Token](https://pentia.visualstudio.com/_details/security/tokens) (PAT) for VSTS. The token must grant read-access to packages.
 2. Open an elevated PowerShell prompt.
 3. Run the following commands, using your VSTS username and PAT as credentials: 
-```powershell
-Update-Module -Name "Publish-WebSolution" -Credential (Get-Credential) -Force -Verbose
-```
+    ```powershell
+    PowerShellGet\Update-Module -Name "Publish-WebSolution" -Credential (Get-Credential) -Force -Verbose
+    ```
 
 ## Table of contents
 
