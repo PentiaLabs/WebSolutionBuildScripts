@@ -2,11 +2,11 @@
 .SYNOPSIS
 Downloads the latest nuget.exe from the web and saves it to "<current directory>\.pentia\nuget.exe".
 #>
-Function Install-NuGetExe {
+function Install-NuGetExe {
     [CmdletBinding()]
-    Param()
+    param ()
     
-    If (Test-NuGetInstall) {
+    if (Test-NuGetInstall) {
         Write-Verbose "nuget.exe is already installed."
         return
     }
@@ -19,20 +19,20 @@ Function Install-NuGetExe {
     Invoke-WebRequest $sourceNugetExe -OutFile $saveToPath
 }
 
-Function Test-NuGetInstall {
+function Test-NuGetInstall {
     Get-NuGetPath | Test-Path
 }
 
-Function Get-NuGetPath {
+function Get-NuGetPath {
     $localNuGetExePath = [System.IO.Path]::Combine("$PWD", ".pentia", "nuget.exe")
     $globalNuGetExePath = Get-GlobalNuGetPath
-    If ([System.String]::IsNullOrWhiteSpace($globalNuGetExePath)) {
+    if ([string]::IsNullOrWhiteSpace($globalNuGetExePath)) {
         return $localNuGetExePath
     }
     $globalNuGetExePath
 }
 
-Function Get-GlobalNuGetPath {
+function Get-GlobalNuGetPath {
     $latestGlobalNuGetExePath = Get-Command "nuget.exe" -ErrorAction SilentlyContinue | Sort-Object -Property "Version" -Descending | Select-Object -ExpandProperty "Source" -First 1
     $latestGlobalNuGetExePath
 }
@@ -56,19 +56,19 @@ The NuGet configuration file to apply. If not specified, %AppData%\NuGet\NuGet.C
 .PARAMETER NoCache
 Prevents NuGet from using packages from local machine caches.
 #>
-Function Restore-NuGetPackage {
+function Restore-NuGetPackage {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $False)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$NuGetExePath = (Get-NuGetPath),
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$SolutionDirectory,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$OutputDirectory,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$ConfigFile,
 
         [switch]$NoCache
@@ -81,8 +81,8 @@ Function Restore-NuGetPackage {
     $builder.NoCache = $NoCache
     $options = $builder.Build()
     & "$NuGetExePath" $options
-    If ($LASTEXITCODE -ne 0) {
-        Throw "NuGet command failed."
+    if ($LASTEXITCODE -ne 0) {
+        throw "NuGet command failed."
     }
 }
 
@@ -114,28 +114,28 @@ The NuGet configuration file to apply. If not specified, %AppData%\NuGet\NuGet.C
 .PARAMETER NoCache
 Prevents NuGet from using packages from local machine caches.
 #>
-Function Install-NuGetPackage {
+function Install-NuGetPackage {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $False)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$NuGetExePath = (Get-NuGetPath),
 
-        [Parameter(ParameterSetName = "InstallByPackageId", Mandatory = $True)]
+        [Parameter(ParameterSetName = "InstallByPackageId", Mandatory = $true)]
         [string]$PackageId,
 
-        [Parameter(ParameterSetName = "InstallByPackageId", Mandatory = $False)]
+        [Parameter(ParameterSetName = "InstallByPackageId", Mandatory = $false)]
         [string]$PackageVersion,
 
-        [Parameter(ParameterSetName = "InstallByPackageConfig", Mandatory = $True)]
+        [Parameter(ParameterSetName = "InstallByPackageConfig", Mandatory = $true)]
         [string]$PackageConfigFile,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$SolutionDirectory,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$OutputDirectory,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$ConfigFile,
 
         [switch]$NoCache
@@ -151,8 +151,8 @@ Function Install-NuGetPackage {
     $builder.NoCache = $NoCache
     $options = $builder.Build()
     & "$NuGetExePath" $options
-    If ($LASTEXITCODE -ne 0) {
-        Throw "NuGet command failed."
+    if ($LASTEXITCODE -ne 0) {
+        throw "NuGet command failed."
     }
 }
 
@@ -173,7 +173,7 @@ Class OptionBuilder {
         $this.AddParameter("-SolutionDirectory", $this.SolutionDirectory)
         $this.AddParameter("-OutputDirectory", $this.OutputDirectory)
         $this.AddParameter("-ConfigFile", $this.ConfigFile)
-        If ($this.NoCache) {
+        if ($this.NoCache) {
             $this.AddParameter("-NoCache")
         }
         return $this.Options
@@ -184,7 +184,7 @@ Class OptionBuilder {
     }
 
     Hidden [void] AddParameter([string]$ParameterName, [string]$ParameterValue) {
-        If (-not [System.String]::IsNullOrWhiteSpace($ParameterValue)) {
+        if (-not [string]::IsNullOrWhiteSpace($ParameterValue)) {
             $this.Options.Add($ParameterName)
             $this.Options.Add($ParameterValue)
         }
@@ -205,7 +205,7 @@ Class InstallOptionBuilder : OptionBuilder {
     }
 
     Hidden [void] InsertParameter([int]$Index, [string]$ParameterValue) {
-        If (-not [System.String]::IsNullOrWhiteSpace($ParameterValue)) {
+        if (-not [string]::IsNullOrWhiteSpace($ParameterValue)) {
             $this.Options.Insert($Index, $ParameterValue)
         }
     }
@@ -247,22 +247,22 @@ The path where the contents of "<package>\Webroot" will be copied to.
 .PARAMETER DataOutputPath
 The path where the contents of "<package>\Data" will be copied to.
 #>
-Function Publish-NuGetPackage {
+function Publish-NuGetPackage {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$PackageName,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$PackageOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
     $packagePath = [System.IO.Path]::Combine($PackageOutputPath, "$PackageName.$PackageVersion")
@@ -272,16 +272,16 @@ Function Publish-NuGetPackage {
     Copy-PackageFolder -SourceFriendlyName "data" -Source $packageDataPath -Target $DataOutputPath
 }
 
-Function Copy-PackageFolder {
+function Copy-PackageFolder {
     [CmdletBinding()]
-    Param (        
-        [Parameter(Mandatory = $True)]
+    param (        
+        [Parameter(Mandatory = $true)]
         [string]$SourceFriendlyName,
                 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$Source,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$Target
     )
 

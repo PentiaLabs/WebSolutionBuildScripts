@@ -10,13 +10,13 @@ Import-Module "$PSScriptRoot\..\Publish-NuGetPackage\Publish-NuGetPackage.psm1" 
 Import-Module "$PSScriptRoot\Publish-WebSolution.psm1" -Force
 Import-Module "$PSScriptRoot\..\TestContent\TestSolution\New-TestSolution.psm1" -Force
     
-Function Initialize-TestSolution {
+function Initialize-TestSolution {
     $solution = New-TestSolution -TempPath $TestDrive
     Initialize-TestPackageSource | Out-Null
     $solution
 }
 
-Function Initialize-TestPackageSource {
+function Initialize-TestPackageSource {
     $packageSource = "$TestDrive\RuntimePackages"
     Remove-Item $packageSource -Force -Recurse -ErrorAction SilentlyContinue
     # Used by Package Management framework
@@ -28,19 +28,19 @@ Function Initialize-TestPackageSource {
     Copy-Item -Path "$PSScriptRoot\..\TestContent\TestPackages\sample-runtime-dependency.1.0.0.nupkg" -Destination $packageSource        
 }
 
-Function Publish-TestSolution {
-    Param(
-        [Parameter(Mandatory = $True)]
+function Publish-TestSolution {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath
     )
     Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug"
 }
 
-Function Publish-TestSolutionWithWebProjects {
-    Param(
-        [Parameter(Mandatory = $True)]
+function Publish-TestSolutionWithWebProjects {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string[]]$WebProjects
     )
     Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website" -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects
@@ -63,7 +63,7 @@ Describe "Publish-WebSolution - solution root path" {
 
         It "should determine the solution root path fallback correctly" {
             # Arrange 
-            $solutionRootPath = $Null
+            $solutionRootPath = $null
             $expectedSolutionRootPath = "$PWD"
 
             # Act
@@ -95,8 +95,8 @@ Describe "Publish-WebSolution - output preparation" {
         Publish-ConfiguredWebSolution -SolutionRootPath $solution -WebrootOutputPath $webroot -DataOutputPath $data -BuildConfiguration $buildConfiguration
 
         # Assert
-        Test-Path $webroot | Should Be $False
-        Test-Path $existingContent | Should Be $False
+        Test-Path $webroot | Should Be $false
+        Test-Path $existingContent | Should Be $false
     }
     
     It "should save configuration files in the correct encoding" {
@@ -147,10 +147,10 @@ Describe "Publish-WebSolution - user setting integration" {
 
         # Assert
         $webrootOutputPathExists = Test-Path -Path $userSettings.webrootOutputPath -PathType Container
-        $webrootOutputPathExists | Should Be $True "Website output path doesn't exist."
+        $webrootOutputPathExists | Should Be $true "Website output path doesn't exist."
         
         $dataOutputPathExists = Test-Path -Path $userSettings.dataOutputPath -PathType Container
-        $dataOutputPathExists | Should Be $True "Data output path doesn't exist."
+        $dataOutputPathExists | Should Be $true "Data output path doesn't exist."
     }
 
     It "should update user settings by default" {
@@ -176,7 +176,7 @@ Describe "Publish-WebSolution - user setting integration" {
 
         # Assert
         $userSettingsExist = Test-Path "$solutionRootPath/.pentia/user-settings.json"
-        $userSettingsExist | Should Be $False
+        $userSettingsExist | Should Be $false
     }
 
 }
@@ -193,8 +193,8 @@ Describe "Publish-WebSolution - runtime dependency publishing" {
         Publish-TestSolution -SolutionRootPath $solutionRootPath
 
         # Assert
-        Test-Path -Path "$TestDrive\Website\WebrootSampleFile.txt" -PathType Leaf | Should Be $True 
-        Test-Path -Path "$TestDrive\Data\DataSampleFile.txt" -PathType Leaf | Should Be $True
+        Test-Path -Path "$TestDrive\Website\WebrootSampleFile.txt" -PathType Leaf | Should Be $true 
+        Test-Path -Path "$TestDrive\Data\DataSampleFile.txt" -PathType Leaf | Should Be $true
     }
 
     It "should publish all runtime dependencies using NuGet" {
@@ -206,8 +206,8 @@ Describe "Publish-WebSolution - runtime dependency publishing" {
         Publish-TestSolution -SolutionRootPath $solutionRootPath
 
         # Assert
-        Test-Path -Path "$TestDrive\Website\WebrootSampleFile.txt" -PathType Leaf | Should Be $True 
-        Test-Path -Path "$TestDrive\Data\DataSampleFile.txt" -PathType Leaf | Should Be $True
+        Test-Path -Path "$TestDrive\Website\WebrootSampleFile.txt" -PathType Leaf | Should Be $true 
+        Test-Path -Path "$TestDrive\Data\DataSampleFile.txt" -PathType Leaf | Should Be $true
     }
 
 }
@@ -222,9 +222,9 @@ Describe "Publish-WebSolution - web project publishing" {
         Publish-TestSolution -SolutionRootPath $solutionRootPath
 
         # Assert
-        Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $True         
-        Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True         
-        Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
+        Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $true         
+        Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $true         
+        Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $true                 
     }
 
     It "should publish all web projects to a single relative output directory" {
@@ -233,17 +233,17 @@ Describe "Publish-WebSolution - web project publishing" {
 
         # Act
         Push-Location $TestDrive
-        Try {
+        try {
             Publish-UnconfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath ".\output\www" -DataOutputPath ".\output\data"
         }
-        Finally {
+        finally {
             Pop-Location
         }
 
         # Assert
-        Test-Path -Path "$TestDrive\output\www\bin\Project.WebProject.dll" -PathType Leaf | Should Be $True         
-        Test-Path -Path "$TestDrive\output\www\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True         
-        Test-Path -Path "$TestDrive\output\www\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $True                 
+        Test-Path -Path "$TestDrive\output\www\bin\Project.WebProject.dll" -PathType Leaf | Should Be $true         
+        Test-Path -Path "$TestDrive\output\www\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $true         
+        Test-Path -Path "$TestDrive\output\www\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $true                 
     }
 
     It "should delete all configuration transform files in the output directory" {
@@ -254,8 +254,8 @@ Describe "Publish-WebSolution - web project publishing" {
         Publish-TestSolution -SolutionRootPath $solutionRootPath
 
         # Assert
-        Test-Path -Path "$TestDrive\Website\Web.Debug.config" -PathType Leaf | Should Be $False
-        Test-Path -Path "$TestDrive\Website\Web.Release.config" -PathType Leaf | Should Be $False
+        Test-Path -Path "$TestDrive\Website\Web.Debug.config" -PathType Leaf | Should Be $false
+        Test-Path -Path "$TestDrive\Website\Web.Release.config" -PathType Leaf | Should Be $false
     }
     
     It "should only publish web projects in the webproject parameter" {
@@ -267,15 +267,15 @@ Describe "Publish-WebSolution - web project publishing" {
         Publish-TestSolutionWithWebProjects -SolutionRootPath $solutionRootPath -WebProjects $WebProjects
     
         # Assert
-        Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $False
-        Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $True    
-        Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $False   
+        Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $false
+        Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $true    
+        Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $false   
     }
 }
 
 Describe "Publish-WebSolution - web project publish concurrency" {
 
-    Function Test-ConcurrencyPrerequisite {
+    function Test-ConcurrencyPrerequisite {
         $processorInfo = Get-WmiObject "Win32_processor" | Select-Object -Property "NumberOfEnabledCore"
         $processorInfo.NumberOfEnabledCore -gt 1
     }
@@ -343,7 +343,7 @@ Describe "Publish-WebSolution - configuration transformation" {
             
         # Assert
         $transformedWebConfig = Get-Content -Path "$TestDrive\Website\Web.config" | Out-String
-        $transformedWebConfig -match "value=""Project.WebProject.Always""" | Should Be $True
+        $transformedWebConfig -match "value=""Project.WebProject.Always""" | Should Be $true
     }
         
     It "should invoke all build configuration specific configuration transforms" {
@@ -355,9 +355,9 @@ Describe "Publish-WebSolution - configuration transformation" {
             
         # Assert
         $transformedWebConfig = Get-Content -Path "$TestDrive\Website\Web.config" | Out-String
-        $transformedWebConfig -match "value=""Project.WebProject""" | Should Be $True
-        $transformedWebConfig -match "value=""Feature.WebProject""" | Should Be $True
-        $transformedWebConfig -match "value=""Foundation.WebProject""" | Should Be $True        
+        $transformedWebConfig -match "value=""Project.WebProject""" | Should Be $true
+        $transformedWebConfig -match "value=""Feature.WebProject""" | Should Be $true
+        $transformedWebConfig -match "value=""Foundation.WebProject""" | Should Be $true        
     }
 
 }

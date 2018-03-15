@@ -5,30 +5,30 @@ Describe "module member exports" {
 
         Describe "'$($moduleDefinitionFile.Name)' member export" {
 
-            Function Get-ExportedCommandsFromDefinition {
-                Param(
-                    [Parameter(Mandatory = $True)]
-                    [String]$ModuleDefinitionFile
+            function Get-ExportedCommandsFromDefinition {
+                param (
+                    [Parameter(Mandatory = $true)]
+                    [string]$ModuleDefinitionFile
                 )
                 $content = (Get-Content $ModuleDefinitionFile | Out-String)
                 $moduleFromDefinition = (Invoke-Expression $content)
-                $exportedCommandsFromDefinition = $moduleFromDefinition.FunctionsToExport
+                $exportedCommandsFromDefinition = $moduleFromDefinition.functionsToExport
                 $exportedCommandsFromDefinition
             }
 
-            Function Get-ExportedCommandsFromScript {
-                Param(
-                    [Parameter(Mandatory = $True)]
-                    [String]$ModuleDefinitionFile
+            function Get-ExportedCommandsFromScript {
+                param (
+                    [Parameter(Mandatory = $true)]
+                    [string]$ModuleDefinitionFile
                 )
                 $moduleScriptFilePath = "$ModuleDefinitionFile".Replace("psd1", "psm1")      
                 $moduleScriptFileContent = Get-Content $moduleScriptFilePath -Raw 
 
                 if ($moduleScriptFileContent -like "*-Alias*") {
-                    $exportModuleMemberRegex = [Regex]"(?mi)^Export-ModuleMember -Function (.*) -Alias (.*)$"
+                    $exportModuleMemberRegex = [regex]"(?mi)^Export-ModuleMember -Function (.*) -Alias (.*)$"
                 }
                 else {
-                    $exportModuleMemberRegex = [Regex]"(?mi)^Export-ModuleMember -Function (.*)$"
+                    $exportModuleMemberRegex = [regex]"(?mi)^Export-ModuleMember -Function (.*)$"
                 }
                 
                 $exportedCommandsFromScriptMatches = $exportModuleMemberRegex.Matches($moduleScriptFileContent)
@@ -45,7 +45,7 @@ Describe "module member exports" {
                 $missingExports = $exportedCommandsFromDefinition | Where-Object { $exportedCommandsFromScript -notcontains $_ }
 
                 # Assert
-                $missingExports | Should Be $Null
+                $missingExports | Should Be $null
             }
 
             It "should export the same members from the .psd1 as from the .psm1 file" {
@@ -57,7 +57,7 @@ Describe "module member exports" {
                 $missingExports = $exportedCommandsFromScript | Where-Object { $exportedCommandsFromDefinition -notcontains $_ }
 
                 # Assert
-                $missingExports | Should Be $Null
+                $missingExports | Should Be $null
             }
         }
 

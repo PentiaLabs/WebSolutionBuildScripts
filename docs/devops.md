@@ -13,14 +13,14 @@ A typical CI build should do the following:
 Example:
 
 ```powershell
-Try {
+try {
   Import-Module "Publish-WebSolution" -MinimumVersion "0.6.0" -Force -ErrorAction "Stop"
   $VerbosePreference = "Continue" 
   Publish-ConfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\output\Webroot" -DataOutputPath "$PWD\output\Data" -BuildConfiguration "Debug" -Verbose
-} Catch {
+} catch {
   Write-Error -Exception $_.Exception
-  Exit 1
-} Finally {
+  exit 1
+} finally {
   $VerbosePreference = "SilentlyContinue"
 }
 ```
@@ -44,12 +44,12 @@ This is basically the same as for [CI](#setting-up-continuous-integration) descr
 ### TeamCity CD
 
 ```powershell
-Try {
+try {
   Import-Module "Publish-WebSolution" -MinimumVersion "0.5.1" -Force -ErrorAction "Stop"  
   Publish-UnconfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\Output\Webroot" -DataOutputPath "$PWD\Output\Data"
-} Catch {
+} catch {
   Write-Error -Exception $_.Exception
-  Exit 1
+  exit 1
 }
 ```
 

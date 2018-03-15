@@ -1,8 +1,8 @@
-Param (
-    [Parameter(Mandatory = $True)]
+param (
+    [Parameter(Mandatory = $true)]
     [string]$Username,
 
-    [Parameter(Mandatory = $True)]
+    [Parameter(Mandatory = $true)]
     [string]$PersonalAccessToken
 )
 
@@ -18,11 +18,11 @@ Class Repository {
     [PSCredential]$Credentials
 }
 
-Function Publish-AllModulesToLocalFolder {    
+function Publish-AllModulesToLocalFolder {    
     $localFolder = "$PSScriptRoot\output"
     Write-Host "Publishing all modules to '$localFolder'..."    
     New-Item -Path $localFolder -ItemType Directory -Force -ErrorAction SilentlyContinue | Out-Null
-    If (-not (Get-PSRepository -Name "Local Folder" -ErrorAction SilentlyContinue)) {
+    if (-not (Get-PSRepository -Name "Local Folder" -ErrorAction SilentlyContinue)) {
         Register-PSRepository -Name "Local Folder" -SourceLocation "$localFolder" -PublishLocation "$localFolder"
     }
 
@@ -51,22 +51,22 @@ Function Publish-AllModulesToLocalFolder {
     $localFolder
 }
 
-Function Publish-AllModulesToRepository {
-    Param(
-        [Parameter(Mandatory = $True)]
+function Publish-AllModulesToRepository {
+    param (
+        [Parameter(Mandatory = $true)]
         [Repository]$Repository,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$LocalFolder
     )
     Write-Host "Publishing all modules to '$($Repository.Name)'..."
     # We're falling back to raw NuGet commands because interaction with feeds which require credentials is currently f*cked in PowerShellGet
     $nugetExePath = Get-Command -Name "NuGet.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty "Path"
-    If (-not $nugetExePath) {
+    if (-not $nugetExePath) {
         Install-NuGetExe
         $nugetExePath = "$PSScriptRoot/.pentia/NuGet.exe"
     }
-    If ($Repository.Username -and $Repository.Password) {
+    if ($Repository.Username -and $Repository.Password) {
         & "$nugetExePath" "sources" "add" "-Name" "$($Repository.Name)" "-Source" "$($Repository.PublishLocation)" "-Username" "$($Repository.Username)" "-Password" "$($Repository.Password)"
     }
     $packages = Get-ChildItem "$LocalFolder\*.nupkg"

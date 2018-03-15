@@ -24,7 +24,7 @@ Describe "Assert-WebProjectConsistency" {
                 $containsSlowCheetah = Test-SlowCheetah -ProjectFilePath $filePath
   
                 # Assert
-                $containsSlowCheetah | Should Be $True
+                $containsSlowCheetah | Should Be $true
             }
 
             It "should find no references to SlowCheetah" {
@@ -46,7 +46,7 @@ Describe "Assert-WebProjectConsistency" {
                 $containsSlowCheetah = Test-SlowCheetah -ProjectFilePath $filePath
 
                 # Assert
-                $containsSlowCheetah | Should Be $False
+                $containsSlowCheetah | Should Be $false
             }
         }
 
@@ -68,7 +68,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Debug" -ProjectFilePath $filePath
 
                 # Assert
-                $hasCorrectBuildAction | Should Be $False
+                $hasCorrectBuildAction | Should Be $false
             }
 
             It "should detect correct build action" {
@@ -88,7 +88,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectBuildAction = Test-XdtBuildActionContent -BuildConfiguration "Release" -ProjectFilePath $filePath
 
                 # Assert
-                $hasCorrectBuildAction | Should Be $True
+                $hasCorrectBuildAction | Should Be $true
             }
         }
 
@@ -108,7 +108,7 @@ Describe "Assert-WebProjectConsistency" {
                 $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFilePath $filePath
 
                 # Assert
-                $containsFilesWithReservedPath | Should Be $True
+                $containsFilesWithReservedPath | Should Be $true
             }
 
             It "should ignore irrelevant file names" {
@@ -127,7 +127,7 @@ Describe "Assert-WebProjectConsistency" {
                 $containsFilesWithReservedPath = Test-ReservedFilePath -ProjectFilePath $filePath
 
                 # Assert
-                $containsFilesWithReservedPath | Should Be $False
+                $containsFilesWithReservedPath | Should Be $false
             }
         }
         
@@ -141,7 +141,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasXmlDeclaration = Test-XmlDeclaration -Path $filePath
             
                 # Assert
-                $hasXmlDeclaration | Should Be $True
+                $hasXmlDeclaration | Should Be $true
             }
         
             It "should detect missing XML declaration" {
@@ -153,7 +153,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasXmlDeclaration = Test-XmlDeclaration -Path $filePath
         
                 # Assert
-                $hasXmlDeclaration | Should Be $False
+                $hasXmlDeclaration | Should Be $false
             }
         }
 
@@ -167,7 +167,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectEncoding = Test-XmlFileEncoding -Path $filePath
 
                 # Assert
-                $hasCorrectEncoding | Should Be $False
+                $hasCorrectEncoding | Should Be $false
             }
 
             It "should detect file encoding match" {
@@ -179,7 +179,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectEncoding = Test-XmlFileEncoding -Path $filePath
         
                 # Assert
-                $hasCorrectEncoding | Should Be $True
+                $hasCorrectEncoding | Should Be $true
             }
           
             It "should detect file encoding mismatch" {
@@ -191,7 +191,7 @@ Describe "Assert-WebProjectConsistency" {
                 $hasCorrectEncoding = Test-XmlFileEncoding -Path $filePath
           
                 # Assert
-                $hasCorrectEncoding | Should Be $False
+                $hasCorrectEncoding | Should Be $false
             }
         }
 
@@ -209,7 +209,7 @@ Describe "Assert-WebProjectConsistency" {
                 $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
 
                 # Assert
-                $referencedFileExists | Should Be $True
+                $referencedFileExists | Should Be $true
             }
 
             It "should detect missing file" {
@@ -220,7 +220,7 @@ Describe "Assert-WebProjectConsistency" {
                 $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
                 
                 # Assert
-                $referencedFileExists | Should Be $False
+                $referencedFileExists | Should Be $false
             }
         }
 
@@ -290,7 +290,7 @@ Describe "Assert-WebProjectConsistency" {
                 $buildConfigurationExists = Test-BuildConfigurationExists -ProjectFilePath $ProjectFilePath -BuildConfiguration "Staging"
             
                 # Assert
-                $buildConfigurationExists | Should Be $True
+                $buildConfigurationExists | Should Be $true
             }
             
             It "should detect missing build configuration" {
@@ -301,7 +301,7 @@ Describe "Assert-WebProjectConsistency" {
                 $buildConfigurationExists = Test-BuildConfigurationExists -ProjectFilePath $ProjectFilePath -BuildConfiguration "something that does not exist"
 
                 # Assert
-                $buildConfigurationExists | Should Be $False
+                $buildConfigurationExists | Should Be $false
             }
         }
     }

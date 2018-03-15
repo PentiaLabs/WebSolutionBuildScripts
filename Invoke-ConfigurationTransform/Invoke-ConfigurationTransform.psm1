@@ -32,25 +32,25 @@ E.g. "C:\MySolution\src\Foundation\Code\App_Config\Sitecore\Include\MyConfig.Deb
 .PARAMETER WebrootOutputPath
 E.g. "D:\websites\MySolution\www".
 #>
-Function Get-PathOfFileToTransform {
+function Get-PathOfFileToTransform {
     [CmdletBinding()]
-    [OutputType([System.String])]    
-    Param (
-        [Parameter(Mandatory = $True)]
+    [OutputType([string])]    
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ConfigurationTransformFilePath,
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath
     )
     $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
-    If ($nameOfFileToTransform -eq "Web.config") {
+    if ($nameOfFileToTransform -eq "Web.config") {
         Write-Verbose "Using path of the main 'Web.config' file."
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
     }
-    ElseIf ($nameOfFileToTransform -imatch "Web\..*\.config") {
+    elseif ($nameOfFileToTransform -imatch "Web\..*\.config") {
         Write-Verbose "Using path of the main 'Web.config' file, by convention."
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
     }
-    Else {
+    else {
         Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."        
         $relativeConfigurationDirectory = Get-RelativeConfigurationDirectory -ConfigurationTransformFilePath $ConfigurationTransformFilePath
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $relativeConfigurationDirectory, $nameOfFileToTransform)    
@@ -59,28 +59,28 @@ Function Get-PathOfFileToTransform {
     $pathOfFileToTransform
 }
 
-Function Get-RelativeConfigurationDirectory {
+function Get-RelativeConfigurationDirectory {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ConfigurationTransformFilePath
     )
     # "C:\MySite\App_Config\Sitecore\Include\Pentia\Sites.Debug.Config" -> "C:\MySite\App_Config\Sitecore\Include\Pentia"
     $directoryName = [System.IO.Path]::GetDirectoryName($ConfigurationTransformFilePath)
     $configurationDirectoryName = "App_Config"
     $configurationDirectoryIndex = $DirectoryName.IndexOf($configurationDirectoryName, [System.StringComparison]::InvariantCultureIgnoreCase)
-    If ($configurationDirectoryIndex -lt 0) {
-        Throw "Can't determine relative configuration directory. '$configurationDirectoryName' not found in path '$ConfigurationTransformFilePath'."
+    if ($configurationDirectoryIndex -lt 0) {
+        throw "Can't determine relative configuration directory. '$configurationDirectoryName' not found in path '$ConfigurationTransformFilePath'."
     }
     # "C:\MySite\App_Config\Sitecore\Include\Pentia" -> "App_Config\Sitecore\Include\Pentia"
     $directoryName.Substring($configurationDirectoryIndex)
 }
 
-Function Get-NameOfFileToTransform {
+function Get-NameOfFileToTransform {
     [CmdletBinding()]
-    [OutputType([System.String])]        
-    Param (
-        [Parameter(Mandatory = $True)]
+    [OutputType([string])]        
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ConfigurationTransformFilePath
     )
     # "C:\MySite\App_Config\Sitecore\Include\MyConfig.Debug.Config" -> "MyConfig.Debug.Config"
@@ -89,8 +89,8 @@ Function Get-NameOfFileToTransform {
     # ["MyConfig", "Debug", "config"]
     [System.Collections.ArrayList]$fileNameParts = $fileName.Split($fileNamePartSeparator)
     $buildConfigurationIndex = $fileNameParts.Count - 2
-    If ($buildConfigurationIndex -lt 1) {
-        Throw "Can't determine file to transform based on file name '$fileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
+    if ($buildConfigurationIndex -lt 1) {
+        throw "Can't determine file to transform based on file name '$fileName'. The file name must follow the convention 'my.file.name.<BuildConfiguration>.config', e.g. 'Solr.Index.Debug.config'."
     }
     # ["MyConfig", "Debug", "config"] -> ["MyConfig", "config"]
     $fileNameParts.RemoveAt($buildConfigurationIndex)
@@ -112,47 +112,47 @@ The path to the configuration transform file.
 Invoke-ConfigurationTransform -XmlFilePath "C:\Solution\src\Web.config" -XdtFilePath "C:\Solution\src\Web.Debug.config" | Set-Content "C:\Website\Web.config"
 Note the call to "Set-Content", to use the resulting output for something meaningful.
 #>
-Function Invoke-ConfigurationTransform {
+function Invoke-ConfigurationTransform {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$XmlFilePath,        
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$XdtFilePath
     )
-    If (!(Test-Path -Path $XmlFilePath -PathType Leaf)) {
-        Throw "File '$XmlFilePath' not found."
+    if (!(Test-Path -Path $XmlFilePath -PathType Leaf)) {
+        throw "File '$XmlFilePath' not found."
     }
-    If (!(Test-Path -Path $XdtFilePath -PathType Leaf)) {
-        Throw "File '$XdtFilePath' not found."
+    if (!(Test-Path -Path $XdtFilePath -PathType Leaf)) {
+        throw "File '$XdtFilePath' not found."
     }
 
-    If (-not ([System.IO.Path]::IsPathRooted($XmlFilePath))) {
+    if (-not ([System.IO.Path]::IsPathRooted($XmlFilePath))) {
         $XmlFilePath = [System.IO.Path]::Combine($PWD, $XmlFilePath)
     }    
-    If (-not ([System.IO.Path]::IsPathRooted($XdtFilePath))) {
+    if (-not ([System.IO.Path]::IsPathRooted($XdtFilePath))) {
         $XdtFilePath = [System.IO.Path]::Combine($PWD, $XdtFilePath)
     }
 
     Add-Type -LiteralPath "$PSScriptRoot\lib\Microsoft.Web.XmlTransform.dll" -ErrorAction Stop
 
     $xmlDocument = New-Object Microsoft.Web.XmlTransform.XmlTransformableDocument
-    $xmlDocument.PreserveWhitespace = $True
+    $xmlDocument.PreserveWhitespace = $true
     $xmlDocument.Load($XmlFilePath)
 
     $transformation = New-Object Microsoft.Web.XmlTransform.XmlTransformation($XdtFilePath)
     $errorMessage = "Transformation of '$XmlFilePath' failed using transform '$XdtFilePath'."
-    Try {
-        If ($transformation.Apply($xmlDocument) -eq $False) {
+    try {
+        if ($transformation.Apply($xmlDocument) -eq $false) {
             $exception = New-Object "System.InvalidOperationException" -ArgumentList $errorMessage
-            Throw $exception
+            throw $exception
         }
     }
-    Catch [Microsoft.Web.XmlTransform.XmlNodeException] {
+    catch [Microsoft.Web.XmlTransform.XmlNodeException] {
         $innerException = $_.Exception
         $errorMessage = $errorMessage + " See the inner exception for details."
         $exception = New-Object "System.InvalidOperationException" -ArgumentList $errorMessage, $innerException
-        Throw $exception
+        throw $exception
     }
     $stringWriter = New-Object -TypeName "System.IO.StringWriter"
     $xmlTextWriter = [System.Xml.XmlWriter]::Create($stringWriter)
@@ -182,16 +182,16 @@ The build configuration for which to apply transforms.
 .EXAMPLE
 Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath "C:\MySolution\src\MyProject" -WebrootOutputPath "C:\Websites\MySolution\www" -BuildConfiguration "Debug"
 #>
-Function Invoke-AllConfigurationTransforms {
+function Invoke-AllConfigurationTransforms {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionOrProjectRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionOrProjectRootPath -BuildConfigurations "Always", $BuildConfiguration)

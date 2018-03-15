@@ -8,8 +8,8 @@ To create a new release of the Build Scripts, do the following:
 4. Update all TeamCity build agents using the script shown below.
 
 ```powershell
-Function Invoke-CommandOnMachine {
-    Param (      
+function Invoke-CommandOnMachine {
+    param (      
       [string[]] $MachineNames,
       [string] $UserName,
       [string] $Password

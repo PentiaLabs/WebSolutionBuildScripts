@@ -5,21 +5,21 @@ Gets the path to highest version of MSBuild.exe installed on the system.
 .EXAMPLE
 Get-MSBuild
 #>
-Function Get-MSBuild {
+function Get-MSBuild {
     [CmdletBinding()]
 	[OutputType([string])]
-	Param()
+	param ()
 	
 	Write-Verbose "Searching for MSBuild.exe."
 	$msBuildExecutable = Invoke-hMSBuildBat
-	if($Null -eq $msBuildExecutable -or !(Test-Path $msBuildExecutable)) {
-		Throw "Didn't find MSBuild.exe."
+	if ($null -eq $msBuildExecutable -or !(Test-Path $msBuildExecutable)) {
+		throw "Didn't find MSBuild.exe."
 	}
 	Write-Verbose "Found MSBuild.exe at '$msBuildExecutable'."
 	$msBuildExecutable
 }
 
-Function Invoke-hMSBuildBat {
+function Invoke-hMSBuildBat {
 	. "$PSScriptRoot\lib\hMSBuild.bat" "-only-path"
 }
 

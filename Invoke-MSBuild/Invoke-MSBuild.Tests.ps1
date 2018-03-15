@@ -54,6 +54,6 @@ Describe "Invoke-MSBuild" {
 
         # Assert
         $LASTEXITCODE | Should Be 0
-        Test-Path -Path "$TestDrive\output\bin\Feature.WebProject.dll" | Should Be $True
+        Test-Path -Path "$TestDrive\output\bin\Feature.WebProject.dll" | Should Be $true
     }
 }

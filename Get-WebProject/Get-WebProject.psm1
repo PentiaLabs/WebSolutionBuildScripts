@@ -13,14 +13,14 @@ Get-WebProject -SolutionRootPath "C:\Path\To\MySolution"
 Get all web projects in "C:\Path\To\MySolution" and it's subfolders.
 
 #>
-Function Get-WebProject {
+function Get-WebProject {
     [CmdletBinding()]
-    [OutputType([System.Object[]])]
-    Param (
-        [Parameter(Mandatory = $False)]
+    [OutputType([object[]])]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
 		
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
@@ -31,23 +31,23 @@ Function Get-WebProject {
 	
     Write-Verbose "Searching for web projects in '$SolutionRootPath', excluding '$ExcludeFilter'."
     $projects = Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
-    If ($projects -is [System.Object[]]) {
+    if ($projects -is [object[]]) {
         return $projects
     }
-    If ($projects -is [System.String]) {
+    if ($projects -is [string]) {
         return @($projects)
     }
     return , @()
 }
 
-Function Find-Project {
+function Find-Project {
     [CmdletBinding()]
-    [OutputType([System.String[]])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    [OutputType([string[]])]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 		
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string[]]$ExcludeFilter
     )
     $projectFilePaths = Get-ChildItem -Recurse -Path "$SolutionRootPath" -Include "*.csproj"
@@ -59,16 +59,16 @@ Function Find-Project {
     $includedProjects
 }
 
-Function Test-WebProject {
+function Test-WebProject {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    [OutputType([bool])]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ProjectFilePath
     )
 
-    If (!(Test-Path $ProjectFilePath -PathType Leaf)) {
-        Throw "File '$ProjectFilePath' not found."
+    if (!(Test-Path $ProjectFilePath -PathType Leaf)) {
+        throw "File '$ProjectFilePath' not found."
     }
     # Retrieved from https://www.mztools.com/articles/2008/MZ2008017.aspx
     $webApplicationProjectTypeGuid = "{349C5851-65DF-11DA-9384-00065B846F21}"

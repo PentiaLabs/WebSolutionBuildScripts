@@ -28,24 +28,24 @@ Returns an array of objects:
 ]
 
 #>
-Function Get-RuntimeDependencyPackage {
+function Get-RuntimeDependencyPackage {
     [CmdletBinding()]
     [OutputType([System.Array])]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ConfigurationFilePath
     )
 
-    If (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
+    if (!(Test-Path $ConfigurationFilePath -PathType Leaf)) {
         $message = "File '$ConfigurationFilePath' not found."
         $argumentException = (New-Object "System.ArgumentException" $message, $_.Exception)
-        Throw $argumentException
+        throw $argumentException
     }
 
     $configuration = Get-PackageConfiguration -ConfigurationFilePath $ConfigurationFilePath
 
-    If (!($configuration.packages)) {
-        Throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencyPackage -Full' for expected usage."
+    if (!($configuration.packages)) {
+        throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencyPackage -Full' for expected usage."
     }
 
     $packages = $configuration.packages.package | ForEach-Object { 
@@ -59,32 +59,32 @@ Function Get-RuntimeDependencyPackage {
     @($packages)
 }
 
-Function Get-PackageConfiguration {
+function Get-PackageConfiguration {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$ConfigurationFilePath
     )
 
-    Try {
+    try {
         [xml]$configuration = Get-Content -Path $ConfigurationFilePath
     }
-    Catch [System.Management.Automation.RuntimeException] {
-        If (Test-XmlParseException $_.Exception) {
+    catch [System.Management.Automation.RuntimeException] {
+        if (Test-XmlParseException $_.Exception) {
             $message = "File '$ConfigurationFilePath' isn't valid XML. Run 'Get-Help Get-RuntimeDependencyPackage -Full' for expected usage."
             $argumentException = (New-Object "System.ArgumentException" $message, $_.Exception)
-            Throw $argumentException
+            throw $argumentException
         }
-        Throw $_.Exception
+        throw $_.Exception
     }
 
     $configuration
 }
 
-Function Test-XmlParseException {
+function Test-XmlParseException {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [System.Management.Automation.RuntimeException]$Exception
     )
     $Exception.Message -match "Cannot convert value .* to type ""System\.Xml\.XmlDocument""\."

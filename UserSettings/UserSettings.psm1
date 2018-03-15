@@ -12,17 +12,17 @@ A simple settings object containing webroot, data folder and build configuration
 Set-UserSettings -Settings @{ webrootOutputPath = "$TestDrive\www"; dataOutputPath = "$TestDrive\data"; BuildConfiguration = "Debug"}
 Saves the specified user settings to "<current directory>/.pentia/user-settings.json".
 #>
-Function Set-UserSettings {
-    [CmdletBinding(SupportsShouldProcess = $True)]
-    Param (
-        [Parameter(Mandatory = $False)]
+function Set-UserSettings {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [UserSettings]$Settings
     )
     $settingsFilePath = Get-UserSettingsFilePath -SolutionRootPath $SolutionRootPath
-    If (-not $pscmdlet.ShouldProcess($settingsFilePath, "Save and overwrite settings file")) {
+    if (-not $pscmdlet.ShouldProcess($settingsFilePath, "Save and overwrite settings file")) {
         return
     }
     Write-Verbose "Saving user settings to '$settingsFilePath'."
@@ -45,18 +45,18 @@ Return "<current working directory>\.pentia\user-settings.json"
 Get-UserSettingsFilePath -SolutionRootPath "C:\Some-Path\"
 Return "C:\Some-Path\.pentia\user-settings.json"
 #>
-Function Get-UserSettingsFilePath {
+function Get-UserSettingsFilePath {
     [CmdletBinding()]
-    [OutputType([System.String])]
-    Param (
-        [Parameter(Mandatory = $False)]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath
     )
-    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
+    if ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
         $SolutionRootPath = $PWD
     }
-    If (-not (Test-Path $SolutionRootPath)) {
-        Throw "Path '$SolutionRootPath' not found."
+    if (-not (Test-Path $SolutionRootPath)) {
+        throw "Path '$SolutionRootPath' not found."
     }
     $absoluteSolutionRootPath = Resolve-Path $SolutionRootPath
     [System.IO.Path]::Combine($absoluteSolutionRootPath, ".pentia", "user-settings.json")
@@ -73,19 +73,19 @@ OPTIONAL - Settings are loaded from "$SolutionRootPath/.pentia/user-settings.jso
 $settings = Get-UserSettings
 Returns the previously saved user settings, or an empty object.
 #>
-Function Get-UserSettings {
+function Get-UserSettings {
     [CmdletBinding()]
     [OutputType([UserSettings])]
-    Param (
-        [Parameter(Mandatory = $False)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath
     )
     $settingsFilePath = Get-UserSettingsFilePath -SolutionRootPath $SolutionRootPath
-    If (Test-Path $settingsFilePath) {
+    if (Test-Path $settingsFilePath) {
         Write-Verbose "Reading user settings from '$settingsFilePath'."
         Get-Content -Path $settingsFilePath | ConvertFrom-Json
     }
-    Else {        
+    else {        
         Write-Verbose "No user settings found in '$settingsFilePath'."
         New-Object -TypeName UserSettings
     }
@@ -97,47 +97,47 @@ Uses the specified settings as a fallback for each parameter that's null, empty 
 The intent is to provide a mechanism for overriding saved values while minimizing the need for mandatory parameters.
 
 .EXAMPLE
-Merge-ParametersAndUserSettings -Settings @{webrootOutputPath = "C:\Website\www"} -WebrootOutputPath $Null
+Merge-ParametersAndUserSettings -Settings @{webrootOutputPath = "C:\Website\www"} -WebrootOutputPath $null
 Returns @{webrootOutputPath = "C:\Website\www"}
 
 Merge-ParametersAndUserSettings -Settings @{webrootOutputPath = "C:\Website\www"} -WebrootOutputPath "C:\SomeOtherFolder\www"
 Returns @{webrootOutputPath = "C:\SomeOtherFolder\www"}
 #>
-Function Merge-ParametersAndUserSettings {
+function Merge-ParametersAndUserSettings {
     [CmdletBinding()]
     [OutputType([UserSettings])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [UserSettings]$Settings,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$BuildConfiguration
     )
 
-    If ([System.String]::IsNullOrWhiteSpace($WebrootOutputPath)) {
+    if ([string]::IsNullOrWhiteSpace($WebrootOutputPath)) {
         Write-Verbose "`$WebrootOutputPath is null or empty. Using setting value '$($Settings.webrootOutputPath)'."
     }
-    Else {
+    else {
         $Settings.webrootOutputPath = $WebrootOutputPath        
     }
 
-    If ([System.String]::IsNullOrWhiteSpace($DataOutputPath)) {
+    if ([string]::IsNullOrWhiteSpace($DataOutputPath)) {
         Write-Verbose "`$DataOutputPath is null or empty. Using setting value '$($Settings.dataOutputPath)'."
     }
-    Else {
+    else {
         $Settings.dataOutputPath = $DataOutputPath
     }
 
-    If ([System.String]::IsNullOrWhiteSpace($BuildConfiguration)) {
+    if ([string]::IsNullOrWhiteSpace($BuildConfiguration)) {
         Write-Verbose "`$BuildConfiguration is null or empty. Using setting value '$($Settings.buildConfiguration)'."
     }
-    Else {
+    else {
         $Settings.buildConfiguration = $BuildConfiguration        
     }
     
@@ -157,32 +157,32 @@ The intent is to provide a mechanism for overriding saved values while minimizin
 $currentSettings = Get-MergedParametersAndUserSettings -SolutionRootPath "D:\Projects\SI\" -WebrootOutputPath "D:\MyNewOutputPath"
 Returns the settings found in "D:\Projects\SI\.pentia\user-settings.json", with the $WebrootOutputPath overwritten to "D:\MyNewOutputPath", and saves these changed settings.
 #>
-Function Get-MergedParametersAndUserSettings {
+function Get-MergedParametersAndUserSettings {
     [CmdletBinding()]
     [OutputType([UserSettings])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$BuildConfiguration
     )
 
     $userSettings = Get-UserSettings -SolutionRootPath $SolutionRootPath
     $mergedSettings = Merge-ParametersAndUserSettings -Settings $userSettings -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
-    If ([string]::IsNullOrWhiteSpace($mergedSettings.webrootOutputPath)) {
+    if ([string]::IsNullOrWhiteSpace($mergedSettings.webrootOutputPath)) {
         $mergedSettings.webrootOutputPath = Read-Host "Enter value for `$WebrootOutputPath"
     }
-    If ([string]::IsNullOrWhiteSpace($mergedSettings.dataOutputPath)) {
+    if ([string]::IsNullOrWhiteSpace($mergedSettings.dataOutputPath)) {
         $mergedSettings.dataOutputPath = Read-Host "Enter value for `$DataOutputPath"
     }
-    If ([string]::IsNullOrWhiteSpace($mergedSettings.buildConfiguration)) {
+    if ([string]::IsNullOrWhiteSpace($mergedSettings.buildConfiguration)) {
         $mergedSettings.buildConfiguration = Read-Host "Enter value for `$BuildConfiguration"
     }
     Set-UserSettings -SolutionRootPath $SolutionRootPath -Settings $mergedSettings

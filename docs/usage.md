@@ -117,8 +117,7 @@ Shown below is a build script example which does the following:
 The script should be placed in the same directory as the solution's `.sln` file.
 
 ```powershell
-Try
-{
+try {
     $ErrorActionPreference = "Stop"
     Import-Module "Publish-WebSolution" -MinimumVersion "1.9.0" -Force
 
@@ -135,8 +134,8 @@ Try
 
     Write-Host "Done."
 
-} Catch {
+} catch {
     Write-Error -Exception $_.Exception
-    Exit 1
+    exit 1
 }
 ```

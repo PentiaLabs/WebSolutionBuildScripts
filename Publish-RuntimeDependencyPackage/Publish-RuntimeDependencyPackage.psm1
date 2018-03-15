@@ -47,126 +47,126 @@ The path where the contents of "<package>\Data" will be copied to.
 .EXAMPLE
 Publish-RuntimeDependencyPackage -Verbose -PackageName "Sitecore.Full" -PackageVersion "8.2.170407" -PackageSource "http://tund/nuget/nuget/FullSitecore" -WebrootOutputPath "C:\my-website\www" -DataOutputPath "C:\my-website\SitecoreDataFolder"
 #>
-Function Publish-RuntimeDependencyPackage {
+function Publish-RuntimeDependencyPackage {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$PackageName,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
         
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$PackageSource,
         
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$Username = [string]::Empty,
         
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [SecureString]$Password = [SecureString]::Empty,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
     Write-Verbose "Publishing package '$PackageName'."
     Write-Verbose "Searching for package '$PackageName' version '$PackageVersion'."
     $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
-    If (-not $package) {
+    if (-not $package) {
         Write-Verbose "Package '$PackageName' version '$PackageVersion' not found locally. Installing from '$PackageSource'."
         Install-RuntimeDependencyPackage -PackageName $PackageName -PackageVersion $PackageVersion -PackageSource $PackageSource -Username $Username -Password $Password
         $package = Get-RuntimeDependencyPackageFromCache -PackageName $PackageName -PackageVersion $PackageVersion
     }
-    If (-not $package) {
-        Throw "Unable to install package '$PackageName' version '$PackageVersion' from source '$PackageSource'."
+    if (-not $package) {
+        throw "Unable to install package '$PackageName' version '$PackageVersion' from source '$PackageSource'."
     }
     Copy-RuntimeDependencyPackageContent -Package $package -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
 
-Function Get-RuntimeDependencyPackageFromCache {
+function Get-RuntimeDependencyPackageFromCache {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$PackageName,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$PackageVersion
     )
     $packageProvider = "NuGet"
-    If (!(Test-PackageProvider $packageProvider)) {
-        Throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
+    if (!(Test-PackageProvider $packageProvider)) {
+        throw "The package provider '$packageProvider' isn't installed. Run 'Install-PackageProvider -Name $packageProvider' from an elevated PowerShell prompt."
     }
     # The "custom filtering" has been added specifically as a workaround for https://github.com/OneGet/oneget/issues/321.
     Get-Package -ProviderName $packageProvider -AllVersions | Where-Object { ($_.Name -eq $PackageName) -and ($_.Version -eq $PackageVersion) } | Select-Object -First 1
 }
 
-Function Test-PackageProvider {
+function Test-PackageProvider {
     [CmdletBinding()]
-    [OutputType([System.Boolean])]        
-    Param(
-        [Parameter(Mandatory = $True)]
+    [OutputType([bool])]        
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$Name
     )
     (Get-PackageProvider | Select-Object -ExpandProperty "Name") -contains $Name
 }
 
-Function Install-RuntimeDependencyPackage {   
+function Install-RuntimeDependencyPackage {   
     [CmdletBinding()] 
-    Param(
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$PackageName,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
     
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$PackageSource,
     
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$Username = [string]::Empty,
     
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [SecureString]$Password = [SecureString]::Empty
     )
     $credentials = [System.Management.Automation.PSCredential]::Empty
-    If ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
+    if ([string]::IsNullOrWhiteSpace($Username) -eq $false -and [string]::IsNullOrWhiteSpace($Password) -eq $false) {
         $credentials = New-Object System.Management.Automation.PSCredential($Username, $Password)
     }
-    Try {
-        If ([string]::IsNullOrWhiteSpace($PackageSource)) {
+    try {
+        if ([string]::IsNullOrWhiteSpace($PackageSource)) {
             # There's currently a bug in the Find-Package cmdlet which requires us to manually pipe in all available package sources.
             # See https://github.com/OneGet/oneget/issues/270 for details.
             $package = Get-PackageSource -ProviderName "NuGet" | Find-Package -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop | Select-Object -First 1
         }
-        Else {
+        else {
             $package = Find-Package -Source $PackageSource -Name $PackageName -RequiredVersion $PackageVersion -Credential $credentials -ErrorAction Stop
         }
         Write-Verbose "Installing package '$PackageName'."
         $package | Install-Package -Scope "CurrentUser" -Credential $credentials -Force
     }
-    Catch {
-        If ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
-            Throw "The package '$PackageName' version '$PackageVersion' couldn't be found in the source '$PackageSource'. " + 
+    catch {
+        if ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
+            throw "The package '$PackageName' version '$PackageVersion' couldn't be found in the source '$PackageSource'. " + 
             "Make sure that all required package sources are set up correctly, e.g. 'Register-PackageSource -Name ""Pentia NuGet"" -Location ""http://tund/nuget/Nuget"" -Trusted -ProviderName ""NuGet""'."
         }
-        Else {
-            Throw $_.Exception
+        else {
+            throw $_.Exception
         }
     }
 }
 
-Function Copy-RuntimeDependencyPackageContent {
+function Copy-RuntimeDependencyPackageContent {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
     
@@ -182,39 +182,39 @@ Function Copy-RuntimeDependencyPackageContent {
     Copy-PackageFolder -SourceFriendlyName "data" -Source $dataSourcePath -Target $DataOutputPath
 }
 
-Function Get-PackageDirectory {
+function Get-PackageDirectory {
     [CmdletBinding()]
-    [OutputType([System.String])]        
-    Param (
-        [Parameter(Mandatory = $True)]
+    [OutputType([string])]        
+    param (
+        [Parameter(Mandatory = $true)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
     )
     Write-Verbose "Determining directory where package '$($Package.Name)' was unpacked."
     # The "FullPath" points to the "unpack directory", e.g. "<package root>\My-Package.1.0.0\".
-    If ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
+    if ([System.IO.Path]::IsPathRooted($Package.FullPath) -and [System.IO.Directory]::Exists($Package.FullPath)) {
         $packageDirectory = $Package.FullPath
         Write-Verbose "Package directory determined via `$Package.FullPath ('$packageDirectory')."
         return $packageDirectory
     }
     # The "Source" points to the NuGet package file *inside* the "unpack directory", e.g. "<package root>\My-Package.1.0.0\My-Package.1.0.0.nupgk".
-    If ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.File]::Exists($Package.Source)) {
+    if ([System.IO.Path]::IsPathRooted($Package.Source) -and [System.IO.File]::Exists($Package.Source)) {
         $packageDirectory = [System.IO.Path]::GetDirectoryName($Package.Source)
         Write-Verbose "Package directory determined via `$Package.Source ('$packageDirectory')."
         return $packageDirectory
     }
-    Throw "Unable to determine unpack directory of package '$($Package.Name)'. Source: '$($Package.Source)'. FullPath: '$($Package.FullPath)'."
+    throw "Unable to determine unpack directory of package '$($Package.Name)'. Source: '$($Package.Source)'. FullPath: '$($Package.FullPath)'."
 }
 
-Function Copy-PackageFolder {
+function Copy-PackageFolder {
     [CmdletBinding()]
-    Param (        
-        [Parameter(Mandatory = $True)]
+    param (        
+        [Parameter(Mandatory = $true)]
         [string]$SourceFriendlyName,
                 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$Source,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$Target
     )
 

@@ -19,35 +19,35 @@ Gets all web projects found under the current working directory, and invokes the
 Get-WebProject -SolutionRootPath $PWD | Invoke-MSBuild -BuildConfiguration "Staging" -BuildArgs "/t:WebPublish", "/p:PublishUrl:C:\Output", "/p:WebPublishMethod=FileSystem"
 Gets all web projects found under the current working directory, and invokes the "WebPublish" build target with the output path "C:\Output", using the build configuration "Staging".
 #>
-Function Invoke-MSBuild {
+function Invoke-MSBuild {
     [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $True, ValueFromPipeline = $True)]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$ProjectOrSolutionFilePath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$BuildConfiguration,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$BuildArgs
     )
 
-    Process {
-        If (-not (Test-Path -Path $ProjectOrSolutionFilePath -PathType Leaf)) {
-            Throw "Project or solution file '$ProjectOrSolutionFilePath' not found."
+    process {
+        if (-not (Test-Path -Path $ProjectOrSolutionFilePath -PathType Leaf)) {
+            throw "Project or solution file '$ProjectOrSolutionFilePath' not found."
         }
         $msBuildExecutablePath = Get-MSBuild
-        If (-not $BuildArgs) {
+        if (-not $BuildArgs) {
             $BuildArgs = @()
             $BuildArgs += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
         }
-        If (-not [System.String]::IsNullOrWhiteSpace($BuildConfiguration)) {
+        if (-not [string]::IsNullOrWhiteSpace($BuildConfiguration)) {
             $BuildArgs += """/property:Configuration=$BuildConfiguration"""
         }        
         $BuildArgs += """$ProjectOrSolutionFilePath"""
         & $msBuildExecutablePath $BuildArgs
-        If ($LASTEXITCODE -ne 0) {
-            Throw "Failed to build '$ProjectOrSolutionFilePath'."
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to build '$ProjectOrSolutionFilePath'."
         }
     }
 }

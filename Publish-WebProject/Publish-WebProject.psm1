@@ -19,24 +19,24 @@
  Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
  Publish a project and specify which MSBuild.exe to use.
 #>   
-Function Publish-WebProject {
+function Publish-WebProject {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True, ValueFromPipeline)]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline)]
         [string]$WebProjectFilePath,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$OutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$MSBuildExecutablePath
     )
 		
-    Process {
-        If (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
-            Throw "File path '$WebProjectFilePath' not found."
+    process {
+        if (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
+            throw "File path '$WebProjectFilePath' not found."
         }
-        If (-not ([System.IO.Path]::IsPathRooted($OutputPath))) {
+        if (-not ([System.IO.Path]::IsPathRooted($OutputPath))) {
             $OutputPath = [System.IO.Path]::Combine($PWD, $OutputPath)
         }
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
@@ -81,24 +81,24 @@ Function Publish-WebProject {
  Get-WebProject | Publish-ConfiguredWebProject
  Retrive all web projects in or under the current directory, and publish them using the settings found in "<solution root>\.pentia\user-settings.json".
 #>   
-Function Publish-ConfiguredWebProject {
+function Publish-ConfiguredWebProject {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True, ValueFromPipeline)]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline)]
         [string]$WebProjectFilePath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$BuildConfiguration
     )
-    Process {
+    process {
         if (-not (Test-Path $WebProjectFilePath -PathType Leaf)) {
-            Throw "File path '$WebProjectFilePath' not found."
+            throw "File path '$WebProjectFilePath' not found."
         }
         $solutionRootPath = $WebProjectFilePath | Find-SolutionRootPath
         $settings = Get-MergedParametersAndUserSettings -SolutionRootPath $solutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
@@ -110,16 +110,16 @@ Function Publish-ConfiguredWebProject {
     }
 }
 
-Function Find-SolutionRootPath {
+function Find-SolutionRootPath {
     [CmdletBinding()]
-    [OutputType([String])]
-    Param (
-        [Parameter(Mandatory = $True, ValueFromPipeline)]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory = $true, ValueFromPipeline)]
         [string]$SearchStartPath
     )
-    Process {
+    process {
         if (-not (Test-Path $SearchStartPath)) {
-            Throw "Path '$SearchStartPath' not found."
+            throw "Path '$SearchStartPath' not found."
         }
         $absoluteSearchStartPath = Resolve-Path $SearchStartPath
         if (Test-Path $absoluteSearchStartPath -PathType Leaf) {
@@ -135,8 +135,8 @@ Function Find-SolutionRootPath {
         }
 
         $parent = Split-Path $directory -Parent
-        if ([String]::IsNullOrWhiteSpace($parent)) {
-            return $Null
+        if ([string]::IsNullOrWhiteSpace($parent)) {
+            return $null
         }
 
         Find-SolutionRootPath -SearchStartPath $parent

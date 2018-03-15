@@ -28,7 +28,7 @@ Describe "Install-NuGetExe" {
 
         Describe "local NuGet.exe usage" {
             
-            Mock Get-GlobalNuGetPath { return $Null }
+            Mock Get-GlobalNuGetPath { return $null }
 
             It "should return an absolute path when NuGet *isn't* available via PATH" {
                 try {
@@ -55,7 +55,7 @@ Describe "Install-NuGetExe" {
                     $isNugetExeInstalled = Test-NuGetInstall
     
                     # Assert
-                    $isNugetExeInstalled | Should Be $False
+                    $isNugetExeInstalled | Should Be $false
                 }
                 finally {
                     Pop-Location                
@@ -71,7 +71,7 @@ Describe "Install-NuGetExe" {
                     Install-NuGetExe
     
                     # Assert
-                    Test-NuGetInstall | Should Be $True
+                    Test-NuGetInstall | Should Be $true
                 }
                 finally {
                     Pop-Location                
@@ -82,8 +82,8 @@ Describe "Install-NuGetExe" {
     }
 }
 
-Function New-NuGetConfig {
-    If (Test-Path "NuGet.config") {
+function New-NuGetConfig {
+    if (Test-Path "NuGet.config") {
         return
     }
     Set-Content -Path "NuGet.config" -Value '<configuration><packageSources><clear /><add key="NuGet official package source" value="https://api.nuget.org/v3/index.json" /></packageSources></configuration>'
@@ -103,7 +103,7 @@ Describe "Restore-NuGetPackage" {
 
             # Assert
             $isSpecificPackageInstalled = Test-Path "packages\jQuery.3.2.1\"
-            $isSpecificPackageInstalled | Should Be $True
+            $isSpecificPackageInstalled | Should Be $true
         }
         finally {
             Pop-Location                

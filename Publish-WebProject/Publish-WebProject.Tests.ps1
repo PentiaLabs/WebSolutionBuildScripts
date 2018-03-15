@@ -21,7 +21,7 @@ Describe "Publish-WebProject" {
         Publish-WebProject -WebProjectFilePath $projectFilePath -OutputPath $PublishWebsitePath
 
         # Assert
-        Test-Path $PublishWebsitePath | Should Be $True
+        Test-Path $PublishWebsitePath | Should Be $true
     }
 
     It "should publish a web project to the target directory" {
@@ -35,8 +35,8 @@ Describe "Publish-WebProject" {
 
         # Assert
         $publishedFiles = Get-ChildItem $PublishUnConfigeredWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
-        $publishedFiles -contains "Project.WebProject.dll" | Should Be $True
-        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
+        $publishedFiles -contains "Project.WebProject.dll" | Should Be $true
+        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $true
     }
 
     It "should publish a web project to the target directory using the alias Publish-UnconfiguredWebProject" {
@@ -49,8 +49,8 @@ Describe "Publish-WebProject" {
 
         # Assert
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
-        $publishedFiles -contains "Project.WebProject.dll" | Should Be $True
-        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $True
+        $publishedFiles -contains "Project.WebProject.dll" | Should Be $true
+        $publishedFiles -contains "Project.WebProject.pdb" | Should Be $true
     }
 
     It "should respect Build Actions of XDT files" {
@@ -67,7 +67,7 @@ Describe "Publish-WebProject" {
         $contentFiles.Count | Should BeGreaterThan 0 "Didn't find any files with Build Action 'Content'."
         $publishedFiles = Get-ChildItem $PublishWebsitePath -Recurse -File | Select-Object -ExpandProperty Name
         foreach ($contentFile in $contentFiles) {
-            $publishedFiles -contains $contentFile | Should Be $True "Didn't find file '$contentFile' in publish output."
+            $publishedFiles -contains $contentFile | Should Be $true "Didn't find file '$contentFile' in publish output."
         }
     }
     
@@ -128,7 +128,7 @@ InModuleScope "Publish-WebProject" {
             $solutionRootPath = Find-SolutionRootPath -SearchStartPath $searchStartPath
 
             # Assert
-            $solutionRootPath | Should Be $Null
+            $solutionRootPath | Should Be $null
         }
 
         It "should find the solution root path when starting in the solution root folder" {
@@ -185,12 +185,12 @@ Describe "Publish-ConfiguredWebProject" {
     $FeatureLayerWebProjectFilePath = "\src\Feature\WebProject\Code\Feature.WebProject.csproj"
     $PublishWebsitePath = "$TestDrive\Website"
 
-    Function New-UserSettings {
-        Param (
-            [Parameter(Mandatory = $True)]
+    function New-UserSettings {
+        param (
+            [Parameter(Mandatory = $true)]
             [string]$SolutionRootPath,
 
-            [Parameter(Mandatory = $False)]
+            [Parameter(Mandatory = $false)]
             [string]$BuildConfiguration = "Debug"            
         )
         New-Item -Path "$SolutionRootPath\.pentia" -ItemType Directory -Force | Out-Null
@@ -202,7 +202,7 @@ Describe "Publish-ConfiguredWebProject" {
         $settings | ConvertTo-Json -Depth 100 | Out-File -FilePath "$SolutionRootPath\.pentia\user-settings.json"
     }
 
-    Function New-Solution {
+    function New-Solution {
         $solutionRootPath = New-TestSolution -TempPath "$TestDrive"
         New-UserSettings -SolutionRootPath $solutionRootPath
         New-Item -Path "$TestDrive\Website\Web.config" -Force | Set-Content -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>" -Force

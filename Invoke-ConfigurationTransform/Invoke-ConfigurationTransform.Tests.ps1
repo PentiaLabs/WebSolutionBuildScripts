@@ -78,11 +78,11 @@ Describe "Invoke-ConfigurationTransform" {
         $xdtFilePath = "$TestDrive\test.Transform.config"
 
         # Act
-        $exception = $Null
-        Try { 
+        $exception = $null
+        try { 
             Invoke-ConfigurationTransform -XmlFilePath $xmlFilePath -XdtFilePath $xdtFilePath
         }
-        Catch {
+        catch {
             $exception = $_.Exception
         }
         
@@ -117,10 +117,10 @@ Describe "Invoke-ConfigurationTransform" {
         
         # Act
         Push-Location $TestDrive
-        Try {
+        try {
             $transformedXML = Invoke-ConfigurationTransform -XmlFilePath ".\test.config" -XdtFilePath ".\test.Transform.config" 
         }
-        Finally {
+        finally {
             Pop-Location            
         }
 

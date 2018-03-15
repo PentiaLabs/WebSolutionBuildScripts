@@ -18,7 +18,7 @@ Describe "UserSettings" {
             Set-UserSettings -Settings $settings -SolutionRootPath $SolutionRootPath
 
             # Assert
-            Test-Path $SolutionRootPath | Should Be $True
+            Test-Path $SolutionRootPath | Should Be $true
         }
     
         It "should save user settings as valid JSON" {
@@ -48,7 +48,7 @@ Describe "UserSettings" {
             $savedSettings = Get-UserSettings -SolutionRootPath $solutionRootPath
 
             # Assert
-            $savedSettings | Should Not Be $Null
+            $savedSettings | Should Not Be $null
         }
     
         It "should read user settings from the default settings path" {
@@ -81,7 +81,7 @@ Describe "UserSettings" {
             }
 
             # Act
-            $mergedSettings = Merge-ParametersAndUserSettings -Settings $settings -WebrootOutputPath $Null -DataOutputPath "" -BuildConfiguration " "
+            $mergedSettings = Merge-ParametersAndUserSettings -Settings $settings -WebrootOutputPath $null -DataOutputPath "" -BuildConfiguration " "
 
             # Assert
             $mergedSettings.webrootOutputPath | Should Be $settings.webrootOutputPath

@@ -1,5 +1,5 @@
-Param (
-    [Parameter(Mandatory = $True)]
+param (
+    [Parameter(Mandatory = $true)]
     [string]$NUnitFormattedTestResultFilePath
 )
 
@@ -7,4 +7,4 @@ Param (
 $failures = $results.SelectNodes("//test-case[@result='Failure']")
 $failures | Select-Object -Property "name", "description" | Write-Error
 
-Exit $failures.Count
+exit $failures.Count

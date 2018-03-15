@@ -1,6 +1,6 @@
 #requires -RunAsAdministrator
-Param (
-    [Parameter(Mandatory = $True)]
+param (
+    [Parameter(Mandatory = $true)]
     [SecureString]$PersonalAccessToken
 )
 
@@ -14,11 +14,11 @@ $credentials = New-Object System.Management.Automation.PSCredential ("<irrelevan
 # Register Pentia's PowerShell module feed
 $powerShellFeed = "https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2"
 $repository = Get-PSRepository | Where-Object { $_.SourceLocation -eq $powerShellFeed }
-If ($repository) {
+if ($repository) {
     Write-Host "Pentia VSTS PowerShell feed already registered as '$($repository.Name)'."
     $repositoryName = $repository.Name
 }
-Else {
+else {
     $repositoryName = "Pentia VSTS PowerShell"
     Register-PSRepository -Name $repositoryName -PublishLocation $powerShellFeed -SourceLocation $powerShellFeed -InstallationPolicy "Trusted" -Credential $credentials -PackageManagementProvider NuGet -Verbose
 }

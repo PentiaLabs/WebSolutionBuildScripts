@@ -2,9 +2,9 @@
 #Requires -Modules Pester
 Import-Module "$PSScriptRoot\Get-ConfigurationTransformFile.psm1" -Force
 
-Function New-ConfigTransformFile {
-    Param (
-        [Parameter(Mandatory = $True)]
+function New-ConfigTransformFile {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$FileName
     )
     $testConfigFile = "$TestDrive\src\$FileName"

@@ -1,10 +1,10 @@
-Function Restore-NuGetPackages {
-    Param(
-        [Parameter(Mandatory = $True)]
+function Restore-NuGetPackages {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionFilePath
     )
     . "$PSScriptRoot\NuGet.exe" "restore" "$SolutionFilePath" | Write-Verbose
-    If ($LASTEXITCODE -ne 0) {
-        Throw "Failed to restore NuGet packages for test solution '$SolutionFilePath'."
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to restore NuGet packages for test solution '$SolutionFilePath'."
     }
 }

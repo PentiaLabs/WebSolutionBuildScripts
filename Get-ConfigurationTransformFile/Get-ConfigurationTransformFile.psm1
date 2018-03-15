@@ -18,22 +18,22 @@ Specifies which folders do exclude in the search. Defaults to "node_modules", "b
 Get-ConfigurationTransformFile -SolutionRootPath "C:\Path\To\MySolution" -BuildConfigurations "Debug"
 Returns all XDT-files found in the "C:\Path\To\MySolution", recursively, for the "Debug" configuration.
 #>
-Function Get-ConfigurationTransformFile {
+function Get-ConfigurationTransformFile {
     [CmdletBinding()]
     [OutputType([System.String[]])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$BuildConfigurations,
 		
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
 	
-    If (-not (Test-Path $SolutionRootPath)) {
-        Throw "Path '$SolutionRootPath' not found."
+    if (-not (Test-Path $SolutionRootPath)) {
+        throw "Path '$SolutionRootPath' not found."
     }
 
     $configurationFiles = Find-ConfigurationFile -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter
@@ -42,14 +42,14 @@ Function Get-ConfigurationTransformFile {
         Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName } | Select-Object -ExpandProperty "FullName"
 }
 
-Function Find-ConfigurationFile {
+function Find-ConfigurationFile {
     [CmdletBinding()]
     [OutputType([System.String[]])]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 		
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string[]]$ExcludeFilter
     )
     $configurationFilePaths = Get-ChildItem -Recurse -Path $SolutionRootPath -Include "*.config"
@@ -61,17 +61,17 @@ Function Find-ConfigurationFile {
     $includedConfigurations | Get-Item
 }
 
-Function Test-BuildConfiguration {
+function Test-BuildConfiguration {
     [CmdletBinding()]
     [OutputType([bool])]
-    Param (
-        [Parameter(Mandatory = $False)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string[]]$BuildConfigurations,
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$FileName
     )
-    If ($BuildConfigurations.Count -lt 1) {
-        return $True
+    if ($BuildConfigurations.Count -lt 1) {
+        return $true
     }
     # "Solr.Default.Index.Debug.config" -> "Debug"
     $buildConfigurationExtension = $FileName.Split(".")[-2]
@@ -88,29 +88,29 @@ The absolute path to the configuration file to check.
 .EXAMPLE
 Test-ConfigurationTransformFile -AbsoluteFilePath "C:\Path\To\MyConfiguration.Prod.config"
 #>
-Function Test-ConfigurationTransformFile {
+function Test-ConfigurationTransformFile {
     [CmdletBinding()]
     [OutputType([bool])]
-    Param (
+    param (
         [Parameter(Position = 0)]
         [string]$AbsoluteFilePath
     )
-    If ([System.String]::IsNullOrWhiteSpace($AbsoluteFilePath)) {
-        return $False
+    if ([string]::IsNullOrWhiteSpace($AbsoluteFilePath)) {
+        return $false
     }
-    If (-not (Test-Path $AbsoluteFilePath)) {
-        return $False
+    if (-not (Test-Path $AbsoluteFilePath)) {
+        return $false
     }
-    Try {
+    try {
         $xmlDocument = New-Object System.Xml.XmlDocument
         $xmlDocument.Load($AbsoluteFilePath)
         $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"        
     }
-    Catch {
+    catch {
         $message = "Error reading XML file '$AbsoluteFilePath': $($_.Exception.Message)"
         $innerException = $_.Exception
         $exception = New-Object "System.InvalidOperationException" -ArgumentList $message, $innerException
-        Throw $exception
+        throw $exception
     }
 }
 

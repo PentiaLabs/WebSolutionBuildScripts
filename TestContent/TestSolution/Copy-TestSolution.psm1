@@ -1,6 +1,6 @@
-Function Copy-TestSolution {
-    Param(
-        [Parameter(Mandatory = $True)]
+function Copy-TestSolution {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath
     )
     # Ensure target directory is clean

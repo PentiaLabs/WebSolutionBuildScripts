@@ -45,22 +45,22 @@ In order to enable verbose or debug output for the entire command, run the follo
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
 #> 
-Function Publish-ConfiguredWebSolution {
+function Publish-ConfiguredWebSolution {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $False)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string]$BuildConfiguration,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
         [switch]$PublishParallelly
@@ -73,25 +73,25 @@ Function Publish-ConfiguredWebSolution {
     $BuildConfiguration = $parameters.buildConfiguration
 
     Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
-    If (Test-Path $WebrootOutputPath) {
+    if (Test-Path $WebrootOutputPath) {
         Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
-    Else {
+    else {
         Write-Warning "'$WebrootOutputPath' not found. Skipping solution configuration."
     }
 }
 
-Function Get-SolutionRootPath {
-    Param (
-        [Parameter(Mandatory = $False)]
+function Get-SolutionRootPath {
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath
     )
 
-    If ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
+    if ([string]::IsNullOrWhiteSpace($SolutionRootPath)) {
         Write-Verbose "`$SolutionRootPath not set. Using '$PWD'."
         $SolutionRootPath = "$PWD"
     }
-    If (-not ([System.IO.Path]::IsPathRooted($SolutionRootPath))) {
+    if (-not ([System.IO.Path]::IsPathRooted($SolutionRootPath))) {
         $SolutionRootPath = [System.IO.Path]::Combine($PWD, $SolutionRootPath)
         Write-Verbose "`$SolutionRootPath not rooted. Using '$SolutionRootPath'."
     }
@@ -137,29 +137,29 @@ In order to enable verbose or debug output for the entire command, run the follo
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
 #>
-Function Publish-UnconfiguredWebSolution {
-    [CmdletBinding(SupportsShouldProcess = $True)]
-    Param (
-        [Parameter(Mandatory = $False)]
+function Publish-UnconfiguredWebSolution {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param (
+        [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
 		
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 		
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
         [switch]$PublishParallelly
     )
 
-    If (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
+    if (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
         $WebrootOutputPath = [System.IO.Path]::Combine($PWD, $WebrootOutputPath)
     }
     
-    If (-not ([System.IO.Path]::IsPathRooted($DataOutputPath))) {
+    if (-not ([System.IO.Path]::IsPathRooted($DataOutputPath))) {
         $DataOutputPath = [System.IO.Path]::Combine($PWD, $DataOutputPath)
     }
 
@@ -177,16 +177,16 @@ Function Publish-UnconfiguredWebSolution {
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
 
-Function Remove-WebrootOutputPath {
-    [CmdletBinding(SupportsShouldProcess = $True)]
-    Param (
-        [Parameter(Mandatory = $True)]
+function Remove-WebrootOutputPath {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath
     )
-    If (-not $pscmdlet.ShouldProcess($WebrootOutputPath, "Delete the directory and all contents")) {
+    if (-not $pscmdlet.ShouldProcess($WebrootOutputPath, "Delete the directory and all contents")) {
         return
     }
-    If (Test-Path $WebrootOutputPath -PathType Container) {
+    if (Test-Path $WebrootOutputPath -PathType Container) {
         Write-Verbose "Deleting '$WebrootOutputPath' and all contents."
         Remove-Item -Path $WebrootOutputPath -Recurse -Force
     }
@@ -215,39 +215,39 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 Publish-AllRuntimeDependencies -SolutionRootPath "D:\Projects\Abbr\Solution\" -WebrootOutputPath "D:\Websites\SolutionSite\www". -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes all runtime packages defined in "D:\Projects\Abbr\Solution\packages.config" and "D:\Projects\Abbr\Solution\runtime-dependencies.config" to the specified output paths.
 #>
-Function Publish-AllRuntimeDependencies {
+function Publish-AllRuntimeDependencies {
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory = $True)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
-    If (-not [System.IO.Path]::IsPathRooted($SolutionRootPath)) {
+    if (-not [System.IO.Path]::IsPathRooted($SolutionRootPath)) {
         $SolutionRootPath = [System.IO.Path]::Combine($PWD, $SolutionRootPath)
     }
     Publish-PackagesUsingPackageManagement -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
     Publish-PackagesUsingNuGet -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 }
 
-Function Publish-PackagesUsingPackageManagement {
-    Param (
-        [Parameter(Mandatory = $True)]
+function Publish-PackagesUsingPackageManagement {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
     $runtimeDependencyConfigurationFileName = "runtime-dependencies.config"
     $runtimeDependencyConfigurationFilePath = [System.IO.Path]::Combine($SolutionRootPath, $runtimeDependencyConfigurationFileName)
-    If (-not (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf)) {
+    if (-not (Test-Path $runtimeDependencyConfigurationFilePath -PathType Leaf)) {
         Write-Verbose "'$runtimeDependencyConfigurationFilePath' not found - skipping runtime package installation using Package Management."
         return
     }
@@ -260,20 +260,20 @@ Function Publish-PackagesUsingPackageManagement {
     }
 }
 
-Function Publish-PackagesUsingNuGet {
-    Param (
-        [Parameter(Mandatory = $True)]
+function Publish-PackagesUsingNuGet {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
     $nugetPackageFileName = "packages.config"
     $nugetPackageFilePath = [System.IO.Path]::Combine($SolutionRootPath, $nugetPackageFileName)
-    If (-not(Test-Path $nugetPackageFilePath -PathType Leaf)) {
+    if (-not(Test-Path $nugetPackageFilePath -PathType Leaf)) {
         Write-Verbose "'$nugetPackageFileName' not found - skipping runtime package installation using NuGet."
         return
     }
@@ -290,25 +290,25 @@ Function Publish-PackagesUsingNuGet {
     }
 }
 
-Function Publish-MultipleWebProjects {
-    Param (
-        [Parameter(Mandatory = $True)]
+function Publish-MultipleWebProjects {
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
     
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
-        [Parameter(Mandatory = $False)]
+        [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
         [switch]$PublishParallelly
     )
     $msBuildExecutablePath = Get-MSBuild
 
-    If ($WebProjects.Count -lt 1) {
+    if ($WebProjects.Count -lt 1) {
         $WebProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
     }
-    If ($WebProjects.Count -lt 1) {
+    if ($WebProjects.Count -lt 1) {
         Write-Verbose "No web projects found - skipping web project publishing."
         return
     }
@@ -336,14 +336,14 @@ A list of web projects to publish.
 .PARAMETER PublishParallelly
 If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
 #>
-Function New-WebPublishProject {
-    [CmdletBinding(SupportsShouldProcess = $True)]
-    [OutputType([System.String])]
-    Param (
-        [Parameter(Mandatory = $True)]
+function New-WebPublishProject {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
         
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string[]]$WebProjects,
 
         [switch]$PublishParallelly
@@ -395,29 +395,29 @@ In order to enable verbose or debug output for the entire command, run the follo
 We'd like to call this function "Configure-WebSolution", but according 
 to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
 #>
-Function Set-WebSolutionConfiguration {
-    [CmdletBinding(SupportsShouldProcess = $True)]
-    Param (
-        [Parameter(Mandatory = $True)]
+function Set-WebSolutionConfiguration {
+    [CmdletBinding(SupportsShouldProcess = $true)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 		
-        [Parameter(Mandatory = $True)]
+        [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )
 	
-    If (-not (Test-Path $WebrootOutputPath)) {
-        Throw "Path '$WebrootOutputPath' not found."
+    if (-not (Test-Path $WebrootOutputPath)) {
+        throw "Path '$WebrootOutputPath' not found."
     }
     
     $WebrootOutputPath = Resolve-Path $WebrootOutputPath
 
     Write-Progress -Activity "Configuring web solution" -Status "Applying XML Document Transforms"
-    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
+    if ($pscmdlet.ShouldProcess($WebrootOutputPath, "Apply XML Document Transforms")) {
         Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath $WebrootOutputPath -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
 
     Write-Progress -Activity "Configuring web solution" -Status "Removing XML Document Transform files"
-    If ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
+    if ($pscmdlet.ShouldProcess($WebrootOutputPath, "Remove XML Document Transform files")) {
         Get-ConfigurationTransformFile -SolutionRootPath $WebrootOutputPath | ForEach-Object { Remove-Item -Path $_ }
     }
 

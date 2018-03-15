@@ -5,7 +5,7 @@ Import-Module "$PSScriptRoot\Publish-RuntimeDependencyPackage.psm1" -Force
 # Test internal functions
 InModuleScope Publish-RuntimeDependencyPackage {
     Describe "Test-PackageProvider" {
-        It "should return '$True' when the specified Package Provider is installed" {
+        It "should return '`$true' when the specified Package Provider is installed" {
             # Arrange
             $packageProvider = "NuGet"
     
@@ -13,10 +13,10 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $isInstalled = Test-PackageProvider $packageProvider
     
             # Assert
-            $isInstalled | Should Be $True
+            $isInstalled | Should Be $true
         }
 
-        It "should return '$False' when the specified Package Provider is not installed" {
+        It "should return '`$false' when the specified Package Provider is not installed" {
             # Arrange
             $packageProvider = "This package provider is not installed"
     
@@ -24,7 +24,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $isInstalled = Test-PackageProvider $packageProvider
     
             # Assert
-            $isInstalled | Should Be $False
+            $isInstalled | Should Be $false
         }
     }
 
@@ -40,7 +40,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $package.Name -PackageVersion $package.Version
 
             # Assert
-            $cachedPackage | Should Not Be $Null
+            $cachedPackage | Should Not Be $null
         }  
 
         It "should return null when package is not found" {
@@ -52,7 +52,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $packageVersion
     
             # Assert
-            $cachedPackage | Should Be $Null
+            $cachedPackage | Should Be $null
         }        
     
         It "should install and find packages with numerical groups in name" {
@@ -68,7 +68,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $cachedPackage = Get-RuntimeDependencyPackageFromCache -PackageName $packageName -PackageVersion $olderPackageVersion
                 
             # Assert
-            $cachedPackage | Should Not Be $Null
+            $cachedPackage | Should Not Be $null
         }
     }
 
@@ -107,7 +107,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
             $packageSourceName = "Publish-RuntimeDependencyPackage.Tests - nuget.org API v2"
             Register-PackageSource -Name $packageSourceName -ProviderName "NuGet" -Location "https://www.nuget.org/api/v2" -ErrorAction SilentlyContinue
         
-            Try {
+            try {
                 # Act
                 $installedPackage = Install-RuntimeDependencyPackage -PackageName $packageName -PackageVersion $packageVersion
             
@@ -115,7 +115,7 @@ InModuleScope Publish-RuntimeDependencyPackage {
                 $installedPackage.Name | Should Be $packageName
                 $installedPackage.Version | Should Be $packageVersion                
             }
-            Finally {
+            finally {
                 Unregister-PackageSource -Name $packageSourceName -ErrorAction SilentlyContinue
             }
         }
