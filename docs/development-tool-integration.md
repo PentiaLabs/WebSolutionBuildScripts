@@ -9,7 +9,7 @@ The following steps make the ``Publish-ConfiguredWebProject`` command available 
 
 #### Step 1: Add PowerShell as an External Tool
    1. Open Visual Studio.
-   2. Open **Tools -> Externl Tools...** 
+   2. Open **Tools -> External Tools...** 
 
    ![Add PowerShell as External Tool step 1](/docs/images/vs-add-external-tool-step-1.png)
 
@@ -18,18 +18,18 @@ The following steps make the ``Publish-ConfiguredWebProject`` command available 
    5. Set the **Command** to the default path for powershell.exe: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
    6. Set the **Arguments** to: `-Command "& {Import-Module Publish-WebProject; Publish-ConfiguredWebProject -WebProjectFilePath '$(ProjectFileName)' -Verbose;}"`
    7. Set the **Initial directory** to: `$(ProjectDir)`
-   8. Count the position (starting from 1) of your command and remember this index number. *Visual Studio usually ships with **Creat &GUID** tool which is typically located at the top in first position.*
+   8. Count the position (starting from 1) of your command and remember this index number. *Visual Studio usually ships with **Create &GUID** tool, which is typically located at the top in first position.*
 
    ![Add PowerShell as External Tool step 2](/docs/images/vs-add-external-tool-step-2.png)
 
 #### Step 2: Create the Context Menu entry
    1. Open **Tools -> Customize...**.
-   2. Select the **Comamnds** tab.
+   2. Select the **Commands** tab.
    3. Click **Context menu** and select **Project and Solution Context Menus | Project**
 
    ![Add Context Menu entry step 1](/docs/images/vs-context-menu-step-1.png)
 
-   4. Click **Add Comamnd...** and from **Categories** select **Tools**
+   4. Click **Add Command...** and from **Categories** select **Tools**
    5. From **Commands** scroll down and select **External Command X** where "X" is the previously determined index.
 
    ![Add Context Menu entry step 2](/docs/images/vs-context-menu-step-2.png)
