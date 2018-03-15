@@ -38,7 +38,7 @@ function Publish-AllModulesToLocalFolder {
     Write-Host "Publishing all modules without dependencies."
     $modulesWithoutDependencies | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { Publish-Module -Path $_ -Repository "Local Folder" }
     Write-Host "Installing all modules without dependencies."
-    $modulesWithoutDependencies | Install-Module -Repository "Local Folder" -Force
+    $modulesWithoutDependencies | Install-Module -Repository "Local Folder" -Scope CurrentUser -Force
 
     # Since these modules can have interdependencies, they need to be installed and published one by one.
     $modulesWithDependencies = $modules | Where-Object { $_.RequiredModules.Count -gt 0 } | Sort-Object -Property { $_.RequiredModules.Count }
@@ -46,7 +46,7 @@ function Publish-AllModulesToLocalFolder {
         Write-Host "Publishing single module with dependencies."
         $moduleWithDependencies | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { Publish-Module -Path $_ -Repository "Local Folder" }
         Write-Host "Installing single module with dependencies."
-        $moduleWithDependencies | Install-Module -Repository "Local Folder" -Force
+        $moduleWithDependencies | Install-Module -Repository "Local Folder" -Scope CurrentUser -Force
     }
     $localFolder
 }
@@ -91,7 +91,7 @@ $vsts.Password = $PersonalAccessToken
 $vsts.Credentials = New-Object System.Management.Automation.PSCredential ($vsts.Username, (ConvertTo-SecureString $vsts.Password -AsPlainText -Force))
 
 $localFolder = Publish-AllModulesToLocalFolder
-Publish-AllModulesToRepository -Repository $tund -LocalFolder $localFolder
-Publish-AllModulesToRepository -Repository $vsts -LocalFolder $localFolder
+#Publish-AllModulesToRepository -Repository $tund -LocalFolder $localFolder
+#Publish-AllModulesToRepository -Repository $vsts -LocalFolder $localFolder
 
 Write-Host "Done."

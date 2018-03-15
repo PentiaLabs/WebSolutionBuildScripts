@@ -24,5 +24,5 @@ else {
 }
 
 # Install the latest version of the build scripts
-Install-Module -Name "Publish-WebSolution" -Repository $repositoryName -Credential $credentials -Force
+Install-Module -Name "Pentia.Publish-WebSolution" -Repository $repositoryName -Credential $credentials -Scope CurrentUser -Force
 Write-Host "Done."

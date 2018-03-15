@@ -54,20 +54,23 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 
 2. Close the PowerShell prompt.
 
-3. Download the install script "[Install-WebSolutionBuildScripts.ps1](/Install-WebSolutionBuildScripts.ps1)" and save it to a file. E.g. "`%TEMP%\Install-WebSolutionBuildScripts.ps1`".
+3. Uninstall previous versions of the build scripts. This is required due to "namespace changes" in the build scripts:
+`$modules = @('Publish-WebSolution', 'Publish-WebProject', 'Publish-RuntimeDependencyPackage', 'Publish-NuGetPackage', 'Invoke-MSBuild', 'Invoke-ConfigurationTransform', 'Get-WebProject', 'Get-RuntimeDependencyPackage', 'Get-MSBuild', 'Get-ConfigurationTransformFile', 'Assert-WebProjectConsistency'); $modules | % { Uninstall-Module -Name $_ -AllVersions -Verbose -ErrorAction Continue};`
+
+4. Download the install script "[Install-WebSolutionBuildScripts.ps1](/Install-WebSolutionBuildScripts.ps1)" and save it to a file. E.g. "`%TEMP%\Install-WebSolutionBuildScripts.ps1`".
     
-4. Open an elevated PowerShell prompt and run the install script. E.g. "`.\%TEMP%\Install-WebSolutionBuildScripts.ps1`". 
+5. Open an elevated PowerShell prompt and run the install script. E.g. "`.\%TEMP%\Install-WebSolutionBuildScripts.ps1`". 
 You'll be prompted for a Personal Access Token (PAT).
 ![Run installation script](/docs/images/install-websolutionbuildscripts.png)
 
-5. [Generate a PAT](https://pentia.visualstudio.com/_details/security/tokens). The token must grant read-access to packages in the [Pentia VSTS PowerShell package feed](https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2). 
+6. [Generate a PAT](https://pentia.visualstudio.com/_details/security/tokens). The token must grant read-access to packages in the [Pentia VSTS PowerShell package feed](https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2). 
 You must be part of Pentia Denmark's Active Directory to access the feed. If you're not, contact <it@pentia.dk> for help. 
 ![Generate a PAT](/docs/images/generate-pat.png)
 
-6. Copy & paste the PAT into the prompt from step 4.
+7. Copy & paste the PAT into the prompt from step 4.
 ![Enter PAT into install script](/docs/images/install-websolutionbuildscripts-with-pat.png)
 
-7. The installation should now commence. You can delete the installation file and revoke the PAT once the installation is done.
+8. The installation should now commence. You can delete the installation file and revoke the PAT once the installation is done.
 
 ## Updating
 
