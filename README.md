@@ -7,7 +7,6 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 ## Table of contents
 * [Terminology](#terminology)
 * [Installation](#installation)
-* [Updating](#updating)
 * [Contributing](#contributing)
 * [Usage](/docs/usage.md)
   * [Publishing a solution](/docs/usage.md#publishing-a-solution)
@@ -45,41 +44,34 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 
 ## Installation
 
-1. Open an elevated PowerShell prompt and run the following commands:
+### Note to early adopters
+The build scripts have been released to the [PowerShell Gallery](https://www.powershellgallery.com/items?q=Tags%3A%22pentia%22). 
+If you've installed the build scripts from e.g. Tund or VSTS, you have to uninstall them first by running the following commands from an elevated PowerShell prompt:
+
+```powershell
+$modules = @('Publish-WebSolution', 'Publish-WebProject', 'Publish-RuntimeDependencyPackage', 'Publish-NuGetPackage', 'Invoke-MSBuild', 'Invoke-ConfigurationTransform', 'Get-WebProject', 'Get-RuntimeDependencyPackage', 'Get-MSBuild', 'Get-ConfigurationTransformFile', 'Assert-WebProjectConsistency'); 
+$modules | % { Uninstall-Module -Name $_ -AllVersions -Verbose -ErrorAction Continue};
+```
+
+### Install build script prerequisites
+1. Open a PowerShell prompt and run the following commands:
+
     ```powershell
-    PowerShellGet\Install-Module -Name "PowerShellGet" -Repository "PSGallery" -Force
-    PowerShellGet\Install-Module -Name "PackageManagement" -Repository "PSGallery" -Force
-    PackageManagement\Install-PackageProvider -Name "NuGet" -Force
+    PowerShellGet\Install-Module -Name "PowerShellGet" -Repository "PSGallery" -Scope "CurrentUser" -Force
+    PowerShellGet\Install-Module -Name "PackageManagement" -Repository "PSGallery" -Scope "CurrentUser" -Force
+    PackageManagement\Install-PackageProvider -Name "NuGet" -Scope "CurrentUser" -Force
     ```
 
 2. Close the PowerShell prompt.
 
-3. Uninstall previous versions of the build scripts. This is required due to "namespace changes" in the build scripts:
-`$modules = @('Publish-WebSolution', 'Publish-WebProject', 'Publish-RuntimeDependencyPackage', 'Publish-NuGetPackage', 'Invoke-MSBuild', 'Invoke-ConfigurationTransform', 'Get-WebProject', 'Get-RuntimeDependencyPackage', 'Get-MSBuild', 'Get-ConfigurationTransformFile', 'Assert-WebProjectConsistency'); $modules | % { Uninstall-Module -Name $_ -AllVersions -Verbose -ErrorAction Continue};`
+### Install build scripts
+1. Open a PowerShell prompt and run the following command:
 
-4. Download the install script "[Install-WebSolutionBuildScripts.ps1](/Install-WebSolutionBuildScripts.ps1)" and save it to a file. E.g. "`%TEMP%\Install-WebSolutionBuildScripts.ps1`".
-    
-5. Open an elevated PowerShell prompt and run the install script. E.g. "`.\%TEMP%\Install-WebSolutionBuildScripts.ps1`". 
-You'll be prompted for a Personal Access Token (PAT).
-![Run installation script](/docs/images/install-websolutionbuildscripts.png)
-
-6. [Generate a PAT](https://pentia.visualstudio.com/_details/security/tokens). The token must grant read-access to packages in the [Pentia VSTS PowerShell package feed](https://pentia.pkgs.visualstudio.com/_packaging/powershell-pentia/nuget/v2). 
-You must be part of Pentia Denmark's Active Directory to access the feed. If you're not, contact <it@pentia.dk> for help. 
-![Generate a PAT](/docs/images/generate-pat.png)
-
-7. Copy & paste the PAT into the prompt from step 4.
-![Enter PAT into install script](/docs/images/install-websolutionbuildscripts-with-pat.png)
-
-8. The installation should now commence. You can delete the installation file and revoke the PAT once the installation is done.
-
-## Updating
-
-1. [Create a Personal Access Token](https://pentia.visualstudio.com/_details/security/tokens) (PAT) for VSTS. The token must grant read-access to packages.
-2. Open an elevated PowerShell prompt.
-3. Run the following commands, using your VSTS username and PAT as credentials: 
-    ```powershell
-    PowerShellGet\Update-Module -Name "Publish-WebSolution" -Credential (Get-Credential) -Force -Verbose
-    ```
+   ```powershell
+   PowerShellGet\Install-Module -Name "Pentia.Publish-WebSolution" -Repository "PSGallery" -Scope "CurrentUser" -Force -Verbose
+   ```
+   
+2. Close the PowerShell prompt.
 
 ## Contributing
 
