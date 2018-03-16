@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Get-RuntimeDependencyPackage.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.0'
+    ModuleVersion     = '2.0.0'
 
     # ID used to uniquely identify this module
     GUID              = '7e75a068-6847-4142-adb0-cf51e2ff8c21'

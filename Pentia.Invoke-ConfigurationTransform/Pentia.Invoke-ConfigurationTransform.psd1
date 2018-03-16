@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Invoke-ConfigurationTransform.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.1.3'
+    ModuleVersion     = '2.0.0'
 
     # ID used to uniquely identify this module
     GUID              = '6277b189-3478-4e86-9e3b-782d74a70758'
