@@ -14,7 +14,7 @@ Example:
 
 ```powershell
 try {
-  Import-Module "Pentia.Publish-WebSolution" -MinimumVersion "1.9.0" -Force -ErrorAction "Stop"
+  Import-Module "Pentia.Publish-WebSolution" -Force -ErrorAction "Stop"
   $VerbosePreference = "Continue" 
   Publish-ConfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\output\Webroot" -DataOutputPath "$PWD\output\Data" -BuildConfiguration "Debug" -Verbose
 } catch {
@@ -45,7 +45,7 @@ This is basically the same as for [CI](#setting-up-continuous-integration) descr
 
 ```powershell
 try {
-  Import-Module "Pentia.Publish-WebSolution" -MinimumVersion "1.9.0" -Force -ErrorAction "Stop"  
+  Import-Module "Pentia.Publish-WebSolution" -Force -ErrorAction "Stop"  
   Publish-UnconfiguredWebSolution -SolutionRootPath "$PWD" -WebrootOutputPath "$PWD\Output\Webroot" -DataOutputPath "$PWD\Output\Data"
 } catch {
   Write-Error -Exception $_.Exception
