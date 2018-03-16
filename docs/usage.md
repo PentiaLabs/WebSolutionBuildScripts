@@ -119,7 +119,7 @@ The script should be placed in the same directory as the solution's `.sln` file.
 ```powershell
 try {
     $ErrorActionPreference = "Stop"
-    Import-Module "Publish-WebSolution" -MinimumVersion "1.9.0" -Force
+    Import-Module "Pentia.Publish-WebSolution" -MinimumVersion "1.9.0" -Force
 
     # Build and publish solution
     Restore-NuGetPackage -SolutionDirectory $PSScriptRoot
