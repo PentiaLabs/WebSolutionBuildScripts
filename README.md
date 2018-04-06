@@ -44,15 +44,6 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 
 ## Installation
 
-### Note to early adopters
-The build scripts have been released to the [PowerShell Gallery](https://www.powershellgallery.com/items?q=Tags%3A%22pentia%22). 
-If you've installed the build scripts from e.g. Tund or VSTS, you have to uninstall them first by running the following commands from an elevated PowerShell prompt:
-
-```powershell
-$modules = @('Publish-WebSolution', 'Publish-WebProject', 'Publish-RuntimeDependencyPackage', 'Publish-NuGetPackage', 'Invoke-MSBuild', 'Invoke-ConfigurationTransform', 'Get-WebProject', 'Get-RuntimeDependencyPackage', 'Get-MSBuild', 'Get-ConfigurationTransformFile', 'Assert-WebProjectConsistency'); 
-$modules | % { Uninstall-Module -Name $_ -AllVersions -Verbose -ErrorAction Continue};
-```
-
 ### Install build script prerequisites
 1. Open a PowerShell prompt and run the following commands:
 
@@ -68,7 +59,7 @@ $modules | % { Uninstall-Module -Name $_ -AllVersions -Verbose -ErrorAction Cont
 1. Open a PowerShell prompt and run the following command:
 
    ```powershell
-   PowerShellGet\Install-Module -Name "Pentia.Publish-WebSolution" -Repository "PSGallery" -Scope "CurrentUser" -Force -Verbose
+   PowerShellGet\Install-Module -Name "Pentia.Publish-WebSolution" -Repository "PSGallery" -Scope "CurrentUser" -AllowClobber -Force -Verbose
    ```
    
 2. Close the PowerShell prompt.
