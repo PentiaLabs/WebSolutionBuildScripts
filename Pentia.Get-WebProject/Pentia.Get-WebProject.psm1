@@ -34,7 +34,7 @@ function Get-WebProject {
     if ($projects -is [object[]]) {
         return $projects
     }
-    if ($projects -is [string]) {
+    if ($projects -is [object]) {
         return @($projects)
     }
     return , @()

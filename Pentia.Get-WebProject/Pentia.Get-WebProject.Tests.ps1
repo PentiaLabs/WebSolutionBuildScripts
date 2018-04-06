@@ -7,7 +7,7 @@ Describe "Get-WebProject" {
     
     It "should return an array even if nothing is found" {
         # Act
-        $actualProjects = Get-WebProject "$TestDrive"
+        $actualProjects = Get-WebProject -SolutionRootPath $TestDrive
             
         # Assert
         $actualProjects.GetType() | Should Be "System.Object[]"
@@ -22,7 +22,7 @@ Describe "Get-WebProject" {
         )
 
         # Act
-        $actualProjects = Get-WebProject $solutionDirectory 
+        $actualProjects = Get-WebProject -SolutionRootPath $solutionDirectory 
         
         # Assert
         $actualProjects.GetType() | Should Be "System.Object[]"
@@ -37,10 +37,21 @@ Describe "Get-WebProject" {
         Copy-Item "$solutionDirectory\src\Project\WebProject\Code\Project.WebProject.csproj" -Destination $bowerComponents
         
         # Act
-        $actualProjects = Get-WebProject $TestDrive
+        $actualProjects = Get-WebProject -SolutionRootPath $TestDrive
         
         # Assert
         $actualProjects.GetType() | Should Be "System.Object[]"
         $actualProjects.Count | Should Be 0
+    }
+
+    It "should include web projects in the solution root" {
+        # Arrange
+        Copy-Item -Path "$solutionDirectory\src\Feature\WebProject\Code\Feature.WebProject.csproj" -Destination "$TestDrive\Feature.WebProject.csproj"
+
+        # Act
+        $actualProjects = Get-WebProject -SolutionRootPath $TestDrive
+
+        # Assert
+        $actualProjects.Count | Should Be 1
     }
 }
