@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Get-MSBuild.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.0.0'
+    ModuleVersion     = '2.1.0'
 
     # ID used to uniquely identify this module
     GUID              = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'
@@ -20,6 +20,11 @@
 
     # Description of the functionality provided by this module
     Description       = 'Used to get the full path of the latest MSBuild version.'
+    
+    # Modules that must be imported into the global environment prior to importing this module
+    RequiredModules   = @( 
+        @{ModuleName = 'VSSetup'; Guid = '440e8fb1-19c4-4d39-8f75-37424bc4265a'; }
+    )
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @('Get-MSBuild')
