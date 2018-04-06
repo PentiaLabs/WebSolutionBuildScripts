@@ -361,3 +361,21 @@ Describe "Publish-WebSolution - configuration transformation" {
     }
 
 }
+
+Describe "Publish-WebSolution - New-WebPublishProject" {
+
+    InModuleScope "Pentia.Publish-WebSolution" {
+        It "should create a valid <Project>-element in the generated .csproj-file" {
+            # Arrange
+            $solutionRootPath = New-TestSolution -TempPath $TestDrive
+            $webProjectFiles = Get-WebProject -SolutionRootPath $solutionRootPath
+
+            # Act
+            $tempProjectFilePath = New-WebPublishProject -SolutionRootPath $solutionRootPath -WebProjects $webProjectFiles
+    
+            # Assert
+            [xml]$content = Get-Content $tempProjectFilePath 
+            $content.DocumentElement.NamespaceURI | Should Be "http://schemas.microsoft.com/developer/msbuild/2003"
+        }
+    }
+}

@@ -358,7 +358,7 @@ function New-WebPublishProject {
         }
     }
     $formattedWebProjectPaths = $webProjectFilePaths -join ";"
-    [xml]$webPublishProject = "<!-- This file is (re-)generated automatically --><Project><ItemGroup><WebProjects Include=""$formattedWebProjectPaths"" /></ItemGroup><Target Name=""WebPublish""><MSBuild Projects=""@(WebProjects)"" Targets=""WebPublish"" BuildInParallel=""$PublishParallelly"" /></Target></Project>"
+    [xml]$webPublishProject = "<!-- This file is (re-)generated automatically --><Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003""><ItemGroup><WebProjects Include=""$formattedWebProjectPaths"" /></ItemGroup><Target Name=""WebPublish""><MSBuild Projects=""@(WebProjects)"" Targets=""WebPublish"" BuildInParallel=""$PublishParallelly"" /></Target></Project>"
     $webPublishProjectDirectory = [System.IO.Path]::Combine($SolutionRootPath, ".pentia")
     if (-not (Test-Path $webPublishProjectDirectory) -and $pscmdlet.ShouldProcess($webPublishProjectDirectory, "Create misc. directory")) {
         $webPublishProjectDirectory = New-Item $webPublishProjectDirectory -ItemType Directory
