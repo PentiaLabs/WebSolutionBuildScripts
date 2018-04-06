@@ -261,15 +261,45 @@ Describe "Publish-WebSolution - web project publishing" {
     It "should only publish web projects in the webproject parameter" {
         # Arrange    
         $solutionRootPath = Initialize-TestSolution
-        $WebProjects = Get-WebProject -SolutionRootPath $solutionRootPath | Where-Object  -FilterScript {$_ -Like "*Feature.WebProject*"}
+        $webProjects = Get-WebProject -SolutionRootPath $solutionRootPath | Where-Object  -FilterScript {$_ -Like "*Feature.WebProject*"}
     
         # Act
-        Publish-TestSolutionWithWebProjects -SolutionRootPath $solutionRootPath -WebProjects $WebProjects
+        Publish-TestSolutionWithWebProjects -SolutionRootPath $solutionRootPath -WebProjects $webProjects
     
         # Assert
         Test-Path -Path "$TestDrive\Website\bin\Project.WebProject.dll" -PathType Leaf | Should Be $false
         Test-Path -Path "$TestDrive\Website\bin\Feature.WebProject.dll" -PathType Leaf | Should Be $true    
         Test-Path -Path "$TestDrive\Website\bin\Foundation.WebProject.dll" -PathType Leaf | Should Be $false   
+    }
+
+    It "should use the specified MSBuild.exe" {
+        # Arrange    
+        $solutionRootPath = Initialize-TestSolution
+        $expectedMSBuildPath = "Hello World!"
+        Mock Publish-MultipleWebProjects { 
+            param (
+                [Parameter(Mandatory = $true)]
+                [string]$SolutionRootPath,
+    
+                [Parameter(Mandatory = $true)]
+                [string]$WebrootOutputPath,
+
+                [Parameter(Mandatory = $false)]
+                [string[]]$WebProjects,
+
+                [Parameter(Mandatory = $false)]
+                [string]$MSBuildExecutablePath,
+
+                [switch]$PublishParallelly
+            )
+        } -ModuleName "Pentia.Publish-WebSolution"
+    
+        # Act
+        Publish-ConfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Dummy\Website"`
+            -DataOutputPath "$TestDrive\Dummy\Data" -BuildConfiguration "Debug" -MSBuildExecutablePath $expectedMSBuildPath
+    
+        # Assert
+        Assert-MockCalled -Exactly -Times 1 -ParameterFilter {$MSBuildExecutablePath.Equals($expectedMSBuildPath)} -CommandName "Publish-MultipleWebProjects" -ModuleName "Pentia.Publish-WebSolution"
     }
 }
 
@@ -294,8 +324,8 @@ Describe "Publish-WebSolution - web project publish concurrency" {
         
         # Act
         try {
-            Publish-ConfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website"`
-                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects -Verbose *> $buildLogPath
+            Publish-ConfiguredWebSolution -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website"`
+                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -Verbose *> $buildLogPath
         }
         finally {
             $VerbosePreference = $preference
@@ -317,8 +347,8 @@ Describe "Publish-WebSolution - web project publish concurrency" {
         
         # Act
         try {
-            Publish-ConfiguredWebSolution -PublishParallelly -SolutionRootPath $SolutionRootPath -WebrootOutputPath "$TestDrive\Website"`
-                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -WebProjects $WebProjects -Verbose *> $buildLogPath
+            Publish-ConfiguredWebSolution -PublishParallelly -SolutionRootPath $solutionRootPath -WebrootOutputPath "$TestDrive\Website"`
+                -DataOutputPath "$TestDrive\Data" -BuildConfiguration "Debug" -Verbose *> $buildLogPath
         }
         finally {
             $VerbosePreference = $preference           

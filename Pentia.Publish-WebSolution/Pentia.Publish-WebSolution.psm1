@@ -28,6 +28,9 @@ The build configuration that will be passed to "MSBuild.exe".
 .PARAMETER WebProjects
 The list of webprojects to publish - will call Get-WebProject if empty
 
+.PARAMETER MSBuildExecutablePath
+Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
+
 .PARAMETER PublishParallelly
 If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
 
@@ -63,6 +66,9 @@ function Publish-ConfiguredWebSolution {
         [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
+        [Parameter(Mandatory = $false)]
+        [string]$MSBuildExecutablePath,
+
         [switch]$PublishParallelly
     )
 
@@ -72,7 +78,7 @@ function Publish-ConfiguredWebSolution {
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
+    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -MSBuildExecutablePath $MSBuildExecutablePath -PublishParallelly:$PublishParallelly
     if (Test-Path $WebrootOutputPath) {
         Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
@@ -123,6 +129,9 @@ This is where the Sitecore data folder will be placed. E.g. "D:\Websites\Solutio
 .PARAMETER WebProjects
 The list of webprojects to publish - will call Get-WebProject if empty
 
+.PARAMETER MSBuildExecutablePath
+Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
+
 .PARAMETER PublishParallelly
 If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
 
@@ -152,6 +161,9 @@ function Publish-UnconfiguredWebSolution {
         [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
+        [Parameter(Mandatory = $false)]
+        [string]$MSBuildExecutablePath,
+
         [switch]$PublishParallelly
     )
 
@@ -172,7 +184,7 @@ function Publish-UnconfiguredWebSolution {
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
-    Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
+    Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects -MSBuildExecutablePath $MSBuildExecutablePath -PublishParallelly:$PublishParallelly
 	
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
@@ -301,9 +313,11 @@ function Publish-MultipleWebProjects {
         [Parameter(Mandatory = $false)]
         [string[]]$WebProjects,
 
+        [Parameter(Mandatory = $false)]
+        [string]$MSBuildExecutablePath,
+
         [switch]$PublishParallelly
     )
-    $msBuildExecutablePath = Get-MSBuild
 
     if ($WebProjects.Count -lt 1) {
         $WebProjects = Get-WebProject -SolutionRootPath $SolutionRootPath
@@ -312,10 +326,15 @@ function Publish-MultipleWebProjects {
         Write-Verbose "No web projects found - skipping web project publishing."
         return
     }
+    
+    if ([string]::IsNullOrWhiteSpace($MSBuildExecutablePath)) {
+        $MSBuildExecutablePath = Get-MSBuild
+    }
+
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects" -CurrentOperation "Creating web publish project"
     $projectFilePath = New-WebPublishProject -SolutionRootPath $SolutionRootPath -WebProjects $WebProjects -PublishParallelly:$PublishParallelly
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects" -CurrentOperation "Publishing all web projects referenced by '$projectFilePath'"
-    Publish-WebProject -WebProjectFilePath $projectFilePath  -OutputPath $WebrootOutputPath -MSBuildExecutablePath $msBuildExecutablePath
+    Publish-WebProject -WebProjectFilePath $projectFilePath  -OutputPath $WebrootOutputPath -MSBuildExecutablePath $MSBuildExecutablePath
 }
 
 <#
