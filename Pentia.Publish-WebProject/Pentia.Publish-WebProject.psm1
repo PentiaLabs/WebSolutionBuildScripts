@@ -48,7 +48,7 @@ function Publish-WebProject {
             "/p:MSDeployUseChecksum=true",
             "/m"
         )
-        Invoke-MSBuild -ProjectOrSolutionFilePath $WebProjectFilePath -BuildArgs $buildArgs
+        Invoke-MSBuild -MSBuildExecutablePath $MSBuildExecutablePath -ProjectOrSolutionFilePath $WebProjectFilePath -BuildArgs $buildArgs
     }
 }
 

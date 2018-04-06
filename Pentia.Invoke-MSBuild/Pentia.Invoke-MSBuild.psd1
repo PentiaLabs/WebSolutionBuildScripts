@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Invoke-MSBuild.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.0.0'
+    ModuleVersion     = '2.1.0'
 
     # ID used to uniquely identify this module
     GUID              = '41268f87-c705-4481-aad8-9e9c6c05ae2c'

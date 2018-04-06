@@ -212,7 +212,6 @@ Publishes the contents of all runtime dependency packages to the specified direc
 Publishes the contents of all runtime dependency packages to the specified directores, by looking for a "packages.config" to install packages using NuGet, 
 or a "runtime-dependencies.config" to install packages using the PowerShell Package Management framework (deprecated).
 
-
 .PARAMETER SolutionRootPath
 This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
 Uses the current working directory ($PWD) as a fallback.

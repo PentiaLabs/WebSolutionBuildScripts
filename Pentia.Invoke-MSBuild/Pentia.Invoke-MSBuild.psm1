@@ -2,6 +2,9 @@
 .SYNOPSIS
 Invokes MSBuild.exe.
 
+.PARAMETER MSBuildExecutablePath
+Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
+
 .PARAMETER ProjectOrSolutionFilePath
 Path to the project or solution to build. Can be piped.
 
@@ -22,6 +25,9 @@ Gets all web projects found under the current working directory, and invokes the
 function Invoke-MSBuild {
     [CmdletBinding()]
     param (
+        [Parameter(Mandatory = $false)]
+        [string]$MSBuildExecutablePath,
+
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$ProjectOrSolutionFilePath,
 
@@ -36,7 +42,9 @@ function Invoke-MSBuild {
         if (-not (Test-Path -Path $ProjectOrSolutionFilePath -PathType Leaf)) {
             throw "Project or solution file '$ProjectOrSolutionFilePath' not found."
         }
-        $msBuildExecutablePath = Get-MSBuild
+        if ([string]::IsNullOrWhiteSpace($MSBuildExecutablePath)) {
+            $MSBuildExecutablePath = Get-MSBuild
+        }
         if (-not $BuildArgs) {
             $BuildArgs = @()
             $BuildArgs += """/maxcpucount""" # Blank means all CPUs. Else use e.g. "/maxcpucount:4"
@@ -45,7 +53,7 @@ function Invoke-MSBuild {
             $BuildArgs += """/property:Configuration=$BuildConfiguration"""
         }        
         $BuildArgs += """$ProjectOrSolutionFilePath"""
-        & $msBuildExecutablePath $BuildArgs
+        & $MSBuildExecutablePath $BuildArgs
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to build '$ProjectOrSolutionFilePath'."
         }
