@@ -20,7 +20,7 @@ function Install-BuildScriptsOnRemoteMachine {
     $credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $UserName, $passwordAsSecureString
 
     Invoke-Command -ComputerName $MachineNames -ScriptBlock { 
-        PowerShellGet\Install-Module -Name "Pentia.Publish-WebSolution" -Force
+        PowerShellGet\Install-Module -Name "Pentia.Publish-WebSolution" -AllowClobber -Force
         Get-Module -Name "Pentia.Publish-WebSolution" -ListAvailable
     } -Credential $credentials
 }
