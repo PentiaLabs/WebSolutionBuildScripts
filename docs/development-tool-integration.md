@@ -16,7 +16,7 @@ The following steps make the ``Publish-ConfiguredWebProject`` command available 
    3. Click the **Add** button.
    4. Set the **Title** to e.g. "Publish Configured Project".
    5. Set the **Command** to the default path for powershell.exe: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
-   6. Set the **Arguments** to: `-Command "& {Import-Module Publish-WebProject; Publish-ConfiguredWebProject -WebProjectFilePath '$(ProjectFileName)' -Verbose;}"`
+   6. Set the **Arguments** to: `-Command "& {Import-Module Pentia.Publish-WebProject; Publish-ConfiguredWebProject -WebProjectFilePath '$(ProjectFileName)' -Verbose;}"`
    7. Set the **Initial directory** to: `$(ProjectDir)`
    8. Count the position (starting from 1) of your command and remember this index number. *Visual Studio usually ships with **Create &GUID** tool, which is typically located at the top in first position.*
 
