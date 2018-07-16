@@ -83,6 +83,15 @@ Publish-ConfiguredWebSolution 4> verbose.txt
 Publish-ConfiguredWebSolution 4>&2 verbose.txt
 ```
 
+### error MSB4057: The target "WebPublish" does not exist in the project
+You need to install the "Web Publish" build target on the machine building the solution.
+
+The *best* way to do this is to use a [NuGet package](https://www.nuget.org/packages?q=web+targets).
+
+The *most common* way to do this on a developer's work station is to tick the "ASP.NET and web development" checkbox via the Visual Studio Installer.
+
+![Web Publish build target installation in Visual Studio](/docs/images/vs-install-web-publish-targets.png)
+
 ### Known issues
 
 #### Path Too long
@@ -92,12 +101,3 @@ Get-ChildItem : Could not find a part of the path 'D:\Projects\Solution\Website\
 ```
 
 This is caused by the `Get-ChildItem` call, when a path in the solution exceeds the windows NTFS path limitation of 255 characters. Reduce the path length to solve the issue.
-
-#### error MSB4057: The target "WebPublish" does not exist in the project
-You need to install the "Web Publish" build target on the machine building the solution.
-
-The *best* way to do this is to use a [NuGet package](https://www.nuget.org/packages?q=web+targets).
-
-The *most common* way to do this on a developer's work station is to tick the "ASP.NET and web development" checkbox via the Visual Studio Installer.
-
-![Web Publish build target installation in Visual Studio](/docs/images/vs-install-web-publish-targets.png)
