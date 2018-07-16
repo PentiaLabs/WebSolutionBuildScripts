@@ -34,6 +34,7 @@ Build scripts written in PowerShell, intended to publish solutions containing we
   * [Running sanity checks](/docs/troubleshooting.md#running-sanity-checks)
   * [Debugging project publishing](/docs/troubleshooting.md#debugging-project-publishing)
   * [Build log](/docs/troubleshooting.md#build-log)
+  * [Web Publish build target](/docs/troubleshooting.md#error-msb4057-the-target-webpublish-does-not-exist-in-the-project)
   * [Known issues](/docs/troubleshooting.md#known-issues)
 * [FAQ](/docs/faq.md)
 
