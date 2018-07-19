@@ -86,7 +86,7 @@ Publish-ConfiguredWebSolution 4>&2 verbose.txt
 ### error MSB4057: The target "WebPublish" does not exist in the project
 You need to install the "Web Publish" build target on the machine building the solution.
 
-The *best* way to do this is to use a [NuGet package](https://www.nuget.org/packages?q=web+targets).
+The *best* way to do this is to use a [NuGet package](https://www.nuget.org/packages/MSBuild.Microsoft.VisualStudio.Web.targets/).
 
 The *most common* way to do this on a developer's work station is to tick the "ASP.NET and web development" checkbox via the Visual Studio Installer.
 
