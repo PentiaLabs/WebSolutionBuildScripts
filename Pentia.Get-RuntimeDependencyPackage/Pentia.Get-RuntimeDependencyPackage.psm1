@@ -48,8 +48,8 @@ function Get-RuntimeDependencyPackage {
         throw "No 'packages' root element found in '$ConfigurationFilePath'. Run 'Get-Help Get-RuntimeDependencyPackage -Full' for expected usage."
     }
 
-    $packages = $configuration.packages.package | ForEach-Object { 
-        $package = New-Object -TypeName "RuntimeDependencyPackage" 
+    $packages = $configuration.packages.package | ForEach-Object {
+        $package = New-Object -TypeName "RuntimeDependencyPackage"
         $package.id = $_.id
         $package.version = $_.version
         $package.source = $_.source

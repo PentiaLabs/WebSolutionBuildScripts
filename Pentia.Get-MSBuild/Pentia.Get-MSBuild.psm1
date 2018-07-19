@@ -9,7 +9,7 @@ function Get-MSBuild {
     [CmdletBinding()]
 	[OutputType([string])]
 	param ()
-	
+
 	Write-Verbose "Searching for MSBuild.exe."
 	$msBuildExecutable = Invoke-hMSBuildBat
 	if ($null -eq $msBuildExecutable -or !(Test-Path $msBuildExecutable)) {

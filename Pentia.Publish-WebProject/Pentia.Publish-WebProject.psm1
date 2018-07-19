@@ -1,4 +1,4 @@
-<# 
+<#
  .SYNOPSIS
  Publishes a web project to the specified output directory using MSBuild.
 
@@ -11,27 +11,27 @@
  .PARAMETER MSBuildExecutablePath
  Absolute or relative path of MSBuild.exe. If null or empty, the script will attempt to find the latest MSBuild.exe installed with Visual Studio 2017 or later.
 
- .EXAMPLE 
+ .EXAMPLE
  Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite"
  Publish a project.
 
- .EXAMPLE 
+ .EXAMPLE
  Publish-WebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
  Publish a project and specify which MSBuild.exe to use.
-#>   
+#>
 function Publish-WebProject {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline)]
         [string]$WebProjectFilePath,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$OutputPath,
 
         [Parameter(Mandatory = $false)]
         [string]$MSBuildExecutablePath
     )
-		
+
     process {
         if (!(Test-Path $WebProjectFilePath -PathType Leaf)) {
             throw "File path '$WebProjectFilePath' not found."
@@ -41,7 +41,7 @@ function Publish-WebProject {
         }
         Write-Verbose "Publishing '$WebProjectFilePath' to '$OutputPath'."
         $buildArgs = @(
-            "/t:WebPublish", 
+            "/t:WebPublish",
             "/p:WebPublishMethod=FileSystem",
             "/p:PublishUrl=""$OutputPath""",
             "/p:DeleteExistingFiles=false",
@@ -52,10 +52,10 @@ function Publish-WebProject {
     }
 }
 
-<# 
+<#
  .SYNOPSIS
  Publishes a web project to the specified output directory using MSBuild and applies all relevant XDTs.
- 
+
  .DESCRIPTION
  Publishes a web project to the specified output directory using MSBuild and applies all relevant XDTs. The XDTs are then deleted.
  Optional function parameters which are omitted, will be read from the settings found in "<solution root>\.pentia\user-settings.json".
@@ -67,11 +67,11 @@ function Publish-WebProject {
  .PARAMETER OutputPath
  Absolute or relative path of the output directory.
 
- .EXAMPLE 
+ .EXAMPLE
  Publish-ConfiguredWebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -BuildConfiguration "Debug"
  Publish a project, and apply all XDTs for the "Debug" configuration.
 
- .EXAMPLE 
+ .EXAMPLE
  Publish-ConfiguredWebProject -WebProjectFilePath "C:\Path\To\MyProject.csproj" -OutputPath "C:\Websites\MyWebsite" -BuildConfiguration "Debug" -MSBuildExecutablePath "C:\Path\To\MsBuild.exe"
  Publish a project, apply all XDTs for the "Debug" configuration, and use the specified MSBuild.exe.
 
@@ -80,7 +80,7 @@ function Publish-WebProject {
 
  Get-WebProject | Publish-ConfiguredWebProject
  Retrive all web projects in or under the current directory, and publish them using the settings found in "<solution root>\.pentia\user-settings.json".
-#>   
+#>
 function Publish-ConfiguredWebProject {
     [CmdletBinding()]
     param (
@@ -123,7 +123,7 @@ function Find-SolutionRootPath {
         }
         $absoluteSearchStartPath = Resolve-Path $SearchStartPath
         if (Test-Path $absoluteSearchStartPath -PathType Leaf) {
-            $directory = [System.IO.Path]::GetDirectoryName($absoluteSearchStartPath)            
+            $directory = [System.IO.Path]::GetDirectoryName($absoluteSearchStartPath)
         }
         else {
             $directory = $absoluteSearchStartPath

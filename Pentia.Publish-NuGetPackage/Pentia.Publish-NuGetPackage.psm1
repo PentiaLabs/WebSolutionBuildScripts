@@ -5,7 +5,7 @@ Downloads the latest nuget.exe from the web and saves it to "<current directory>
 function Install-NuGetExe {
     [CmdletBinding()]
     param ()
-    
+
     if (Test-NuGetInstall) {
         Write-Verbose "nuget.exe is already installed."
         return
@@ -252,10 +252,10 @@ function Publish-NuGetPackage {
     param (
         [Parameter(Mandatory = $true)]
         [string]$PackageName,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$PackageOutputPath,
 
@@ -274,13 +274,13 @@ function Publish-NuGetPackage {
 
 function Copy-PackageFolder {
     [CmdletBinding()]
-    param (        
+    param (
         [Parameter(Mandatory = $true)]
         [string]$SourceFriendlyName,
-                
+
         [Parameter(Mandatory = $true)]
         [string]$Source,
-    
+
         [Parameter(Mandatory = $true)]
         [string]$Target
     )

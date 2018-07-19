@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Determines the location of a configuration file in a target directory based 
+Determines the location of a configuration file in a target directory based
 on the location of a XDT file in a source directory.
 
 .DESCRIPTION
@@ -10,7 +10,7 @@ OR in case of files named "Web.config", "Web.Feature.MyProject.config" etc., def
 
 E.g.:
 Given the following project folder structure:
-    
+
     "C:\MySolution\src\Foundation\MyProject\App_Config\MyConfig.Debug.config"
     "C:\MySolution\src\Foundation\MyProject\Web.MyProject.Debug.config"
 
@@ -34,7 +34,7 @@ E.g. "D:\websites\MySolution\www".
 #>
 function Get-PathOfFileToTransform {
     [CmdletBinding()]
-    [OutputType([string])]    
+    [OutputType([string])]
     param (
         [Parameter(Mandatory = $true)]
         [string]$ConfigurationTransformFilePath,
@@ -51,9 +51,9 @@ function Get-PathOfFileToTransform {
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
     }
     else {
-        Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."        
+        Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."
         $relativeConfigurationDirectory = Get-RelativeConfigurationDirectory -ConfigurationTransformFilePath $ConfigurationTransformFilePath
-        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $relativeConfigurationDirectory, $nameOfFileToTransform)    
+        $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $relativeConfigurationDirectory, $nameOfFileToTransform)
     }
     Write-Verbose "Found matching configuration file '$pathOfFileToTransform' for configuration transform '$ConfigurationTransformFilePath'."
     $pathOfFileToTransform
@@ -78,7 +78,7 @@ function Get-RelativeConfigurationDirectory {
 
 function Get-NameOfFileToTransform {
     [CmdletBinding()]
-    [OutputType([string])]        
+    [OutputType([string])]
     param (
         [Parameter(Mandatory = $true)]
         [string]$ConfigurationTransformFilePath
@@ -116,7 +116,7 @@ function Invoke-ConfigurationTransform {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
-        [string]$XmlFilePath,        
+        [string]$XmlFilePath,
         [Parameter(Mandatory = $true)]
         [string]$XdtFilePath
     )
@@ -129,7 +129,7 @@ function Invoke-ConfigurationTransform {
 
     if (-not ([System.IO.Path]::IsPathRooted($XmlFilePath))) {
         $XmlFilePath = [System.IO.Path]::Combine($PWD, $XmlFilePath)
-    }    
+    }
     if (-not ([System.IO.Path]::IsPathRooted($XdtFilePath))) {
         $XdtFilePath = [System.IO.Path]::Combine($PWD, $XdtFilePath)
     }
@@ -161,13 +161,13 @@ function Invoke-ConfigurationTransform {
     $transformedXml = $stringWriter.GetStringBuilder().ToString()
     $xmlTextWriter.Dispose()
     $stringWriter.Dispose()
-    
+
     $transformedXml.Trim()
 }
 
 <#
 .SYNOPSIS
-Applies all configuration transforms found under the specified root path, matching a certain build configuration. 
+Applies all configuration transforms found under the specified root path, matching a certain build configuration.
 By convention, XDTs ending with ".Always.config" are always applied.
 
 .PARAMETER SolutionOrProjectRootPath
@@ -190,7 +190,7 @@ function Invoke-AllConfigurationTransforms {
 
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )

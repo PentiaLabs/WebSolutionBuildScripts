@@ -20,7 +20,7 @@ The following steps are performed during package publishing:
 3. Copy the contents of the "<package>\Data"-folder to the "<DataOutputPath>".
 
 .PARAMETER Package
-Optional package definition, as found in a NuGet packages.config file. 
+Optional package definition, as found in a NuGet packages.config file.
 If set, "$Package.id" will be used instead of "$PackageName", and "$Package.version" instead of "$PackageVersion".
 
 .PARAMETER PackageName
@@ -52,19 +52,19 @@ function Publish-RuntimeDependencyPackage {
     param (
         [Parameter(Mandatory = $true)]
         [string]$PackageName,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
-        
+
         [Parameter(Mandatory = $false)]
         [string]$PackageSource,
-        
+
         [Parameter(Mandatory = $false)]
         [string]$Username = [string]::Empty,
-        
+
         [Parameter(Mandatory = $false)]
         [SecureString]$Password = [SecureString]::Empty,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
@@ -90,7 +90,7 @@ function Get-RuntimeDependencyPackageFromCache {
     param (
         [Parameter(Mandatory = $true)]
         [string]$PackageName,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$PackageVersion
     )
@@ -104,7 +104,7 @@ function Get-RuntimeDependencyPackageFromCache {
 
 function Test-PackageProvider {
     [CmdletBinding()]
-    [OutputType([bool])]        
+    [OutputType([bool])]
     param (
         [Parameter(Mandatory = $true)]
         [string]$Name
@@ -112,21 +112,21 @@ function Test-PackageProvider {
     (Get-PackageProvider | Select-Object -ExpandProperty "Name") -contains $Name
 }
 
-function Install-RuntimeDependencyPackage {   
-    [CmdletBinding()] 
+function Install-RuntimeDependencyPackage {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true)]
         [string]$PackageName,
-    
+
         [Parameter(Mandatory = $true)]
         [string]$PackageVersion,
-    
+
         [Parameter(Mandatory = $false)]
         [string]$PackageSource,
-    
+
         [Parameter(Mandatory = $false)]
         [string]$Username = [string]::Empty,
-    
+
         [Parameter(Mandatory = $false)]
         [SecureString]$Password = [SecureString]::Empty
     )
@@ -148,7 +148,7 @@ function Install-RuntimeDependencyPackage {
     }
     catch {
         if ($_.Exception.Message -match "No match was found for the specified search criteria and package name") {
-            throw "The package '$PackageName' version '$PackageVersion' couldn't be found in the source '$PackageSource'. " + 
+            throw "The package '$PackageName' version '$PackageVersion' couldn't be found in the source '$PackageSource'. " +
             "Make sure that all required package sources are set up correctly, e.g. 'Register-PackageSource -Name ""Pentia NuGet"" -Location ""http://tund/nuget/Nuget"" -Trusted -ProviderName ""NuGet""'."
         }
         else {
@@ -169,7 +169,7 @@ function Copy-RuntimeDependencyPackageContent {
         [Parameter(Mandatory = $true)]
         [string]$DataOutputPath
     )
-    
+
     $packageName = $Package.Name
     Write-Verbose "Copying package contents of '$packageName'."
 
@@ -177,14 +177,14 @@ function Copy-RuntimeDependencyPackageContent {
 
     $webrootSourcePath = [System.IO.Path]::Combine($packageDirectory, "Webroot")
     Copy-PackageFolder -SourceFriendlyName "webroot" -Source $webrootSourcePath -Target $WebrootOutputPath
-    
+
     $dataSourcePath = [System.IO.Path]::Combine($packageDirectory, "Data")
     Copy-PackageFolder -SourceFriendlyName "data" -Source $dataSourcePath -Target $DataOutputPath
 }
 
 function Get-PackageDirectory {
     [CmdletBinding()]
-    [OutputType([string])]        
+    [OutputType([string])]
     param (
         [Parameter(Mandatory = $true)]
         [Microsoft.PackageManagement.Packaging.SoftwareIdentity]$Package
@@ -207,13 +207,13 @@ function Get-PackageDirectory {
 
 function Copy-PackageFolder {
     [CmdletBinding()]
-    param (        
+    param (
         [Parameter(Mandatory = $true)]
         [string]$SourceFriendlyName,
-                
+
         [Parameter(Mandatory = $true)]
         [string]$Source,
-    
+
         [Parameter(Mandatory = $true)]
         [string]$Target
     )

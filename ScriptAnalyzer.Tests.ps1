@@ -24,7 +24,7 @@ Describe "all scripts and modules conform to PowerShell best pratices" {
                 It "conforms to best practice '$scriptAnalyzerRule'" {
                     # Act
                     $ruleViolations = Invoke-ScriptAnalyzer -Path $scriptModule.FullName -IncludeRule $scriptAnalyzerRule
-                    
+
                     # Assert
                     $ruleViolations | Where-Object RuleName -EQ $scriptAnalyzerRule | Out-Default
                     $ruleViolations.Count | Should Be 0

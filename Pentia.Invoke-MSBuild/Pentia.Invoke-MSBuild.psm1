@@ -51,7 +51,7 @@ function Invoke-MSBuild {
         }
         if (-not [string]::IsNullOrWhiteSpace($BuildConfiguration)) {
             $BuildArgs += """/property:Configuration=$BuildConfiguration"""
-        }        
+        }
         $BuildArgs += """$ProjectOrSolutionFilePath"""
         & $MSBuildExecutablePath $BuildArgs
         if ($LASTEXITCODE -ne 0) {

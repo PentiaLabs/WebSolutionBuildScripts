@@ -23,7 +23,7 @@ function Assert-WebProjectConsistency {
     param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
         [string]$ProjectFilePath,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )
@@ -31,7 +31,7 @@ function Assert-WebProjectConsistency {
         if (-not (Test-Path $ProjectFilePath -PathType Leaf)) {
             throw "File '$ProjectFilePath' not found."
         }
-        
+
         Write-Verbose "Processing '$ProjectFilePath'..."
 
         Write-Verbose "Checking for missing build configuration..."
@@ -41,29 +41,29 @@ function Assert-WebProjectConsistency {
 
         Write-Verbose "Checking for missing content files..."
         if (Test-ContentFileExists -ProjectFilePath $ProjectFilePath) {
-            Write-Verbose "All content files exist on disk."            
+            Write-Verbose "All content files exist on disk."
         }
-        
+
         Write-Verbose "Checking for SlowCheetah..."
         if (-not (Test-SlowCheetah -ProjectFilePath $ProjectFilePath)) {
             Write-Verbose "SlowCheetah is not installed."
         }
-    
+
         Write-Verbose "Checking for XDT build actions..."
         if (Test-XdtBuildActionContent -ProjectFilePath $ProjectFilePath -BuildConfiguration $BuildConfiguration) {
             Write-Verbose "Build action of XDTs is 'Content'."
         }
-    
+
         Write-Verbose "Checking for reserved file names..."
         if (-not (Test-ReservedFilePath -ProjectFilePath $ProjectFilePath)) {
             Write-Verbose "Reserved file names are not used."
         }
-        
+
         Write-Verbose "Checking for XML declaration..."
         if (Test-XmlDeclaration -Path $ProjectFilePath) {
             Write-Verbose "XML declaration found."
         }
-    
+
         Write-Verbose "Checking for correct file encoding..."
         if (Test-XmlFileEncoding -Path $ProjectFilePath) {
             Write-Verbose "File encoding matches encoding specified in XML declaration."
@@ -247,7 +247,7 @@ function Test-BuildConfigurationExists {
     param (
         [Parameter(Mandatory = $true)]
         [string]$ProjectFilePath,
-        
+
         [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )

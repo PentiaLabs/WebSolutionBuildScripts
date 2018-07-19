@@ -27,18 +27,18 @@ function Get-ConfigurationTransformFile {
 
         [Parameter(Mandatory = $false)]
         [string[]]$BuildConfigurations,
-		
+
         [Parameter(Mandatory = $false)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
-	
+
     if (-not (Test-Path $SolutionRootPath)) {
         throw "Path '$SolutionRootPath' not found."
     }
 
     $configurationFiles = Find-ConfigurationFile -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter
-    $configurationFiles | Where-Object { 
-        Test-BuildConfiguration -BuildConfigurations $BuildConfigurations -FileName $_.Name } | Where-Object { 
+    $configurationFiles | Where-Object {
+        Test-BuildConfiguration -BuildConfigurations $BuildConfigurations -FileName $_.Name } | Where-Object {
         Test-ConfigurationTransformFile -AbsoluteFilePath $_.FullName } | Select-Object -ExpandProperty "FullName"
 }
 
@@ -48,12 +48,12 @@ function Find-ConfigurationFile {
     param (
         [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
-		
+
         [Parameter(Mandatory = $true)]
         [string[]]$ExcludeFilter
     )
     $configurationFilePaths = Get-ChildItem -Recurse -Path $SolutionRootPath -Include "*.config"
-    $includedConfigurations = $configurationFilePaths | Where-Object { 
+    $includedConfigurations = $configurationFilePaths | Where-Object {
         $pathParts = $_.FullName.Split([System.IO.Path]::DirectorySeparatorChar, [System.StringSplitOptions]::RemoveEmptyEntries)
         $matchedFilters = $ExcludeFilter | Where-Object { $pathParts -contains $_ }
         $matchedFilters.Count -lt 1
@@ -104,7 +104,7 @@ function Test-ConfigurationTransformFile {
     try {
         $xmlDocument = New-Object System.Xml.XmlDocument
         $xmlDocument.Load($AbsoluteFilePath)
-        $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"        
+        $xmlDocument.DocumentElement.xdt -eq "http://schemas.microsoft.com/XML-Document-Transform"
     }
     catch {
         $message = "Error reading XML file '$AbsoluteFilePath': $($_.Exception.Message)"

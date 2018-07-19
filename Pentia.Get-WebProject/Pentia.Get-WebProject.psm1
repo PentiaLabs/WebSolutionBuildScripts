@@ -19,16 +19,16 @@ function Get-WebProject {
     param (
         [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
-		
+
         [Parameter(Mandatory = $false)]
         [string[]]$ExcludeFilter = @("node_modules", "bower_components", "obj", "bin")
     )
-	
+
     if ([string]::IsNullOrEmpty($SolutionRootPath)) {
         Write-Verbose "`$SolutionRootPath is null or empty. Using current working directory '$PWD'."
         $SolutionRootPath = $PWD;
     }
-	
+
     Write-Verbose "Searching for web projects in '$SolutionRootPath', excluding '$ExcludeFilter'."
     $projects = Find-Project -SolutionRootPath $SolutionRootPath -ExcludeFilter $ExcludeFilter | Where-Object { Test-WebProject $_ }
     if ($projects -is [object[]]) {
@@ -46,12 +46,12 @@ function Find-Project {
     param (
         [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
-		
+
         [Parameter(Mandatory = $true)]
         [string[]]$ExcludeFilter
     )
     $projectFilePaths = Get-ChildItem -Recurse -Path "$SolutionRootPath" -Include "*.csproj"
-    $includedProjects = $projectFilePaths | Where-Object { 
+    $includedProjects = $projectFilePaths | Where-Object {
         $pathParts = $_.FullName.Split([System.IO.Path]::DirectorySeparatorChar, [System.StringSplitOptions]::RemoveEmptyEntries)
         $matchedFilters = $ExcludeFilter | Where-Object { $pathParts -contains $_ }
         $matchedFilters.Count -lt 1

@@ -3,7 +3,7 @@
 Used to publish a web solution to disk for a specific build configuration.
 
 .DESCRIPTION
-Used to publish a web solution to disk, applying and subsequently removing all relevant XDTs. 
+Used to publish a web solution to disk, applying and subsequently removing all relevant XDTs.
 The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
@@ -13,7 +13,7 @@ The steps it runs through are:
 5. Delete all XML Document Transform files found in $WebrootOutputPath.
 
 .PARAMETER SolutionRootPath
-This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed.
 Uses the current working directory ($PWD) as a fallback.
 
 .PARAMETER WebrootOutputPath
@@ -47,7 +47,7 @@ Most large scale solutions will end up with file lock issues when using the "-Pu
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
-#> 
+#>
 function Publish-ConfiguredWebSolution {
     [CmdletBinding()]
     param (
@@ -72,7 +72,7 @@ function Publish-ConfiguredWebSolution {
         [switch]$PublishParallelly
     )
 
-    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath		
+    $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
     $parameters = Get-MergedParametersAndUserSettings -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -BuildConfiguration $BuildConfiguration
     $WebrootOutputPath = $parameters.webrootOutputPath
     $DataOutputPath = $parameters.dataOutputPath
@@ -109,7 +109,7 @@ function Get-SolutionRootPath {
 Publishes a web solution, without applying any XDTs.
 
 .DESCRIPTION
-Used to publish a Sitecore web solution to disk, without applying or removing any XDTs. 
+Used to publish a Sitecore web solution to disk, without applying or removing any XDTs.
 The steps it runs through are:
 
 1. Delete $WebrootOutputPath.
@@ -117,7 +117,7 @@ The steps it runs through are:
 3. Publish all web projects to $WebrootOutputPath, on top of the published runtime dependencies.
 
 .PARAMETER SolutionRootPath
-This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed.
 Uses the current working directory ($PWD) as a fallback.
 
 .PARAMETER WebrootOutputPath
@@ -151,10 +151,10 @@ function Publish-UnconfiguredWebSolution {
     param (
         [Parameter(Mandatory = $false)]
         [string]$SolutionRootPath,
-		
+
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
-		
+
         [Parameter(Mandatory = $true)]
         [string]$DataOutputPath,
 
@@ -170,7 +170,7 @@ function Publish-UnconfiguredWebSolution {
     if (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
         $WebrootOutputPath = [System.IO.Path]::Combine($PWD, $WebrootOutputPath)
     }
-    
+
     if (-not ([System.IO.Path]::IsPathRooted($DataOutputPath))) {
         $DataOutputPath = [System.IO.Path]::Combine($PWD, $DataOutputPath)
     }
@@ -180,12 +180,12 @@ function Publish-UnconfiguredWebSolution {
     Write-Progress -Activity "Publishing web solution" -Status "Cleaning webroot output path"
     Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
 
-    Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages"    
+    Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages"
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing web projects"
     Publish-MultipleWebProjects -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -WebProjects $WebProjects -MSBuildExecutablePath $MSBuildExecutablePath -PublishParallelly:$PublishParallelly
-	
+
     Write-Progress -Activity "Publishing web solution" -Completed -Status "Done."
 }
 
@@ -209,11 +209,11 @@ function Remove-WebrootOutputPath {
 Publishes the contents of all runtime dependency packages to the specified directores.
 
 .DESCRIPTION
-Publishes the contents of all runtime dependency packages to the specified directores, by looking for a "packages.config" to install packages using NuGet, 
+Publishes the contents of all runtime dependency packages to the specified directores, by looking for a "packages.config" to install packages using NuGet,
 or a "runtime-dependencies.config" to install packages using the PowerShell Package Management framework (deprecated).
 
 .PARAMETER SolutionRootPath
-This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed. 
+This is the absolute path to the root of your solution, usually the same directory as your ".sln"-file is placed.
 Uses the current working directory ($PWD) as a fallback.
 
 .PARAMETER WebrootOutputPath
@@ -305,7 +305,7 @@ function Publish-MultipleWebProjects {
     param (
         [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
-    
+
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
 
@@ -325,7 +325,7 @@ function Publish-MultipleWebProjects {
         Write-Verbose "No web projects found - skipping web project publishing."
         return
     }
-    
+
     if ([string]::IsNullOrWhiteSpace($MSBuildExecutablePath)) {
         $MSBuildExecutablePath = Get-MSBuild
     }
@@ -342,7 +342,7 @@ Creates a .csproj-file which references all projects in "WebProjects".
 
 .DESCRIPTION
 Creates a .csproj-file which references all projects in "WebProjects".
-Publishing this project will trigger the WebPublish target for all referenced projects. 
+Publishing this project will trigger the WebPublish target for all referenced projects.
 This gives a significant performance boost compared to publishing individual projects sequentially.
 
 .PARAMETER SolutionRootPath
@@ -360,7 +360,7 @@ function New-WebPublishProject {
     param (
         [Parameter(Mandatory = $true)]
         [string]$SolutionRootPath,
-        
+
         [Parameter(Mandatory = $true)]
         [string[]]$WebProjects,
 
@@ -409,8 +409,8 @@ Searchse for all "*.Debug.config" XDTs in the "D:\Websites\SolutionSite\www" dir
 In order to enable verbose or debug output for the entire command, run the following in your current PowerShell session (your "PowerShell command prompt"):
     $VerbosePreference = "Continue"
     $DebugPreference = "Continue"
-    
-We'd like to call this function "Configure-WebSolution", but according 
+
+We'd like to call this function "Configure-WebSolution", but according
 to https://msdn.microsoft.com/en-us/library/ms714428(v=vs.85).aspx the "Set" verb should be used instead.
 #>
 function Set-WebSolutionConfiguration {
@@ -418,15 +418,15 @@ function Set-WebSolutionConfiguration {
     param (
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath,
-		
+
         [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )
-	
+
     if (-not (Test-Path $WebrootOutputPath)) {
         throw "Path '$WebrootOutputPath' not found."
     }
-    
+
     $WebrootOutputPath = Resolve-Path $WebrootOutputPath
 
     Write-Progress -Activity "Configuring web solution" -Status "Applying XML Document Transforms"

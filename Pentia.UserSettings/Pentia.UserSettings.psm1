@@ -85,7 +85,7 @@ function Get-UserSettings {
         Write-Verbose "Reading user settings from '$settingsFilePath'."
         Get-Content -Path $settingsFilePath | ConvertFrom-Json
     }
-    else {        
+    else {
         Write-Verbose "No user settings found in '$settingsFilePath'."
         New-Object -TypeName UserSettings
     }
@@ -124,7 +124,7 @@ function Merge-ParametersAndUserSettings {
         Write-Verbose "`$WebrootOutputPath is null or empty. Using setting value '$($Settings.webrootOutputPath)'."
     }
     else {
-        $Settings.webrootOutputPath = $WebrootOutputPath        
+        $Settings.webrootOutputPath = $WebrootOutputPath
     }
 
     if ([string]::IsNullOrWhiteSpace($DataOutputPath)) {
@@ -138,9 +138,9 @@ function Merge-ParametersAndUserSettings {
         Write-Verbose "`$BuildConfiguration is null or empty. Using setting value '$($Settings.buildConfiguration)'."
     }
     else {
-        $Settings.buildConfiguration = $BuildConfiguration        
+        $Settings.buildConfiguration = $BuildConfiguration
     }
-    
+
     $Settings
 }
 
