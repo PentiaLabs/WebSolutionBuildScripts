@@ -176,6 +176,7 @@ Class OptionBuilder {
         if ($this.NoCache) {
             $this.AddParameter("-NoCache")
         }
+        $this.AddParameter("-NonInteractive")
         return $this.Options
     }
 

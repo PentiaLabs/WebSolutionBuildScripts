@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Publish-NuGetPackage.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.0.0'
+    ModuleVersion     = '2.0.1'
 
     # ID used to uniquely identify this module
     GUID              = 'df34c7b7-7748-40b7-8c8a-bd90c60cd8af'

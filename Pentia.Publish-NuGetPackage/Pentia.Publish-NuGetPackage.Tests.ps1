@@ -109,6 +109,35 @@ Describe "Restore-NuGetPackage" {
             Pop-Location                
         }
     }
+
+    It "should fail when user interaction is required" {
+        Push-Location $TestDrive
+        try {
+            # Arrange
+            Get-ChildItem $TestDrive -Recurse | Remove-Item -Recurse -Force
+            Install-NuGetExe
+            Set-Content -Path "$TestDrive\NuGet.config" -Value '<configuration>
+                <packageSources>
+                    <clear />
+                    <add key="A repository which requires credentials" 
+                         value="https://pentia.pkgs.visualstudio.com/_packaging/nuget-pentia/nuget/v3/index.json" />
+                </packageSources>
+            </configuration>'
+
+            Set-Content -Path "packages.config" -Value "<packages><package id=""This-Package-Does-Not-Exist-Locally"" version=""1.2.3"" /></packages>"
+        
+            # Act
+            $invocation = { 
+                Restore-NuGetPackage -SolutionDirectory "."
+            }
+
+            # Assert
+            $invocation | Should Throw "NuGet command failed."
+        }
+        finally {
+            Pop-Location                
+        }
+    }
 }
 
 Describe "Install-NuGetPackage" {
