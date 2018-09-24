@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Assert-WebProjectConsistency.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.0.0'
+    ModuleVersion     = '2.0.1'
 
     # ID used to uniquely identify this module
     GUID              = '3c3eabeb-7ac7-41b3-a1f9-74596966cfcb'

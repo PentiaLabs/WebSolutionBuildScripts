@@ -197,30 +197,35 @@ Describe "Assert-WebProjectConsistency" {
 
         Describe "Test-ContentFileExists" {
             $ProjectFilePath = "$TestDrive\temp.csproj"
-            $ProjectFileContent = "<Test><Content Include=""MyFile.txt""></Content></Test>"
-            $AbsoluteContentFilePath = "$TestDrive\MyFile.txt"
+            $ProjectFileContent = "<Test>
+                    <Content Include=""MyFile.txt""></Content>
+                    <Content Include=""A%20file%20name%20with%20spaces%20and%20%40.txt""></Content>
+            </Test>"
+            $FilePath = "$TestDrive\MyFile.txt"
+            $FilePathWithEncodedCharacters = "$TestDrive\A file name with spaces and @.txt"
             Set-Content -Path $ProjectFilePath -Value $ProjectFileContent -Encoding UTF8
 
-            It "should detect existing file" {
+            It "should detect existing files" {
                 # Arrange
-                Set-Content -Path $AbsoluteContentFilePath -Value "Hello World!"
+                Set-Content -Path $FilePath -Value "Hello World!"
+                Set-Content -Path $FilePathWithEncodedCharacters -Value "Hello World!"
 
                 # Act
-                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
+                $referencedFilesExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
 
                 # Assert
-                $referencedFileExists | Should Be $true
+                $referencedFilesExists | Should Be $true
             }
 
             It "should detect missing file" {
                 # Arrange
-                Remove-Item -Path $AbsoluteContentFilePath -ErrorAction SilentlyContinue
+                Remove-Item -Path $FilePathWithEncodedCharacters -ErrorAction SilentlyContinue
                 
                 # Act
-                $referencedFileExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
+                $referencedFilesExists = Test-ContentFileExists -ProjectFilePath $ProjectFilePath
                 
                 # Assert
-                $referencedFileExists | Should Be $false
+                $referencedFilesExists | Should Be $false
             }
         }
 

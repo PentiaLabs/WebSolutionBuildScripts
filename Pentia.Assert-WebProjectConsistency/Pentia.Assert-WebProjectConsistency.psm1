@@ -235,7 +235,8 @@ function Get-AbsoluteContentFilePath {
         $projectDirectory = [System.IO.Path]::GetDirectoryName($ProjectFilePath)
         $absolutePath = [System.IO.Path]::Combine($projectDirectory, $ContentFilePath)
     }
-    $absolutePath
+    Add-Type -AssemblyName "System.Web"
+    [System.Web.HttpUtility]::UrlDecode($absolutePath)
 }
 
 <#

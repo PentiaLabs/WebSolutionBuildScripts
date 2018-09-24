@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Publish-WebSolution.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.1.1'
+    ModuleVersion     = '2.1.2'
 
     # ID used to uniquely identify this module
     GUID              = '8eef74e7-2440-4a00-b2ec-bfc56a7c6297'
@@ -31,7 +31,7 @@
         @{ModuleName = 'Pentia.Get-ConfigurationTransformFile'; ModuleVersion = '2.0.0'; Guid = '87e9e091-cb36-40fa-8e3f-b7a54cc8c892'}, 
         @{ModuleName = 'Pentia.Invoke-ConfigurationTransform'; ModuleVersion = '2.0.0'; Guid = '6277b189-3478-4e86-9e3b-782d74a70758' }, 
         @{ModuleName = 'Pentia.UserSettings'; ModuleVersion = '2.0.0'; Guid = '124f394a-8328-4f0e-9aa0-e6c027a02e2b' }, 
-        @{ModuleName = 'Pentia.Assert-WebProjectConsistency'; ModuleVersion = '2.0.0'; Guid = '3c3eabeb-7ac7-41b3-a1f9-74596966cfcb' }, 
+        @{ModuleName = 'Pentia.Assert-WebProjectConsistency'; ModuleVersion = '2.0.1'; Guid = '3c3eabeb-7ac7-41b3-a1f9-74596966cfcb' }, 
         @{ModuleName = 'Pentia.Publish-NuGetPackage'; ModuleVersion = '2.0.0'; Guid = 'df34c7b7-7748-40b7-8c8a-bd90c60cd8af' }
     )
 
