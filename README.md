@@ -49,8 +49,8 @@ Build scripts written in PowerShell, intended to publish solutions containing we
 1. Open a PowerShell prompt and run the following commands:
 
     ```powershell
-    PowerShellGet\Install-Module -Name "PowerShellGet" -Repository "PSGallery" -Scope "CurrentUser" -Force
-    PowerShellGet\Install-Module -Name "PackageManagement" -Repository "PSGallery" -Scope "CurrentUser" -Force
+    PowerShellGet\Install-Module -Name "PowerShellGet" -Repository "PSGallery" -Scope "CurrentUser" -AllowClobber -Force
+    PowerShellGet\Install-Module -Name "PackageManagement" -Repository "PSGallery" -Scope "CurrentUser" -AllowClobber -Force
     PackageManagement\Install-PackageProvider -Name "NuGet" -Scope "CurrentUser" -Force
     ```
 
