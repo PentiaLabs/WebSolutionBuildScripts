@@ -175,3 +175,59 @@ gulp.task('sync', function(callback) {
   powershell.runAsync("./autosync-scripts/autosync-unicorn.ps1", "", callback);
 });
 ```
+
+### Migration example - PT.Website2016
+
+Total effort, incl. fixing critical issues and writing documentation ~ 15 hours.
+
+#### packages.config
+
+The migration guide outlined above was used to migrate the `solution-packages.json` file to `packages.config`.
+
+#### Publish-Solution.ps1
+
+1. The base `Publish-Solution.ps1` file was copied from the [Pentia Sitecore Boilerplate project](https://pentia.visualstudio.com/Pentia.SitecoreBoilerplate/_git/Pentia.SitecoreBoilerplate?path=%2FPublish-Solution.ps1).
+
+2. Since the boilerplate script was created for Sitecore 9, and the solution at hand uses Sitecore 8, the `$RoleName` variable was superfluous and simply replaced with `$SolutionName`.
+
+3. The [`Install-EmberFastBoot.ps1`](https://pentia.visualstudio.com/_git/PT.Website%202016?path=%2Finstall-emberfastboot.ps1&version=GCe5f6aa07894eb2179637177d28aafb1425aa7566) script, specific to the solution, was integrated into the `Publish-Solution.ps1` script. A switch parameter was added to disable this step during packaging.
+
+4. The [`SetupIIS.ps1`](https://pentia.visualstudio.com/_git/PT.Website%202016?path=%2FSetup%20website%2FSetupIIS.ps1&version=GCe5f6aa07894eb2179637177d28aafb1425aa7566) script, specific to the solution, was integrated into the `Publish-Solution.ps1` script. A switch parameter was added to disable this step during packaging.
+
+#### New-NuGetPackage.ps1
+
+The [`New-NuGetPackage.ps1`](https://pentia.visualstudio.com/_git/PT.Website%202016/commit/4a10d66ad5408705c8a26aef3272768c2b610dc0?refName=refs%2Fheads%2Fmaster&_a=compare&path=%2FNew-NuGetPackage.ps1) script was created to reduce the amount of "inline script" found in TeamCity and Octopus Deploy.
+
+To support build and deploy script versioning, and general clarity, inline scripts should be kept to an absolute minimum.
+
+#### .gitignore
+The following were added:
+
+```
+.pentia
+output/
+```
+
+#### WebPublish MSBuild target
+
+This was the primary cause for developer headaches, as some of the projects had references to VS 2012 and VS 2015 build targets:
+
+1. Remove references to VS 14.0 specific build targets from all web projects (see line 241 in [commit 468b8f8b of PentiaDK.Website.csproj](https://pentia.visualstudio.com/_git/PT.Website%202016/commit/468b8f8b7d932286c277f184ba5f9dafae1f3108?refName=refs%2Fheads%2Fmaster&_a=compare&path=%2Fsrc%2FProject%2FPentiaDK.Website%2FPentiaDK.Website.csproj) for an example).
+
+2. Add the [`MSBuild.Microsoft.VisualStudio.Web.targets`](https://www.nuget.org/packages/MSBuild.Microsoft.VisualStudio.Web.targets/) NuGet package to all web projects (see line 3 in [`PentiaDK.Website.csproj`](https://pentia.visualstudio.com/_git/PT.Website%202016/commit/468b8f8b7d932286c277f184ba5f9dafae1f3108?path=%2Fsrc%2FProject%2FPentiaDK.Website%2FPentiaDK.Website.csproj&gridItemType=2&mpath=%2Fsrc%2FProject%2FPentiaDK.Website%2FPentiaDK.Website.csproj&opath=%2Fsrc%2FProject%2FPentiaDK.Website%2FPentiaDK.Website.csproj&mversion=GC468b8f8b7d932286c277f184ba5f9dafae1f3108&oversion=GCe5f6aa07894eb2179637177d28aafb1425aa7566&_a=compare) and line 5 in [`packages.config`](https://pentia.visualstudio.com/_git/PT.Website%202016/commit/468b8f8b7d932286c277f184ba5f9dafae1f3108?path=%2Fsrc%2FProject%2FPentiaDK.Website%2Fpackages.config&gridItemType=2&mpath=%2Fsrc%2FProject%2FPentiaDK.Website%2Fpackages.config&opath=%2Fsrc%2FProject%2FPentiaDK.Website%2Fpackages.config&mversion=GC468b8f8b7d932286c277f184ba5f9dafae1f3108&oversion=GCe5f6aa07894eb2179637177d28aafb1425aa7566&_a=compare) for an example).
+
+#### TeamCity
+
+TeamCity build pipelines for [Pentia.dk](http://buildserver/viewType.html?buildTypeId=PentiaDkWebsite_CreateReleaseOnOctopus) and [Pentia.se](http://buildserver/viewType.html?buildTypeId=PentiaDkWebsite_CreateReleaseOnOctopusPentiaSe) were modified to use the new build scripts for NuGet package creation.
+
+#### Unforseen critical issue - Sitecore data folder location
+
+The Sitecore data folder was placed inside the webroot, without any form of access control.
+This allowed our Sitecore partner license to be downloaded via https://pentia.dk/data/license.xml.
+
+#### Unforseen critical issue - Pentia.se
+
+The existance of Pentia.se only became apparent after inspecting the deployment pipeline in Octopus Deploy.
+It's not mentioned anywhere on the intranet!
+
+This meant time had to be spent updating the documentation.
