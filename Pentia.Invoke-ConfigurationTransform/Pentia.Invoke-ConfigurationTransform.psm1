@@ -199,7 +199,8 @@ function Invoke-AllConfigurationTransforms {
         Write-Progress -Activity "Configuring web solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
         $xdtFile = $xdtFiles[$i]
         $fileToTransform = Get-PathOfFileToTransform -ConfigurationTransformFilePath $xdtFile -WebrootOutputPath $WebrootOutputPath
-        Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile | Set-Content -Path $fileToTransform -Encoding UTF8
+        [xml]$xml = Invoke-ConfigurationTransform -XmlFilePath $fileToTransform -XdtFilePath $xdtFile
+        $xml.Save($fileToTransform.ToString())
     }
 }
 

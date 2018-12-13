@@ -1,3 +1,5 @@
+#Requires -Modules "Pester", "PSScriptAnalyzer"
+
 $scriptsModules = Get-ChildItem "$PSScriptRoot" -Include "*.psm1" -Recurse | Where-Object { $_.FullName -notmatch "TestContent" }
 
 Describe "all scripts and modules conform to PowerShell best pratices" {
@@ -16,17 +18,18 @@ Describe "all scripts and modules conform to PowerShell best pratices" {
         }
     }
 
-    $scriptAnalyzerRules = Get-ScriptAnalyzerRule | Where-Object -Property RuleName -NE PSUseSingularNouns
+    $scriptAnalyzerRules = Get-ScriptAnalyzerRule | Where-Object -Property RuleName -ne PSUseSingularNouns
     forEach ($scriptModule in $scriptsModules) {
 
         Describe "module '$($scriptModule.Name)' ($($scriptModule.FullName))" {
-            forEach ($scriptAnalyzerRule in $scriptAnalyzerRules) {
+            $scriptAnalyzerRules | ForEach-Object {
+                $scriptAnalyzerRule = $_
                 It "conforms to best practice '$scriptAnalyzerRule'" {
                     # Act
                     $ruleViolations = Invoke-ScriptAnalyzer -Path $scriptModule.FullName -IncludeRule $scriptAnalyzerRule
 
                     # Assert
-                    $ruleViolations | Where-Object RuleName -EQ $scriptAnalyzerRule | Out-Default
+                    $ruleViolations | Where-Object RuleName -eq $scriptAnalyzerRule | Out-Default
                     $ruleViolations.Count | Should Be 0
                 }
             }
