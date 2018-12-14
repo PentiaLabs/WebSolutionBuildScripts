@@ -3,10 +3,17 @@
 To create a new release of the Build Scripts, do the following:
 
 1. Update all `.psd` files with the new script version as appropriate.
-2. Log in to the [PowerShell Gallery](https://www.powershellgallery.com) with the  user it@pentia.dk. The password is available through LastPass.
-3. Copy the NuGet API shown at the bottom of the [PowerShell Gallery account page](https://www.powershellgallery.com/account).
-4. Run `Publish-AllModules.ps1 -NuGetApiKey <API key from PowerShell Gallery>`.
-5. Update all TeamCity build agents using the script shown below. The password can be obtained from it@pentia.dk.
+
+2. Log in to the [PowerShell Gallery](https://www.powershellgallery.com) with the  user it@pentia.dk. 
+The password is available through LastPass by searching for "PowerShell" in your LastPass Vault. 
+If you can't find the credentials, contact Internal IT.
+
+3. Generate a NuGet API which has package update permissions, via the [PowerShell Gallery API keys page](https://www.powershellgallery.com/account/apikeys).
+
+4. Run `Publish-AllModules.ps1 -NuGetApiKey "<API key from PowerShell Gallery>"`.
+
+5. Update all TeamCity build agents using the script shown below. 
+The password to log in as the build agent users is available through LastPass, by searching for "TeamCity" in your LastPass Vault.
 
 ```powershell
 function Install-BuildScriptsOnRemoteMachine {
