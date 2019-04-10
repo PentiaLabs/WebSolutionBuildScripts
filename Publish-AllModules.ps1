@@ -16,7 +16,7 @@ function Test-ModuleVersionUpdated {
         [string]$RepositoryName
     )
     $moduleName = $ModuleDefinition.RootModule.Replace(".psm1", "")
-    $moduleVersion = $ModuleDefinition.ModuleVersion
+    $moduleVersion = $ModuleDefinition.Version.ToString()
     $module = Find-Module -Name $moduleName -RequiredVersion $moduleVersion -Repository $RepositoryName -ErrorAction SilentlyContinue
     $null -eq $module
 }
@@ -34,7 +34,7 @@ $repositoryName = "PSGallery"
 $modulesWithoutDependencies | Where-Object {
     Test-ModuleVersionUpdated -ModuleDefinition $_ -RepositoryName $repositoryName
 } | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object {
-    Write-Host "Publishing '$($_.RootModule)'..."
+    Write-Host "Publishing '$_'..."
     Publish-Module -Path $_ -Repository $repositoryName -NuGetApiKey $NuGetApiKey
 }
 Write-Host "Installing all modules with zero dependencies..."
@@ -49,7 +49,7 @@ foreach ($moduleWithDependencies in $modulesWithDependencies) {
     $moduleWithDependencies | Where-Object {
         Test-ModuleVersionUpdated -ModuleDefinition $_ -RepositoryName $repositoryName
     } | Select-Object -ExpandProperty "ModuleBase" | ForEach-Object { 
-        Write-Host "Publishing '$($_.RootModule)'..."
+        Write-Host "Publishing '$_'..."
         Publish-Module -Path $_ -Repository $repositoryName -NuGetApiKey $NuGetApiKey
     }
     Write-Host "Installing single module with 1 or more dependencies..."
