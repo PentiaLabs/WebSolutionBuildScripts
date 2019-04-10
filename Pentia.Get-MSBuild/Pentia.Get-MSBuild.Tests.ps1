@@ -8,6 +8,7 @@ InModuleScope "Pentia.Get-MSBuild" {
 		It "should throw an exception when MSBuild does not exist" {
 			# Arrange
 			Mock Invoke-hMSBuildBat { return "C:\notvalid"} -ModuleName "Pentia.Get-MSBuild"
+			Mock Invoke-VSWhereExe { return "C:\notvalid"} -ModuleName "Pentia.Get-MSBuild"
 	
 			# Act
 			$invocation = { Get-MSBuild }
