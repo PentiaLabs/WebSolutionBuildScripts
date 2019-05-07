@@ -23,9 +23,6 @@ Given the following project folder structure:
 
     "C:\MyWebsite\www\Web.config"
 
-.PARAMETER SolutionRootPath
-E.g. "C:\MySolution\".
-
 .PARAMETER ConfigurationTransformFilePath
 E.g. "C:\MySolution\src\Foundation\Code\App_Config\Sitecore\Include\MyConfig.Debug.config".
 
@@ -41,6 +38,7 @@ function Get-PathOfFileToTransform {
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath
     )
+    $WebrootOutputPath = $WebrootOutputPath.Trim([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
     $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
     if ($nameOfFileToTransform -eq "Web.config") {
         Write-Verbose "Using path of the main 'Web.config' file."
@@ -49,6 +47,17 @@ function Get-PathOfFileToTransform {
     elseif ($nameOfFileToTransform -imatch "Web\..*\.config") {
         Write-Verbose "Using path of the main 'Web.config' file, by convention."
         $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, "Web.config")
+    }
+    elseif ($ConfigurationTransformFilePath.ToUpperInvariant().StartsWith($WebrootOutputPath.ToUpperInvariant())) {
+        Write-Verbose "Resolving path to the matching configuration file within the same webroot."
+        $configurationTransformDirectoryPath = [System.IO.Path]::GetDirectoryName($ConfigurationTransformFilePath)
+        if ($configurationTransformDirectoryPath.ToUpperInvariant() -eq $WebrootOutputPath.ToUpperInvariant()) {
+            $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $nameOfFileToTransform)
+        }
+        else {
+            $relativePath = $configurationTransformDirectoryPath.Substring($WebrootOutputPath.Length + [IO.Path]::DirectorySeparatorChar.ToString().Length)
+            $pathOfFileToTransform = [System.IO.Path]::Combine($WebrootOutputPath, $relativePath, $nameOfFileToTransform)
+        }
     }
     else {
         Write-Verbose "Resolving path to the matching configuration file in 'App_Config'."
@@ -171,7 +180,7 @@ Applies all configuration transforms found under the specified root path, matchi
 By convention, XDTs ending with ".Always.config" are always applied.
 
 .PARAMETER SolutionOrProjectRootPath
-The root path from which to fetch XDT files.
+The root path from which to fetch XDT files. If null or empty, $WebrootOutputPath is used.
 
 .PARAMETER WebrootOutputPath
 The root path in which to search for configuration files.
@@ -185,7 +194,7 @@ Invoke-AllConfigurationTransforms -SolutionOrProjectRootPath "C:\MySolution\src\
 function Invoke-AllConfigurationTransforms {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]$SolutionOrProjectRootPath,
 
         [Parameter(Mandatory = $true)]
@@ -194,6 +203,9 @@ function Invoke-AllConfigurationTransforms {
         [Parameter(Mandatory = $true)]
         [string]$BuildConfiguration
     )
+    if ([string]::IsNullOrEmpty($SolutionOrProjectRootPath)) {
+        $SolutionOrProjectRootPath = $WebrootOutputPath
+    }
     $xdtFiles = @(Get-ConfigurationTransformFile -SolutionRootPath $SolutionOrProjectRootPath -BuildConfigurations "Always", $BuildConfiguration)
     for ($i = 0; $i -lt $xdtFiles.Count; $i++) {
         Write-Progress -Activity "Configuring web solution" -PercentComplete ($i / $xdtFiles.Count * 100) -Status "Applying XML Document Transforms" -CurrentOperation "$xdtFile"
