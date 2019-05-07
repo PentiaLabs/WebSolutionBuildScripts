@@ -38,7 +38,8 @@ function Get-PathOfFileToTransform {
         [Parameter(Mandatory = $true)]
         [string]$WebrootOutputPath
     )
-    $WebrootOutputPath = $WebrootOutputPath.Trim([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    $ConfigurationTransformFilePath = Get-NormalizedPath -Path $ConfigurationTransformFilePath
+    $WebrootOutputPath = Get-NormalizedPath -Path $WebrootOutputPath
     $nameOfFileToTransform = Get-NameOfFileToTransform -ConfigurationTransformFilePath $ConfigurationTransformFilePath
     if ($nameOfFileToTransform -eq "Web.config") {
         Write-Verbose "Using path of the main 'Web.config' file."
@@ -66,6 +67,19 @@ function Get-PathOfFileToTransform {
     }
     Write-Verbose "Found matching configuration file '$pathOfFileToTransform' for configuration transform '$ConfigurationTransformFilePath'."
     $pathOfFileToTransform
+}
+
+function Get-NormalizedPath {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+    if (-not ([System.IO.Path]::IsPathRooted($Path))) {
+        $Path = [System.IO.Path]::Combine($PWD, $Path)
+    }
+    [System.IO.Path]::GetFullPath($Path).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
 }
 
 function Get-RelativeConfigurationDirectory {
@@ -136,12 +150,8 @@ function Invoke-ConfigurationTransform {
         throw "File '$XdtFilePath' not found."
     }
 
-    if (-not ([System.IO.Path]::IsPathRooted($XmlFilePath))) {
-        $XmlFilePath = [System.IO.Path]::Combine($PWD, $XmlFilePath)
-    }
-    if (-not ([System.IO.Path]::IsPathRooted($XdtFilePath))) {
-        $XdtFilePath = [System.IO.Path]::Combine($PWD, $XdtFilePath)
-    }
+    $XmlFilePath = Get-NormalizedPath -Path $XmlFilePath
+    $XdtFilePath = Get-NormalizedPath -Path $XdtFilePath
 
     Add-Type -LiteralPath "$PSScriptRoot\lib\Microsoft.Web.XmlTransform.dll" -ErrorAction Stop
 

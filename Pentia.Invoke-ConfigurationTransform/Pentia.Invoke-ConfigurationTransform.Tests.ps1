@@ -184,13 +184,15 @@ Describe "Invoke-AllConfigurationTransforms" {
         Get-FileEncoding -Path $testFilePath | Should Be "utf8"
     }
 
-    foreach ($webrootOutputPathVariant in @($TestDrive, "$TestDrive\")) {
+    foreach ($webrootOutputPathVariant in @($TestDrive, "$TestDrive\", "$TestDrive\subdir\..\subdir\")) {
     
         It "should use the `$WebrootOutputPath as a fallback when `$SolutionOrProjectRootPath is null or empty" {
             # Arrange
-            $testFilePath = "$TestDrive\test.config"
+            New-Item -Path $webrootOutputPathVariant -Force -ItemType Directory | Out-Null
+            $testFilePath = Join-Path -Path $webrootOutputPathVariant -ChildPath "test.config"
             Set-Content -Path $testFilePath -Value "<?xml version=""1.0"" encoding=""utf-8""?><configuration></configuration>"
-            Set-Content -Path "$TestDrive\test.MyBuildConfiguration.config" -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
+            $xdtFilePath = Join-Path -Path $webrootOutputPathVariant -ChildPath "test.MyBuildConfiguration.config"
+            Set-Content -Path $xdtFilePath -Value "<configuration xmlns:xdt=""http://schemas.microsoft.com/XML-Document-Transform""><setting xdt:Transform=""Insert"" /></configuration>"
 
             # Act
             Invoke-AllConfigurationTransforms -WebrootOutputPath $webrootOutputPathVariant -BuildConfiguration "MyBuildConfiguration"
