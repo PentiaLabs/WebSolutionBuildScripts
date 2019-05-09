@@ -289,10 +289,74 @@ function Copy-PackageFolder {
     Write-Verbose "Checking if package has a $SourceFriendlyName folder '$Source'."
     if (Test-Path -Path $Source -PathType Container) {
         Write-Verbose "Copying $SourceFriendlyName files from '$Source' to '$Target'."
-        robocopy "$Source" "$Target" *.* /E /MT 64 /NFL /NP /NDL /NJH | Write-Verbose
+        Invoke-RoboCopy -Source $Source -Target $Target
+        $global:LASTEXITCODE = Convert-RoboCopyExitCode -ExitCode $LASTEXITCODE
     }
     else {
         Write-Verbose "No $SourceFriendlyName folder found."
+    }
+}
+
+function Invoke-RoboCopy {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Source,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Target
+    )
+    $roboCopyExeFilePath = Get-Command -Name "Robocopy.exe"
+    & $roboCopyExeFilePath "$Source" "$Target" *.* /E /R:0 /MT:64 /NFL /NP /NDL /NJH | Write-Verbose
+}
+
+<#
+Converts the RoboCopy exit code (https://ss64.com/nt/robocopy-exit.html) to exit codes usable by PowerShell (i.e. 0 on success, non-zero on failure).
+#>
+function Convert-RoboCopyExitCode {
+    [CmdletBinding()]
+    [OutputType([int])]
+    param (
+        [Parameter(Mandatory = $true)]
+        [int]$ExitCode
+    )
+    switch ($ExitCode) {
+        0 {
+            Write-Verbose "No errors occurred, and no copying was done. The source and destination directory trees are completely synchronized."
+            return 0
+        }
+        1 {
+            Write-Verbose "One or more files were copied successfully (that is, new files have arrived)."
+            return 0
+        }
+        2 {
+            Write-Verbose "Some extra files or directories were detected. No files were copied. Examine the output log for details."
+            return 0
+        }
+        3 {
+            Write-Verbose "Some files were copied. Additional files were present. No failure was encountered."
+            return 0
+        }
+        4 {
+            Write-Warning "Some mismatched files or directories were detected. Examine the output log. Housekeeping might be required."
+            return 0
+        }
+        5 {
+            Write-Verbose "Some files were copied. Some files were mismatched. No failure was encountered."
+            return 0
+        }
+        6 {
+            Write-Verbose "Additional files and mismatched files exist. No files were copied and no failures were encountered. This means that the files already exist in the destination directory."
+            return 0
+        }
+        7 {
+            Write-Verbose "Files were copied, a file mismatch was present, and additional files were present."
+            return 0
+        }
+        default {
+            Write-Error "Error during file copy. RoboCopy exit code '$ExitCode'. See https://ss64.com/nt/robocopy-exit.html for details."
+            return $ExitCode
+        }
     }
 }
 

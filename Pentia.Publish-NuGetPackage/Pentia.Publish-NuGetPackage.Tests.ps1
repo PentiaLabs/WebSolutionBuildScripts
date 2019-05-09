@@ -181,3 +181,66 @@ Describe "Install-NuGetPackage" {
         }
     }
 }
+
+Describe "Copy-PackageFolder" {
+
+    InModuleScope "Pentia.Publish-NuGetPackage" {
+        
+        Context "RoboCopy success" {
+
+            It "should set a zero exit code" {
+                # Arrange
+
+                ## Create source directory
+                $source = "$TestDrive\test-source"
+                New-Item -Path $source -ItemType Directory | Out-Null
+                New-Item -Path "$source\test.txt" -ItemType File | Out-Null
+
+                ## Create empty target directory - this ensures that RoboCopy sets the exit code to "2", because the target directory exists.
+                $target = "$TestDrive\test-target"
+                New-Item -Path $target -ItemType Directory | Out-Null
+
+                # Act
+                Copy-PackageFolder -SourceFriendlyName "Test" -Source $source -Target $target
+
+                # Assert
+                $LASTEXITCODE | Should Be 0
+                Test-Path -Path "$target\test.txt" | Should be $true
+            }
+
+        }
+
+        Context "RoboCopy failure" {
+
+            Mock Invoke-RoboCopy {
+                $global:LASTEXITCODE = -100
+            }
+
+            It "should set a non-zero exit code" {
+                # Arrange
+                
+                ## Create source directory
+                $source = "$TestDrive\test-source"
+                New-Item -Path $source -ItemType Directory | Out-Null
+                New-Item -Path "$source\test.txt" -ItemType File | Out-Null
+
+                ## Create read-only file in target directory
+                $target = "$TestDrive\test-target"
+                New-Item -Path $target -ItemType Directory | Out-Null
+                $testFilePath = "$target\test.txt"
+                New-Item -Path $testFilePath -ItemType File | Out-Null
+                Set-Content -Path $testFilePath -Value "Hello World!"
+                Set-ItemProperty -Path $testFilePath -Name "IsReadOnly" -Value $true
+
+                # Act
+                Copy-PackageFolder -SourceFriendlyName "Test" -Source $source -Target $target -ErrorAction "Continue"
+
+                # Assert
+                $global:LASTEXITCODE | Should Not Be 0
+            }
+
+        }
+
+    }
+
+}
