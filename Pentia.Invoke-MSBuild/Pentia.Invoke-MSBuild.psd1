@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Invoke-MSBuild.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.2.0'
+    ModuleVersion     = '2.3.0'
 
     # ID used to uniquely identify this module
     GUID              = '41268f87-c705-4481-aad8-9e9c6c05ae2c'
@@ -19,7 +19,7 @@
     Copyright         = '(c) 2018 Pentia A/S. All rights reserved.'
 
     RequiredModules   = @(
-        @{ModuleName = 'Pentia.Get-MSBuild'; ModuleVersion = '2.1.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'}
+        @{ModuleName = 'Pentia.Get-MSBuild'; ModuleVersion = '2.2.0'; Guid = '3d2a79b9-7b42-4c20-b2c3-03b3e492ff32'}
     )
 
     # Description of the functionality provided by this module
