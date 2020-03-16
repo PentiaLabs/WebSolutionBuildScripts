@@ -34,6 +34,9 @@ Absolute or relative path of MSBuild.exe. If null or empty, the script will atte
 .PARAMETER PublishParallelly
 If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
 
+.PARAMETER KeepWebrootOutputPath
+If set, the WebrootOutputPath will not be removed before publishing dependencies and projects
+
 .EXAMPLE
 Publish-ConfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data" -BuildConfiguration "Debug"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www" using the "Debug" build configuration, and saves the provided parameters to "D:\Project\Solution\.pentia\user-settings.json" for future use.
@@ -69,7 +72,9 @@ function Publish-ConfiguredWebSolution {
         [Parameter(Mandatory = $false)]
         [string]$MSBuildExecutablePath,
 
-        [switch]$PublishParallelly
+        [switch]$PublishParallelly,
+
+        [switch]$KeepWebrootOutputPath
     )
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
@@ -78,7 +83,7 @@ function Publish-ConfiguredWebSolution {
     $DataOutputPath = $parameters.dataOutputPath
     $BuildConfiguration = $parameters.buildConfiguration
 
-    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -MSBuildExecutablePath $MSBuildExecutablePath -PublishParallelly:$PublishParallelly
+    Publish-UnconfiguredWebSolution -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath -WebProjects $WebProjects -MSBuildExecutablePath $MSBuildExecutablePath -PublishParallelly:$PublishParallelly -KeepWebrootOutputPath:$KeepWebrootOutputPath
     if (Test-Path $WebrootOutputPath) {
         Set-WebSolutionConfiguration -WebrootOutputPath $WebrootOutputPath -BuildConfiguration $BuildConfiguration
     }
