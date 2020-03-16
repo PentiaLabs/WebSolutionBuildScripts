@@ -4,7 +4,7 @@
     RootModule        = 'Pentia.Publish-WebSolution.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '2.3.0'
+    ModuleVersion     = '2.3.1'
 
     # ID used to uniquely identify this module
     GUID              = '8eef74e7-2440-4a00-b2ec-bfc56a7c6297'

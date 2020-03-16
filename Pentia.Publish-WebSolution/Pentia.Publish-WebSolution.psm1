@@ -135,6 +135,9 @@ Absolute or relative path of MSBuild.exe. If null or empty, the script will atte
 .PARAMETER PublishParallelly
 If set, MSBuild will use all available nodes for publishing multiple projects in parallel; otherwise, MSBuild will only use one node for publishing.
 
+.PARAMETER KeepWebrootOutputPath
+If set, the WebrootOutputPath will not be removed before publishing dependencies and projects
+
 .EXAMPLE
 Publish-UnconfiguredWebSolution -SolutionRootPath "D:\Project\Solution" -WebrootOutputPath "D:\Websites\SolutionSite\www" -DataOutputPath "D:\Websites\SolutionSite\Data"
 Publishes the solution placed at "D:\Project\Solution" to "D:\Websites\SolutionSite\www".
@@ -164,7 +167,9 @@ function Publish-UnconfiguredWebSolution {
         [Parameter(Mandatory = $false)]
         [string]$MSBuildExecutablePath,
 
-        [switch]$PublishParallelly
+        [switch]$PublishParallelly,
+
+        [switch]$KeepWebrootOutputPath
     )
 
     if (-not ([System.IO.Path]::IsPathRooted($WebrootOutputPath))) {
@@ -177,8 +182,10 @@ function Publish-UnconfiguredWebSolution {
 
     $SolutionRootPath = Get-SolutionRootPath -SolutionRootPath $SolutionRootPath
 
-    Write-Progress -Activity "Publishing web solution" -Status "Cleaning webroot output path"
-    Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+    if (-not $KeepWebrootOutputPath) {
+        Write-Progress -Activity "Publishing web solution" -Status "Cleaning webroot output path"
+        Remove-WebrootOutputPath -WebrootOutputPath $WebrootOutputPath
+    }
 
     Write-Progress -Activity "Publishing web solution" -Status "Publishing runtime dependency packages"
     Publish-AllRuntimeDependencies -SolutionRootPath $SolutionRootPath -WebrootOutputPath $WebrootOutputPath -DataOutputPath $DataOutputPath
